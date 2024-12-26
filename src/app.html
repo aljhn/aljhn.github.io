@@ -1,5 +1,5 @@
 <!doctype html>
-<html>
+<html lang="en">
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -16,7 +16,11 @@
         <meta name="author" content="Albert Johannessen" />
 
         <title>Albert Johannessen</title>
-        <link rel="icon" type="image/x-icon" href="images/favicon.ico" />
+        <link
+            rel="icon"
+            type="image/x-icon"
+            href="%sveltekit.assets%/favicon.ico"
+        />
 
         <meta property="og:site_name" content="aljhn.github.io" />
         <meta property="og:title" content="Albert Johannessen" />
@@ -39,15 +43,10 @@
         <meta name="twitter:image" content="images/Hex.jpg" />
         <meta name="twitter:url" content="https://aljhn.github.io/" />
         <meta name="twitter:creator" content="@aljhnssnn" />
+
+        %sveltekit.head%
     </head>
-    <body>
-        <h2>Albert Johannessen</h2>
-        <h5>Home</h5>
-        <h5>About</h5>
-        <h5>Publications</h5>
-        <h5>Interests</h5>
-        <h5>Tech Stack</h5>
-        <img src="images/Hex.jpg" />
-        <p>Work in progress</p>
+    <body data-sveltekit-preload-data="hover" data-theme="rocket">
+        <div style="display: contents">%sveltekit.body%</div>
     </body>
 </html>
