@@ -3,10 +3,11 @@
 ## Tech Stack
 
 - pnpm
-- SvelteKit
+- Svelte + SvelteKit
 - TypeScript
 - Prettier + ESLint
 - Tailwind CSS + Skeleton
+- GitHub Pages + GitHub Actions
 
 ## Commands
 
