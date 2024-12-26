@@ -12,7 +12,7 @@ export default {
 
     plugins: [
         skeleton({
-            themes: [themes.rocket]
+            themes: [themes.concord]
         })
     ]
 } satisfies Config;
