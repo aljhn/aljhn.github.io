@@ -3,9 +3,19 @@
     let { children } = $props();
 </script>
 
-<ul>
-    <li><a href="/">Home</a></li>
-    <li><a href="/about">About</a></li>
-</ul>
+<header>
+    <h1>Albert Johannessen</h1>
+</header>
 
-{@render children()}
+<nav>
+    <ul>
+        <li><a href="/">Home</a></li>
+        <li><a href="/about">About</a></li>
+    </ul>
+</nav>
+
+<main>
+    {@render children()}
+</main>
+
+<footer>Footer</footer>
