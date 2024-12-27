@@ -29,6 +29,9 @@
     <meta name="description" content={meta.description} />
     <meta name="keywords" content={meta.keywords} />
     <meta name="author" content={meta.author} />
+    <meta name="temp1" content={pathName} />
+    <meta name="temp2" content={pageName} />
+    <meta name="temp3" content={base} />
 
     <meta property="og:site_name" content="aljhn.github.io" />
     <meta property="og:title" content={meta.title} />
