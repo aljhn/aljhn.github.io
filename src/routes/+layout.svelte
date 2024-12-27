@@ -2,21 +2,23 @@
     import "../app.css";
     import Header from "$lib/Header.svelte";
     import { page } from "$app/state";
+    import { base } from "$app/paths";
 
     let { children } = $props();
 
     const pathName = page.url.pathname;
+    const pageName = pathName.substring(pathName.indexOf(base), -1);
 
     const meta = {
         author: "Albert Johannessen",
         title:
             "Albert Johannessen" +
-            (pathName === "/" ? "" : " - " + (pathName.charAt(1).toUpperCase() + pathName.slice(2))),
+            (pageName === "/" ? "" : " - " + (pageName.charAt(1).toUpperCase() + pageName.slice(2))),
         description: "Personal website. Resume, portfolio and interests.",
         keywords:
             "Personal Website, Resume, Portfolio, Projects, Publications, Interests, Computer Science, Programming, Artificial Intelligence, AI, Machine Learning, Deep Learning, Math, Dynamical Systems, Control Theory",
         url: "https://aljhn.github.io/",
-        image: "images/Hex.png"
+        image: "https://aljhn.github.io/images/Hex.png"
     };
 </script>
 
