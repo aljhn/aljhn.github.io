@@ -3,11 +3,11 @@
     import { base } from "$app/paths";
 
     const links = [
-        { url: base + "/", label: "Home" },
-        { url: base + "/about", label: "About" },
-        { url: base + "/publications", label: "Publications" },
-        { url: base + "/interests", label: "Interests" },
-        { url: base + "/tech", label: "Tech Stack" }
+        { url: "/", label: "Home" },
+        { url: "/about", label: "About" },
+        { url: "/publications", label: "Publications" },
+        { url: "/interests", label: "Interests" },
+        { url: "/tech", label: "Tech Stack" }
     ];
 </script>
 
@@ -21,7 +21,7 @@
         </div>
         <nav class="content-center gap-2">
             {#each links as link}
-                <a href={link.url} class="btn-lg">{link.label}</a>
+                <a href={base}{link.url} class="btn-lg">{link.label}</a>
             {/each}
         </nav>
     </section>
