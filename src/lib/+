@@ -1,0 +1,44 @@
+<script lang="ts">
+    import { AppBar } from "@skeletonlabs/skeleton-svelte";
+    import { base } from "$app/paths";
+
+    const links = [
+        { url: base + "/", label: "Home" },
+        { url: base + "/about", label: "About" },
+        { url: base + "/publications", label: "Publications" },
+        { url: base + "/interests", label: "Interests" },
+        { url: base + "/tech", label: "Tech Stack" }
+    ];
+</script>
+
+<header class="flex justify-evenly">
+    <!-- <AppBar> -->
+    <!--     {#snippet lead()} -->
+    <!--         <div class="p-4"> -->
+    <!--             <img src="images/Hex.png" width="100" height="100" alt="Logo" /> -->
+    <!--         </div> -->
+    <!--     {/snippet} -->
+    <!--     {#snippet trail()} -->
+    <!--         <nav class="flex gap-2"> -->
+    <!--             {#each links as link} -->
+    <!--                 <a href={link.url} class="btn-lg">{link.label}</a> -->
+    <!--             {/each} -->
+    <!--         </nav> -->
+    <!--     {/snippet} -->
+    <!--     <h2 class="h2 mt-0 pt-0 text-left">Albert Johannessen</h2> -->
+    <!-- </AppBar> -->
+
+    <div>
+        <img src="images/Hex.png" width="100" height="100" alt="Logo" />
+    </div>
+    <div>
+        <h2 class="h2 mt-0 pt-0 text-left">Albert Johannessen</h2>
+    </div>
+    <div>
+        <nav class="flex gap-2">
+            {#each links as link}
+                <a href={link.url} class="btn-lg">{link.label}</a>
+            {/each}
+        </nav>
+    </div>
+</header>
