@@ -1,11 +1,26 @@
 <urlset>
     <url>
         <loc>https://aljhn.github.io/</loc>
-        <lastmod>2024-12-26T00:00:00+00:00</lastmod>
+        <lastmod>2024-12-27T00:00:00+00:00</lastmod>
     </url>
 
     <url>
         <loc>https://aljhn.github.io/about</loc>
-        <lastmod>2024-12-26T00:00:00+00:00</lastmod>
+        <lastmod>2024-12-27T00:00:00+00:00</lastmod>
+    </url>
+
+    <url>
+        <loc>https://aljhn.github.io/publications</loc>
+        <lastmod>2024-12-27T00:00:00+00:00</lastmod>
+    </url>
+
+    <url>
+        <loc>https://aljhn.github.io/interests</loc>
+        <lastmod>2024-12-27T00:00:00+00:00</lastmod>
+    </url>
+
+    <url>
+        <loc>https://aljhn.github.io/tech</loc>
+        <lastmod>2024-12-27T00:00:00+00:00</lastmod>
     </url>
 </urlset>
