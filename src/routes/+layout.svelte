@@ -2,12 +2,11 @@
     import "../app.css";
     import Header from "$lib/Header.svelte";
     import { page } from "$app/state";
-    import { base } from "$app/paths";
 
     let { children } = $props();
 
     const pathName = page.url.pathname;
-    const pageName = pathName.substring(pathName.indexOf(base), -1);
+    const pageName = pathName.substring(pathName.lastIndexOf("/"), pathName.length);
 
     const meta = {
         author: "Albert Johannessen",
@@ -29,9 +28,6 @@
     <meta name="description" content={meta.description} />
     <meta name="keywords" content={meta.keywords} />
     <meta name="author" content={meta.author} />
-    <meta name="temp1" content={pathName} />
-    <meta name="temp2" content={pageName} />
-    <meta name="temp3" content={base} />
 
     <meta property="og:site_name" content="aljhn.github.io" />
     <meta property="og:title" content={meta.title} />
