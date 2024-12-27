@@ -19,10 +19,10 @@
         <div class="grow content-center text-left">
             <a href="/"><h3 class="h3">Albert Johannessen</h3></a>
         </div>
-        <nav class="content-center gap-2">
-            {#each links as link}
-                <a href={base}{link.url} class="btn-lg">{link.label}</a>
-            {/each}
-        </nav>
+        <!-- <nav class="content-center gap-2"> -->
+        <!--     {#each links as link} -->
+        <!--         <a href={base}{link.url} class="btn-lg">{link.label}</a> -->
+        <!--     {/each} -->
+        <!-- </nav> -->
     </section>
 </header>
