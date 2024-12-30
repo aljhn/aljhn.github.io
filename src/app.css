@@ -5,8 +5,5 @@
 html,
 body {
     @apply h-full;
-}
-
-* {
     @apply transition-colors duration-500;
 }
