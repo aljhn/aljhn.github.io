@@ -2,6 +2,6 @@
     import Head from "$lib/Head.svelte";
 </script>
 
-<Head name="Interests" />
+<Head name="Skills" />
 
-<h1>Interests</h1>
+<h1>Tech Stack</h1>

@@ -14,9 +14,8 @@
     const links = [
         { url: base + "/", label: "Home" },
         { url: base + "/about", label: "About" },
-        { url: base + "/publications", label: "Publications" },
-        { url: base + "/interests", label: "Interests" },
-        { url: base + "/tech", label: "Tech Stack" }
+        { url: base + "/skills", label: "Skills" },
+        { url: base + "/publications", label: "Publications" }
     ];
 
     let darkModeState = $state(false);
@@ -36,7 +35,7 @@
     <header class="flex w-full">
         <section class="mx-auto flex w-9/12">
             <div class="p-4">
-                <a href="{base}/"><img src="images/Hex.png" width="75" height="75" alt="Logo" /></a>
+                <a href="{base}/"><img src="{base}/images/Hex.png" width="75" height="75" alt="Logo" /></a>
             </div>
             <div class="grow content-center text-left">
                 <a href="{base}/"><h3 class="h3">Albert Johannessen</h3></a>
