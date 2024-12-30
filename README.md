@@ -7,6 +7,7 @@
 - TypeScript
 - Prettier + ESLint
 - Tailwind CSS + Skeleton
+- unplugin-icons + Iconify with Material Design Icons
 - GitHub Pages + GitHub Actions
 
 ## Commands
