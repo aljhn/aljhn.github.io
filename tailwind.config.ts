@@ -14,5 +14,7 @@ export default {
         skeleton({
             themes: [themes.concord]
         })
-    ]
+    ],
+
+    darkMode: "selector"
 } satisfies Config;

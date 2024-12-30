@@ -97,14 +97,13 @@
                 const dy: number = x * (rho - z) - y;
                 const dz: number = x * y - beta * z;
 
-                x += dx * dt;
-                y += dy * dt;
-                z += dz * dt;
+                x += dx * dt * 0.5;
+                y += dy * dt * 0.5;
+                z += dz * dt * 0.5;
             }, interval);
         }
     });
 </script>
-
 
 <div class="">
     <canvas bind:this={canvas} width="800" height="600"></canvas>

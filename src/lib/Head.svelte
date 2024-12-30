@@ -29,10 +29,8 @@
     <meta property="og:locale" content="en_US" />
 
     <meta name="twitter:card" content="summary" />
-    <meta name="twitter:site" content="@aljhnssnn" />
     <meta name="twitter:title" content={meta.title} />
     <meta name="twitter:description" content={meta.description} />
     <meta name="twitter:image" content={meta.image} />
     <meta name="twitter:url" content={meta.url} />
-    <meta name="twitter:creator" content="@aljhnssnn" />
 </svelte:head>
