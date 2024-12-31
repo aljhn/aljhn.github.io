@@ -158,6 +158,6 @@
     });
 </script>
 
-<div class="">
+<div>
     <canvas bind:this={canvas} width="800" height="600"></canvas>
 </div>
