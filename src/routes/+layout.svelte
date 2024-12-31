@@ -38,25 +38,25 @@
                 <a href="{base}/"><img src="{base}/images/Hex.png" width="75" height="75" alt="Logo" /></a>
             </div>
             <div class="grow content-center text-left">
-                <a href="{base}/"><h3 class="h3">Albert Johannessen</h3></a>
+                <h3 class="h3"><a href="{base}/">Albert Johannessen</a></h3>
             </div>
             <nav class="content-center gap-2">
                 {#each links as link}
                     <a href={link.url} class="btn-lg">{link.label}</a>
                 {/each}
             </nav>
-            <div class="ml-10 flex items-center gap-2">
+            <div class="ml-10 flex items-center gap-3">
                 <Switch
                     name="mode"
                     controlActive="bg-surface-200"
                     bind:checked={darkModeState}
                     onCheckedChange={handleDarkModeStateChange}
                 >
-                    {#snippet inactiveChild()}<Moon width="18" height="18" />{/snippet}
-                    {#snippet activeChild()}<Sun width="18" height="18" />{/snippet}
+                    {#snippet inactiveChild()}<Moon class="size-6" />{/snippet}
+                    {#snippet activeChild()}<Sun class="size-6" />{/snippet}
                 </Switch>
-                <a href="https://github.com/aljhn"><Github width="24" height="24" /></a>
-                <a href="https://www.linkedin.com/in/albertjohannessen/"><Linkedin width="24" height="24" /></a>
+                <a href="https://github.com/aljhn"><Github class="size-8" /></a>
+                <a href="https://www.linkedin.com/in/albertjohannessen/"><Linkedin class="size-8" /></a>
             </div>
         </section>
     </header>
