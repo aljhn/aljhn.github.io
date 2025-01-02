@@ -1,8 +1,8 @@
 <script lang="ts">
-    import Head from "$lib/Head.svelte";
-    import Lorenz from "$lib/Lorenz.svelte";
+    import Meta from "$lib/Meta.svelte";
+    import Canvas from "$lib/Canvas.svelte";
 </script>
 
-<Head name="Home" />
+<Meta name="Home" />
 
-<Lorenz />
+<Canvas />

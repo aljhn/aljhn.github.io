@@ -1,7 +1,7 @@
 <script lang="ts">
-    import Head from "$lib/Head.svelte";
+    import Meta from "$lib/Meta.svelte";
 </script>
 
-<Head name="Publications" />
+<Meta name="Publications" />
 
 <h1>Publications</h1>
