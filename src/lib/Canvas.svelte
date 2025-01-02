@@ -64,9 +64,9 @@
                 this.path[this.currentPointIndex].z = nextZ;
             }
 
-            const deltaX: number =
+            let deltaX: number =
                 this.path[this.currentPointIndex].x - this.path[mod(this.currentPointIndex - 1, this.path.length)].x;
-            const deltaZ: number =
+            let deltaZ: number =
                 this.path[this.currentPointIndex].z - this.path[mod(this.currentPointIndex - 1, this.path.length)].z;
             const angle: number = (Math.atan2(deltaZ, deltaX) * 180) / Math.PI + 180;
             ctx.fillStyle = "hsl(" + angle + ", 40%, 50%)";
@@ -86,19 +86,12 @@
                 const index2: number = mod(this.currentPointIndex + 2 + i, this.path.length);
 
                 const alphaCounter: number = mod(index1 - this.currentPointIndex, this.path.length);
-                // const alphaValue: number = Math.floor(Math.pow(alphaCounter / this.path.length, 2) * 255);
-                // let alpha: string = alphaValue.toString(16);
-                // if (alpha.length < 2) {
-                //     alpha = "0" + alpha;
-                // }
-                // ctx.strokeStyle = "#ffffff" + alpha;
-
                 const alphaValue: number = Math.pow(alphaCounter / this.path.length, 2);
-                const angle: number =
-                    (Math.atan2(this.path[index2].z - this.path[index1].z, this.path[index2].x - this.path[index1].x) *
-                        180) /
-                        Math.PI +
-                    180;
+
+                deltaX = this.path[index2].x - this.path[index1].x;
+                deltaZ = this.path[index2].z - this.path[index1].z;
+                const angle: number = (Math.atan2(deltaZ, deltaX) * 180) / Math.PI + 180;
+
                 ctx.strokeStyle = "hsla(" + angle + ", 40%, 50%," + alphaValue + ")";
                 ctx.lineWidth = 3;
 
@@ -113,12 +106,13 @@
     $effect(() => {
         const ctx: CanvasRenderingContext2D | null = canvas.getContext("2d");
         if (ctx != null) {
-            ctx.fillStyle = "#222222";
+            const backgroundColor: string = "#222222";
+            ctx.fillStyle = backgroundColor;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            let x0: number = 0.0;
-            let y0: number = 1.0;
-            let z0: number = 1.05;
+            const x0: number = 0.0;
+            const y0: number = 1.0;
+            const z0: number = 1.05;
 
             const rho: number = 28;
             const sigma: number = 10;
@@ -126,6 +120,7 @@
 
             const maxPoints: number = 50;
             const particleAmount = 50;
+
             let particles: Particle[] = [];
             for (let i = 0; i < particleAmount; i++) {
                 const initialPoint: Point = new Point(
@@ -136,24 +131,31 @@
                 particles.push(new Particle(initialPoint, maxPoints));
             }
 
-            const fps: number = 60;
-            const dt: number = 1 / fps;
-            const drawInterval: number = 1000 * dt;
-
             const scale: number = 10;
             const centerX: number = canvas.width / 2;
             const centerY: number = canvas.height / 2 + 30 * scale;
 
             const speedScale: number = 0.5;
 
-            setInterval(() => {
+            let lastTimestamp: DOMHighResTimeStamp = 0;
+
+            function draw(timestamp: DOMHighResTimeStamp) {
+                const dt: number = (timestamp - lastTimestamp) / 1000;
+
                 ctx.fillStyle = "#222222";
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-                for (let i = 0; i < particles.length; i++) {
-                    particles[i].update(ctx, centerX, centerY, scale, speedScale, dt, sigma, rho, beta);
+                if (dt <= 0.1) {
+                    for (let i = 0; i < particles.length; i++) {
+                        particles[i].update(ctx, centerX, centerY, scale, speedScale, dt, sigma, rho, beta);
+                    }
                 }
-            }, drawInterval);
+
+                lastTimestamp = timestamp;
+                requestAnimationFrame(draw);
+            }
+
+            requestAnimationFrame(draw);
         }
     });
 </script>

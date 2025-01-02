@@ -1,7 +1,7 @@
 <script lang="ts">
-    import Head from "$lib/Head.svelte";
+    import Meta from "$lib/Meta.svelte";
 </script>
 
-<Head name="Skills" />
+<Meta name="Skills" />
 
 <h1>Tech Stack</h1>

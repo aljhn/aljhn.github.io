@@ -1,7 +1,7 @@
 <script lang="ts">
-    import Head from "$lib/Head.svelte";
+    import Meta from "$lib/Meta.svelte";
 </script>
 
-<Head name="404" />
+<Meta name="404" />
 
 <h1>404 Not Found</h1>
