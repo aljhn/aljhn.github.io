@@ -35,7 +35,8 @@
             ctx: CanvasRenderingContext2D,
             centerX: number,
             centerY: number,
-            scale: number,
+            scaleX: number,
+            scaleY: number,
             speedScale: number,
             dt: number,
             sigma: number,
@@ -64,17 +65,16 @@
                 this.path[this.currentPointIndex].z = nextZ;
             }
 
-            let deltaX: number =
-                this.path[this.currentPointIndex].x - this.path[mod(this.currentPointIndex - 1, this.path.length)].x;
-            let deltaZ: number =
-                this.path[this.currentPointIndex].z - this.path[mod(this.currentPointIndex - 1, this.path.length)].z;
+            const index1: number = mod(this.currentPointIndex - 1, this.path.length);
+            const index2: number = this.currentPointIndex;
+            const deltaX: number = this.path[index2].x - this.path[index1].x;
+            const deltaZ: number = this.path[index2].z - this.path[index1].z;
             const angle: number = (Math.atan2(deltaZ, deltaX) * 180) / Math.PI + 180;
             ctx.fillStyle = "hsl(" + angle + ", 40%, 50%)";
-            // ctx.fillStyle = "#ffffff";
             ctx.beginPath();
             ctx.arc(
-                centerX + this.path[this.currentPointIndex].x * scale,
-                centerY - this.path[this.currentPointIndex].z * scale,
+                centerX + this.path[this.currentPointIndex].x * scaleX,
+                centerY - this.path[this.currentPointIndex].z * scaleY,
                 3,
                 0,
                 2 * Math.PI
@@ -88,16 +88,16 @@
                 const alphaCounter: number = mod(index1 - this.currentPointIndex, this.path.length);
                 const alphaValue: number = Math.pow(alphaCounter / this.path.length, 2);
 
-                deltaX = this.path[index2].x - this.path[index1].x;
-                deltaZ = this.path[index2].z - this.path[index1].z;
+                const deltaX: number = this.path[index2].x - this.path[index1].x;
+                const deltaZ: number = this.path[index2].z - this.path[index1].z;
                 const angle: number = (Math.atan2(deltaZ, deltaX) * 180) / Math.PI + 180;
 
                 ctx.strokeStyle = "hsla(" + angle + ", 40%, 50%," + alphaValue + ")";
                 ctx.lineWidth = 3;
 
                 ctx.beginPath();
-                ctx.moveTo(centerX + this.path[index1].x * scale, centerY - this.path[index1].z * scale);
-                ctx.lineTo(centerX + this.path[index2].x * scale, centerY - this.path[index2].z * scale);
+                ctx.moveTo(centerX + this.path[index1].x * scaleX, centerY - this.path[index1].z * scaleY);
+                ctx.lineTo(centerX + this.path[index2].x * scaleX, centerY - this.path[index2].z * scaleY);
                 ctx.stroke();
             }
         }
@@ -118,6 +118,11 @@
             const sigma: number = 10;
             const beta: number = 8 / 3;
 
+            const boundingBoxX0: number = -50;
+            const boundingBoxX1: number = 50;
+            const boundingBoxY0: number = -10;
+            const boundingBoxY1: number = 60;
+
             const maxPoints: number = 50;
             const particleAmount = 50;
 
@@ -131,23 +136,44 @@
                 particles.push(new Particle(initialPoint, maxPoints));
             }
 
-            const scale: number = 10;
-            const centerX: number = canvas.width / 2;
-            const centerY: number = canvas.height / 2 + 30 * scale;
-
             const speedScale: number = 0.5;
+
+            const canvasDiv = document.getElementById("canvasDiv");
 
             let lastTimestamp: DOMHighResTimeStamp = 0;
 
             function draw(timestamp: DOMHighResTimeStamp) {
                 const dt: number = (timestamp - lastTimestamp) / 1000;
 
-                ctx.fillStyle = "#222222";
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                if (ctx != null) {
+                    if (canvas != null && canvasDiv != null) {
+                        canvas.width = canvasDiv.clientWidth;
+                        canvas.height = canvasDiv.clientHeight;
+                    }
 
-                if (dt <= 0.1) {
-                    for (let i = 0; i < particles.length; i++) {
-                        particles[i].update(ctx, centerX, centerY, scale, speedScale, dt, sigma, rho, beta);
+                    const scaleX: number = canvas.width / (boundingBoxX1 - boundingBoxX0);
+                    const scaleY: number = canvas.height / (boundingBoxY1 - boundingBoxY0);
+                    const centerX: number = canvas.width / 2 + ((boundingBoxX1 + boundingBoxX0) / 2) * scaleX;
+                    const centerY: number = canvas.height / 2 + ((boundingBoxY1 + boundingBoxY0) / 2) * scaleY;
+
+                    ctx.fillStyle = "#222222";
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                    if (dt <= 0.1) {
+                        for (let i = 0; i < particles.length; i++) {
+                            particles[i].update(
+                                ctx,
+                                centerX,
+                                centerY,
+                                scaleX,
+                                scaleY,
+                                speedScale,
+                                dt,
+                                sigma,
+                                rho,
+                                beta
+                            );
+                        }
                     }
                 }
 
@@ -160,6 +186,6 @@
     });
 </script>
 
-<div>
-    <canvas bind:this={canvas} width="800" height="600"></canvas>
+<div class="size-full" id="canvasDiv">
+    <canvas bind:this={canvas}></canvas>
 </div>
