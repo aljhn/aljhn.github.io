@@ -8,11 +8,11 @@
 <div class="grid h-screen grid-rows-[auto_1fr]">
     <Header />
 
-    <div class="grid grid-cols-[auto_1fr_auto] w-full bg-surface-800">
-        <aside></aside>
-        <main class="mx-auto flex w-8/12">
-            {@render children()}
-        </main>
-        <aside></aside>
+    <div class="flex w-full h-full bg-surface-100 dark:bg-surface-800">
+        <div class="container mx-auto">
+            <main class="flex w-full h-full">
+                {@render children()}
+            </main>
+        </div>
     </div>
 </div>

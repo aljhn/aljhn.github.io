@@ -29,8 +29,8 @@
     }
 </script>
 
-<header class="w-full">
-    <div class="mx-auto flex w-9/12">
+<header class="flex w-full bg-surface-200 dark:bg-surface-900">
+    <div class="container mx-auto flex">
         <div class="shrink-0 pr-4">
             <a href="{base}/"><img src="{base}/images/Hex.png" width="75" height="75" alt="Logo" /></a>
         </div>
@@ -42,10 +42,11 @@
                 <a href={link.url} class="btn-lg px-2">{link.label}</a>
             {/each}
         </nav>
-        <div class="px-4 flex items-center gap-1">
+        <div class="flex items-center gap-1 px-4">
             <Switch
                 name="mode"
-                controlActive="bg-surface-200"
+                controlActive="bg-surface-300"
+                controlInactive="bg-surface-500"
                 bind:checked={darkModeState}
                 onCheckedChange={handleDarkModeStateChange}
             >
