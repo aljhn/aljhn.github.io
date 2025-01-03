@@ -106,10 +106,6 @@
     $effect(() => {
         const ctx: CanvasRenderingContext2D | null = canvas.getContext("2d");
         if (ctx != null) {
-            const backgroundColor: string = "#222222";
-            ctx.fillStyle = backgroundColor;
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
             const x0: number = 0.0;
             const y0: number = 1.0;
             const z0: number = 1.05;
@@ -136,7 +132,7 @@
                 particles.push(new Particle(initialPoint, maxPoints));
             }
 
-            const speedScale: number = 0.5;
+            const speedScale: number = 0.4;
 
             const canvasDiv = document.getElementById("canvasDiv");
 
@@ -145,18 +141,28 @@
             function draw(timestamp: DOMHighResTimeStamp) {
                 const dt: number = (timestamp - lastTimestamp) / 1000;
 
-                if (ctx != null) {
-                    if (canvas != null && canvasDiv != null) {
-                        canvas.width = canvasDiv.clientWidth;
-                        canvas.height = canvasDiv.clientHeight;
-                    }
+                if (ctx != null && canvas != null && canvasDiv != null) {
+                    const darkMode: boolean = document.documentElement.classList.contains("dark");
+
+                    const bgColorRaw: string = darkMode
+                        ? getComputedStyle(document.body).getPropertyValue("--color-surface-800")
+                        : getComputedStyle(document.body).getPropertyValue("--color-surface-100");
+
+                    const backgroundColor = bgColorRaw
+                        .split(" ")
+                        .map((x) => parseInt(x).toString(16))
+                        .map((x) => (x.length === 1 ? "0" + x : x))
+                        .reduce((acc, x) => acc + x, "#");
+
+                    canvas.width = canvasDiv.clientWidth;
+                    canvas.height = canvasDiv.clientHeight;
 
                     const scaleX: number = canvas.width / (boundingBoxX1 - boundingBoxX0);
                     const scaleY: number = canvas.height / (boundingBoxY1 - boundingBoxY0);
                     const centerX: number = canvas.width / 2 + ((boundingBoxX1 + boundingBoxX0) / 2) * scaleX;
                     const centerY: number = canvas.height / 2 + ((boundingBoxY1 + boundingBoxY0) / 2) * scaleY;
 
-                    ctx.fillStyle = "#222222";
+                    ctx.fillStyle = backgroundColor;
                     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
                     if (dt <= 0.1) {
@@ -187,5 +193,5 @@
 </script>
 
 <div class="size-full" id="canvasDiv">
-    <canvas bind:this={canvas}></canvas>
+    <canvas bind:this={canvas} class="bg-surface-100 dark:bg-surface-800"></canvas>
 </div>

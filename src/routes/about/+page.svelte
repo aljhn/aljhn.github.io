@@ -4,4 +4,6 @@
 
 <Meta name="About" />
 
-<h1>About</h1>
+<div class="container mx-auto flex justify-center pt-20">
+    <h1 class="h1">About</h1>
+</div>
