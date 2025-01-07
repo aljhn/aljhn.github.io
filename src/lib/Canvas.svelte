@@ -1,12 +1,166 @@
 <script lang="ts">
+    import Header from "./Header.svelte";
+
     let canvas: HTMLCanvasElement;
 
     function mod(n: number, m: number): number {
         return ((n % m) + m) % m;
     }
 
-    function getRandom(low: number, high: number) {
+    function getRandom(low: number, high: number): number {
         return Math.random() * (high - low) + low;
+    }
+
+    function lorenz(t: number, p: Point, args: number[]): Point {
+        const [sigma, rho, beta]: number[] = args;
+
+        const dx: number = sigma * (p.y - p.x);
+        const dy: number = p.x * (rho - p.z) - p.y;
+        const dz: number = p.x * p.y - beta * p.z;
+
+        return new Point(dx, dy, dz);
+    }
+
+    class ButcherTable {
+        a: number[][];
+        b: number[];
+        c: number[];
+        b_e: number[] | null;
+        dim: number;
+
+        constructor(a: number[][], b: number[], c: number[], b_e: number[] | null = null) {
+            this.a = a;
+            this.b = b;
+            this.c = c;
+            this.b_e = b_e;
+            this.dim = b.length;
+        }
+    }
+
+    class RK4 extends ButcherTable {
+        constructor() {
+            const a: number[][] = [
+                [0, 0, 0, 0],
+                [1 / 2, 0, 0, 0],
+                [0, 1 / 2, 0, 0],
+                [0, 0, 1, 0]
+            ];
+            const b: number[] = [1 / 6, 1 / 3, 1 / 3, 1 / 6];
+            const c: number[] = [0, 1 / 2, 1 / 2, 1];
+            super(a, b, c);
+        }
+    }
+
+    class Dopri5 extends ButcherTable {
+        constructor() {
+            const a: number[][] = [
+                [0, 0, 0, 0, 0, 0],
+                [1 / 5, 0, 0, 0, 0, 0],
+                [3 / 40, 9 / 40, 0, 0, 0, 0],
+                [44 / 45, -56 / 15, 32 / 9, 0, 0, 0],
+                [19372 / 6561, -25360 / 2187, 64448 / 6561, -212 / 729, 0, 0],
+                [9017 / 3168, -355 / 33, 46732 / 5247, 49 / 176, -5103 / 18656, 0],
+                [35 / 384, 0, 500 / 1113, 125 / 192, -2187 / 6784, 11 / 84]
+            ];
+            const b: number[] = [35 / 384, 0, 500 / 1113, 125 / 192, -2187 / 6784, 11 / 84, 0];
+            const b_e: number[] = [5179 / 57600, 0, 7571 / 16695, 393 / 640, -92097 / 339200, 187 / 2100, 1 / 40];
+            const c: number[] = [0, 1 / 5, 3 / 10, 4 / 5, 8 / 9, 1, 1];
+            super(a, b, c, b_e);
+        }
+    }
+
+    class Integrator {
+        system: Function;
+        args: number[];
+        table: ButcherTable;
+
+        constructor(table: ButcherTable, system: Function, args: number[]) {
+            this.system = system;
+            this.args = args;
+            this.table = table;
+        }
+
+        next(t: number, p: Point, h: number): Point {
+            let k: Point[] = new Array(this.table.dim);
+
+            let p_temp: Point = new Point();
+
+            for (let i = 0; i < this.table.dim; i++) {
+                p_temp.x = p.x;
+                p_temp.y = p.y;
+                p_temp.z = p.z;
+
+                for (let j = 0; j < i; j++) {
+                    p_temp = addPoints(p_temp, mulPoint(k[j], this.table.a[i][j] * h));
+                }
+                k[i] = this.system(t + this.table.c[i] * h, p_temp, this.args);
+            }
+
+            let p_next: Point = new Point(p.x, p.y, p.z);
+            for (let i = 0; i < this.table.dim; i++) {
+                p_next = addPoints(p_next, mulPoint(k[i], this.table.b[i] * h));
+            }
+            return p_next;
+        }
+    }
+
+    class AdaptiveIntegrator {
+        system: Function;
+        args: number[];
+        table: ButcherTable;
+        h: number;
+        atol: number;
+        rtol: number;
+        prevNorm1: number;
+        prevNorm2: number;
+
+        constructor(table: ButcherTable, system: Function, args: number[], atol: number, rtol: number) {
+            this.system = system;
+            this.args = args;
+            this.table = table;
+            this.h = 1e-3;
+            this.atol = atol;
+            this.rtol = rtol;
+            this.prevNorm1 = 1;
+            this.prevNorm2 = 1;
+        }
+
+        next(t: number, p: Point): Point {
+            let k: Point[] = new Array(this.table.dim);
+
+            let p_temp: Point = new Point();
+
+            for (let i = 0; i < this.table.dim; i++) {
+                p_temp.x = p.x;
+                p_temp.y = p.y;
+                p_temp.z = p.z;
+
+                for (let j = 0; j < i; j++) {
+                    p_temp = addPoints(p_temp, mulPoint(k[j], this.table.a[i][j] * this.h));
+                }
+                k[i] = this.system(t + this.table.c[i] * this.h, p_temp, this.args);
+            }
+
+            let p_next: Point = new Point(p.x, p.y, p.z);
+            for (let i = 0; i < this.table.dim; i++) {
+                p_next = addPoints(p_next, mulPoint(k[i], this.table.b[i] * this.h));
+            }
+
+            let p_e_next: Point = new Point(p.x, p.y, p.z);
+            for (let i = 0; i < this.table.dim; i++) {
+                p_e_next = addPoints(p_e_next, mulPoint(k[i], this.table.b_e[i] * this.h));
+            }
+
+            const error: Point = addPoints(p_next, mulPoint(p_e_next, -1));
+            const tol: number = this.atol + this.rtol * Math.max(0, 0);
+            const E: number = pointNorm(mulPoint(error, 1 / tol));
+
+            this.h = this.h * Math.pow(1 / E, 1 / (this.table.dim + 1));
+            this.prevNorm2 = this.prevNorm1;
+            this.prevNorm1 = pointNorm(p_next);
+
+            return p_next;
+        }
     }
 
     class Point {
@@ -14,11 +168,23 @@
         y: number;
         z: number;
 
-        constructor(x: number, y: number, z: number) {
+        constructor(x: number = 0, y: number = 0, z: number = 0) {
             this.x = x;
             this.y = y;
             this.z = z;
         }
+    }
+
+    function addPoints(p1: Point, p2: Point): Point {
+        return new Point(p1.x + p2.x, p1.y + p2.y, p1.z + p2.z);
+    }
+
+    function mulPoint(p: Point, scalar: number): Point {
+        return new Point(p.x * scalar, p.y * scalar, p.z * scalar);
+    }
+
+    function pointNorm(p: Point): number {
+        return Math.sqrt(p.x * p.x + p.y * p.y + p.z * p.z);
     }
 
     class Particle {
@@ -39,30 +205,19 @@
             scaleY: number,
             speedScale: number,
             dt: number,
-            sigma: number,
-            rho: number,
-            beta: number
-        ) {
-            const x: number = this.path[this.currentPointIndex].x;
-            const y: number = this.path[this.currentPointIndex].y;
-            const z: number = this.path[this.currentPointIndex].z;
+            simulator: Integrator
+        ): void {
+            const p: Point = this.path[this.currentPointIndex];
 
-            const dx: number = sigma * (y - x);
-            const dy: number = x * (rho - z) - y;
-            const dz: number = x * y - beta * z;
-
-            const nextX: number = x + dx * dt * speedScale;
-            const nextY: number = y + dy * dt * speedScale;
-            const nextZ: number = z + dz * dt * speedScale;
+            const h: number = dt * speedScale;
+            const p_next = simulator.next(0, p, h);
 
             if (this.path.length < this.pathLength) {
-                this.path.push(new Point(nextX, nextY, nextZ));
+                this.path.push(p_next);
                 this.currentPointIndex++;
             } else {
                 this.currentPointIndex = mod(this.currentPointIndex + 1, this.pathLength);
-                this.path[this.currentPointIndex].x = nextX;
-                this.path[this.currentPointIndex].y = nextY;
-                this.path[this.currentPointIndex].z = nextZ;
+                this.path[this.currentPointIndex] = p_next; // TODO: insert everything inplace instead of so many allocations
             }
 
             const index1: number = mod(this.currentPointIndex - 1, this.path.length);
@@ -113,6 +268,16 @@
             const rho: number = 28;
             const sigma: number = 10;
             const beta: number = 8 / 3;
+            const args: number[] = [sigma, rho, beta];
+
+            const system: Function = lorenz;
+
+            // const table: ButcherTable = new RK4();
+            // const simulator: Integrator = new Integrator(table, system, args);
+            const table: ButcherTable = new Dopri5();
+            const atol: number = 1e-9;
+            const rtol: number = 1e-3;
+            const simulator: AdaptiveIntegrator = new AdaptiveIntegrator(table, system, args, atol, rtol);
 
             const boundingBoxX0: number = -50;
             const boundingBoxX1: number = 50;
@@ -125,20 +290,20 @@
             let particles: Particle[] = [];
             for (let i = 0; i < particleAmount; i++) {
                 const initialPoint: Point = new Point(
-                    x0 + getRandom(-1, 1),
-                    y0 + getRandom(-1, 1),
-                    z0 + getRandom(-1, 1)
+                    x0 + getRandom(-10, 10),
+                    y0 + getRandom(-10, 10),
+                    z0 + getRandom(-10, 10)
                 );
                 particles.push(new Particle(initialPoint, maxPoints));
             }
 
-            const speedScale: number = 0.4;
+            const speedScale: number = 0.1;
 
             const canvasDiv = document.getElementById("canvasDiv");
 
             let lastTimestamp: DOMHighResTimeStamp = 0;
 
-            function draw(timestamp: DOMHighResTimeStamp) {
+            function draw(timestamp: DOMHighResTimeStamp): void {
                 const dt: number = (timestamp - lastTimestamp) / 1000;
 
                 if (ctx != null && canvas != null && canvasDiv != null) {
@@ -167,18 +332,7 @@
 
                     if (dt <= 0.1) {
                         for (let i = 0; i < particles.length; i++) {
-                            particles[i].update(
-                                ctx,
-                                centerX,
-                                centerY,
-                                scaleX,
-                                scaleY,
-                                speedScale,
-                                dt,
-                                sigma,
-                                rho,
-                                beta
-                            );
+                            particles[i].update(ctx, centerX, centerY, scaleX, scaleY, speedScale, dt, simulator);
                         }
                     }
                 }
