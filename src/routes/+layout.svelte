@@ -5,14 +5,12 @@
     let { children } = $props();
 </script>
 
-<div class="grid h-screen grid-rows-[auto_1fr]">
+<div class="grid h-screen w-screen grid-rows-[auto_1fr]">
     <Header />
 
-    <div class="flex w-full h-full bg-surface-100 dark:bg-surface-800">
-        <div class="container mx-auto">
-            <main class="flex w-full h-full">
-                {@render children()}
-            </main>
-        </div>
+    <div class="bg-surface-100 dark:bg-surface-800">
+        <main class="container mx-auto h-full">
+            {@render children()}
+        </main>
     </div>
 </div>
