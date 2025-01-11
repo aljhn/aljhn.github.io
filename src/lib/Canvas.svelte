@@ -358,5 +358,5 @@
 </script>
 
 <div class="size-full" id="canvasDiv">
-    <canvas bind:this={canvas} class="bg-surface-100 dark:bg-surface-800"></canvas>
+    <canvas bind:this={canvas}></canvas>
 </div>

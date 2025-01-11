@@ -29,20 +29,20 @@
     }
 </script>
 
-<header class="flex w-full bg-surface-200 dark:bg-surface-900">
-    <div class="container mx-auto flex">
-        <div class="shrink-0 pr-4">
+<header class="bg-surface-200 dark:bg-surface-900">
+    <div class="container mx-auto flex flex-col items-center py-2 md:flex-row md:justify-between">
+        <div class="flex grow items-center">
             <a href="{base}/"><img src="{base}/images/Hex.png" width="75" height="75" alt="Logo" /></a>
+            <h4 class="h4 pl-3"><a href="{base}/">Albert Johannessen</a></h4>
         </div>
-        <div class="grow content-center text-left leading-10">
-            <h3 class="h3"><a href="{base}/">Albert Johannessen</a></h3>
-        </div>
-        <nav class="flex items-center">
+
+        <nav class="flex">
             {#each links as link}
                 <a href={link.url} class="btn-lg px-2">{link.label}</a>
             {/each}
         </nav>
-        <div class="flex items-center gap-1 px-4">
+
+        <div class="flex gap-2 md:gap-1 md:pl-5">
             <Switch
                 name="mode"
                 controlActive="bg-surface-300"
