@@ -39,7 +39,10 @@
         pathX: Float32Array;
         pathY: Float32Array;
         pathZ: Float32Array;
-        currentIndex: number = 0;
+        currentIndex: number;
+        currentX: number;
+        currentY: number;
+        currentZ: number;
 
         constructor(system: ODE, x0: number, y0: number, z0: number, pathLength: number) {
             this.system = system;
@@ -49,20 +52,46 @@
             this.pathX[0] = x0;
             this.pathY[0] = y0;
             this.pathZ[0] = z0;
+            this.currentIndex = 0;
+            this.currentX = x0;
+            this.currentY = y0;
+            this.currentZ = z0;
         }
 
         update(h: number): void {
-            const x: number = this.pathX[this.currentIndex];
-            const y: number = this.pathY[this.currentIndex];
-            const z: number = this.pathZ[this.currentIndex];
+            // const x: number = this.pathX[this.currentIndex];
+            // const y: number = this.pathY[this.currentIndex];
+            // const z: number = this.pathZ[this.currentIndex];
+            //
+            // const [dx, dy, dz]: [number, number, number] = this.system.f(0, x, y, z);
+            //
+            // const nextIndex: number = mod(this.currentIndex + 1, this.pathX.length);
+            // this.pathX[nextIndex] = x + dx * h;
+            // this.pathY[nextIndex] = y + dy * h;
+            // this.pathZ[nextIndex] = z + dz * h;
+            // this.currentIndex = nextIndex;
 
-            const [dx, dy, dz] = this.system.f(0, x, y, z);
+            const x: number = this.currentX;
+            const y: number = this.currentY;
+            const z: number = this.currentZ;
 
-            const nextIndex: number = mod(this.currentIndex + 1, this.pathX.length);
-            this.pathX[nextIndex] = x + dx * h;
-            this.pathY[nextIndex] = y + dy * h;
-            this.pathZ[nextIndex] = z + dz * h;
-            this.currentIndex = nextIndex;
+            const [dx, dy, dz]: [number, number, number] = this.system.f(0, x, y, z);
+
+            this.currentX = x + dx * h;
+            this.currentY = y + dy * h;
+            this.currentZ = z + dz * h;
+
+            const distSquared: number =
+                (this.currentX - this.pathX[this.currentIndex]) * (this.currentX - this.pathX[this.currentIndex]) +
+                (this.currentY - this.pathY[this.currentIndex]) * (this.currentY - this.pathY[this.currentIndex]) +
+                (this.currentZ - this.pathZ[this.currentIndex]) * (this.currentZ - this.pathZ[this.currentIndex]);
+
+            if (distSquared > 0.01) {
+                this.currentIndex = mod(this.currentIndex + 1, this.pathX.length);
+                this.pathX[this.currentIndex] = this.currentX;
+                this.pathY[this.currentIndex] = this.currentY;
+                this.pathZ[this.currentIndex] = this.currentZ;
+            }
         }
 
         draw(ctx: CanvasRenderingContext2D, centerX: number, centerY: number, scaleX: number, scaleY: number): void {
@@ -71,13 +100,13 @@
                 const index1: number = mod(this.currentIndex + 1 + i, pathLength);
                 const index2: number = mod(this.currentIndex + 2 + i, pathLength);
 
-                const alphaValue: number = mod(index1 - this.currentIndex, pathLength) / pathLength;
+                const alpha: number = mod(index1 - this.currentIndex, pathLength) / pathLength;
 
                 const deltaX: number = this.pathX[index2] - this.pathX[index1];
                 const deltaZ: number = this.pathZ[index2] - this.pathZ[index1];
                 const angle: number = Math.atan2(deltaZ, deltaX) * RAD2DEG + 180;
 
-                ctx.strokeStyle = "hsla(" + angle + ", 40%, 50%," + alphaValue + ")";
+                ctx.strokeStyle = `hsla(${angle}, 40%, 50%, ${alpha})`;
 
                 ctx.beginPath();
                 ctx.moveTo(centerX + this.pathX[index1] * scaleX, centerY - this.pathZ[index1] * scaleY);
@@ -88,7 +117,7 @@
     }
 
     $effect(() => {
-        const ctx: CanvasRenderingContext2D = canvas.getContext("2d", { alpha: false })!;
+        const ctx: CanvasRenderingContext2D = canvas.getContext("2d")!;
 
         const mainRoot: HTMLElement = document.getElementById("mainRoot")!;
         const canvasDiv: HTMLElement = document.getElementById("canvasDiv")!;
@@ -121,11 +150,11 @@
             );
         });
 
-        ctx.lineWidth = 3;
+        ctx.lineWidth = 2;
 
         const speedScale: number = 0.4;
 
-        let lastTimestamp: DOMHighResTimeStamp = 0;
+        let lastTimestamp: DOMHighResTimeStamp = performance.now();
 
         function draw(timestamp: DOMHighResTimeStamp): void {
             const dt: number = (timestamp - lastTimestamp) / 1000;
