@@ -269,91 +269,78 @@
     }
 
     $effect(() => {
-        const ctx: CanvasRenderingContext2D | null = canvas.getContext("2d");
-        if (ctx != null) {
-            const x0: number = 0.0;
-            const y0: number = 1.0;
-            const z0: number = 1.05;
+        const ctx: CanvasRenderingContext2D = canvas.getContext("2d")!;
 
-            const rho: number = 28;
-            const sigma: number = 10;
-            const beta: number = 8 / 3;
-            const args: number[] = [sigma, rho, beta];
+        const mainRoot: HTMLElement = document.getElementById("mainRoot")!;
+        const canvasDiv: HTMLElement = document.getElementById("canvasDiv")!;
 
-            const system: Function = lorenz;
+        const x0: number = 0.0;
+        const y0: number = 1.0;
+        const z0: number = 1.05;
 
-            // const table: ButcherTable = new RK4();
-            const table: ButcherTable = new Euler();
-            const simulator: Integrator = new Integrator(table, system, args);
-            // const table: ButcherTable = new Dopri5();
-            // const atol: number = 1e-8;
-            // const rtol: number = 1e-3;
-            // const simulator: AdaptiveIntegrator = new AdaptiveIntegrator(table, system, args, atol, rtol);
+        const rho: number = 28;
+        const sigma: number = 10;
+        const beta: number = 8 / 3;
+        const args: number[] = [sigma, rho, beta];
 
-            const boundingBoxX0: number = -40;
-            const boundingBoxX1: number = 40;
-            const boundingBoxY0: number = -10;
-            const boundingBoxY1: number = 60;
+        const system: Function = lorenz;
 
-            const maxPoints: number = 50;
-            const particleAmount = 50;
+        // const table: ButcherTable = new RK4();
+        const table: ButcherTable = new Euler();
+        const simulator: Integrator = new Integrator(table, system, args);
+        // const table: ButcherTable = new Dopri5();
+        // const atol: number = 1e-8;
+        // const rtol: number = 1e-3;
+        // const simulator: AdaptiveIntegrator = new AdaptiveIntegrator(table, system, args, atol, rtol);
 
-            let particles: Particle[] = [];
-            for (let i = 0; i < particleAmount; i++) {
-                const initialPoint: Point = new Point(
-                    x0 + getRandom(-10, 10),
-                    y0 + getRandom(-10, 10),
-                    z0 + getRandom(-10, 10)
-                );
-                particles.push(new Particle(initialPoint, maxPoints));
-            }
+        const boundingBoxX0: number = -40;
+        const boundingBoxX1: number = 40;
+        const boundingBoxY0: number = -10;
+        const boundingBoxY1: number = 60;
 
-            const speedScale: number = 0.3;
+        const maxPoints: number = 50;
+        const particleAmount = 50;
 
-            const canvasDiv = document.getElementById("canvasDiv");
+        let particles: Particle[] = [];
+        for (let i = 0; i < particleAmount; i++) {
+            const initialPoint: Point = new Point(
+                x0 + getRandom(-10, 10),
+                y0 + getRandom(-10, 10),
+                z0 + getRandom(-10, 10)
+            );
+            particles.push(new Particle(initialPoint, maxPoints));
+        }
 
-            let lastTimestamp: DOMHighResTimeStamp = 0;
+        const speedScale: number = 0.3;
 
-            function draw(timestamp: DOMHighResTimeStamp): void {
-                const dt: number = (timestamp - lastTimestamp) / 1000;
+        let lastTimestamp: DOMHighResTimeStamp = 0;
 
-                if (ctx != null && canvas != null && canvasDiv != null) {
-                    const darkMode: boolean = document.documentElement.classList.contains("dark");
+        function draw(timestamp: DOMHighResTimeStamp): void {
+            const dt: number = (timestamp - lastTimestamp) / 1000;
 
-                    const bgColorRaw: string = darkMode
-                        ? getComputedStyle(document.body).getPropertyValue("--color-surface-800")
-                        : getComputedStyle(document.body).getPropertyValue("--color-surface-100");
+            canvas.width = canvasDiv.clientWidth;
+            canvas.height = canvasDiv.clientHeight;
 
-                    const backgroundColor = bgColorRaw
-                        .split(" ")
-                        .map((x) => parseInt(x).toString(16))
-                        .map((x) => (x.length === 1 ? "0" + x : x))
-                        .reduce((acc, x) => acc + x, "#");
+            const scaleX: number = canvas.width / (boundingBoxX1 - boundingBoxX0);
+            const scaleY: number = canvas.height / (boundingBoxY1 - boundingBoxY0);
+            const centerX: number = canvas.width / 2 + ((boundingBoxX1 + boundingBoxX0) / 2) * scaleX;
+            const centerY: number = canvas.height / 2 + ((boundingBoxY1 + boundingBoxY0) / 2) * scaleY;
 
-                    canvas.width = canvasDiv.clientWidth;
-                    canvas.height = canvasDiv.clientHeight;
+            const backgroundColor: string = window.getComputedStyle(mainRoot).backgroundColor;
+            ctx.fillStyle = backgroundColor;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-                    const scaleX: number = canvas.width / (boundingBoxX1 - boundingBoxX0);
-                    const scaleY: number = canvas.height / (boundingBoxY1 - boundingBoxY0);
-                    const centerX: number = canvas.width / 2 + ((boundingBoxX1 + boundingBoxX0) / 2) * scaleX;
-                    const centerY: number = canvas.height / 2 + ((boundingBoxY1 + boundingBoxY0) / 2) * scaleY;
-
-                    ctx.fillStyle = backgroundColor;
-                    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-                    if (dt <= 0.1) {
-                        for (let i = 0; i < particles.length; i++) {
-                            particles[i].update(ctx, centerX, centerY, scaleX, scaleY, speedScale, dt, simulator);
-                        }
-                    }
+            if (dt <= 0.1) {
+                for (let i = 0; i < particles.length; i++) {
+                    particles[i].update(ctx, centerX, centerY, scaleX, scaleY, speedScale, dt, simulator);
                 }
-
-                lastTimestamp = timestamp;
-                requestAnimationFrame(draw);
             }
 
+            lastTimestamp = timestamp;
             requestAnimationFrame(draw);
         }
+
+        requestAnimationFrame(draw);
     });
 </script>
 
