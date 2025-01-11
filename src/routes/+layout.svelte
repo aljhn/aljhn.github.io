@@ -8,7 +8,7 @@
 <div class="grid h-screen w-screen grid-rows-[auto_1fr]">
     <Header />
 
-    <div class="bg-surface-100 dark:bg-surface-800">
+    <div class="bg-surface-100 dark:bg-surface-800" id="mainRoot">
         <main class="container mx-auto h-full">
             {@render children()}
         </main>
