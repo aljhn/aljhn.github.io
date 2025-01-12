@@ -12,9 +12,13 @@
 
 ## Commands
 
-#### Initial
+#### Initial Setup
 
 pnpx sv create website
+
+### Install Packages
+
+pnpm install
 
 #### Run Development Server
 
