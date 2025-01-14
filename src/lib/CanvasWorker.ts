@@ -49,7 +49,7 @@ class Lorenz implements ODE {
     }
 }
 
-let lineSegments: Map<string, Array<Array<number>>> = new Map<string, Array<Array<number>>>();
+// let lineSegments: Map<string, Array<Array<number>>> = new Map<string, Array<Array<number>>>();
 
 class Particle {
     system: ODE;
@@ -120,22 +120,22 @@ class Particle {
 
             const color: string = `hsla(${Math.floor(hue)}, ${Math.floor(saturation)}%, ${Math.floor(light)}%, ${Math.round(alpha * 100) / 100})`
 
-            if (lineSegments.has(color)) {
-                lineSegments
-                    .get(color)
-                    .push([this.pathX[index1], this.pathZ[index1], this.pathX[index2], this.pathZ[index2]]);
-            } else {
-                lineSegments.set(color, [
-                    [this.pathX[index1], this.pathZ[index1], this.pathX[index2], this.pathZ[index2]]
-                ]);
-            }
+            // if (lineSegments.has(color)) {
+            //     lineSegments
+            //         .get(color)
+            //         .push([this.pathX[index1], this.pathZ[index1], this.pathX[index2], this.pathZ[index2]]);
+            // } else {
+            //     lineSegments.set(color, [
+            //         [this.pathX[index1], this.pathZ[index1], this.pathX[index2], this.pathZ[index2]]
+            //     ]);
+            // }
 
-            // ctx.strokeStyle = `hsla(${Math.floor(hue)}, ${Math.floor(saturation)}%, ${Math.floor(light)}%, ${alpha})`;
-            //
-            // ctx.beginPath();
-            // ctx.moveTo(centerX + this.pathX[index1] * scaleX, centerY - this.pathZ[index1] * scaleY);
-            // ctx.lineTo(centerX + this.pathX[index2] * scaleX, centerY - this.pathZ[index2] * scaleY);
-            // ctx.stroke();
+            ctx.strokeStyle = color;
+
+            ctx.beginPath();
+            ctx.moveTo(centerX + this.pathX[index1] * scaleX, centerY - this.pathZ[index1] * scaleY);
+            ctx.lineTo(centerX + this.pathX[index2] * scaleX, centerY - this.pathZ[index2] * scaleY);
+            ctx.stroke();
         }
     }
 }
@@ -165,7 +165,7 @@ self.onmessage = (e: MessageEvent) => {
         const boundingBoxY0: number = -10;
         const boundingBoxY1: number = 60;
 
-        const pathLength: number = 70;
+        const pathLength: number = 40;
         const particleAmount: number = 40;
 
         const particles: Particle[] = Array.from({ length: particleAmount }, () => {
@@ -284,21 +284,21 @@ self.onmessage = (e: MessageEvent) => {
                     );
                 }
 
-                for (const [key, value] of lineSegments) {
-                    ctx.strokeStyle = key;
-
-                    ctx.beginPath();
-
-                    const lineLengths = value.length;
-                    for (let i = 0; i < lineLengths; i++) {
-                        ctx.moveTo(centerX + value[i][0] * scaleX, centerY - value[i][1] * scaleY);
-                        ctx.lineTo(centerX + value[i][2] * scaleX, centerY - value[i][3] * scaleY);
-                    }
-
-                    ctx.stroke();
-                }
-
-                lineSegments.clear();
+                // for (const [key, value] of lineSegments) {
+                //     ctx.strokeStyle = key;
+                //
+                //     ctx.beginPath();
+                //
+                //     const lineLengths = value.length;
+                //     for (let i = 0; i < lineLengths; i++) {
+                //         ctx.moveTo(centerX + value[i][0] * scaleX, centerY - value[i][1] * scaleY);
+                //         ctx.lineTo(centerX + value[i][2] * scaleX, centerY - value[i][3] * scaleY);
+                //     }
+                //
+                //     ctx.stroke();
+                // }
+                //
+                // lineSegments.clear();
             }
 
             lastTimestamp = timestamp;
