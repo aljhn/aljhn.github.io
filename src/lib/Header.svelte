@@ -1,6 +1,7 @@
 <script lang="ts">
     import { base } from "$app/paths";
     import { onMount } from "svelte";
+    import { page } from "$app/stores";
     import { Switch } from "@skeletonlabs/skeleton-svelte";
 
     import Sun from "~icons/mdi/weather-sunny";
@@ -13,7 +14,7 @@
         { url: base + "/", label: "Home" },
         { url: base + "/about", label: "About" },
         { url: base + "/skills", label: "Skills" },
-        { url: base + "/publications", label: "Publications" }
+        { url: base + "/research", label: "Research" }
     ];
 
     let darkModeState = $state(false);
@@ -29,7 +30,7 @@
     }
 </script>
 
-<header class="bg-surface-300 dark:bg-surface-900">
+<header class="bg-surface-200 dark:bg-surface-900">
     <div class="container mx-auto flex flex-col items-center py-2 lg:flex-row lg:justify-between">
         <div class="flex grow items-center">
             <a href="{base}/"><img src="{base}/images/Hex.png" width="75" height="75" alt="Logo" /></a>
@@ -38,7 +39,9 @@
 
         <nav class="flex">
             {#each links as link}
-                <a href={link.url} class="btn-lg px-2">{link.label}</a>
+                <a href={link.url} class="btn-lg px-2 {$page.url.pathname === link.url ? 'underline' : ''}"
+                    >{link.label}</a
+                >
             {/each}
         </nav>
 

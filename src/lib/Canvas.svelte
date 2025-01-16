@@ -32,5 +32,5 @@
 </script>
 
 <div class="size-full" id="canvasDiv">
-    <canvas bind:this={canvas}></canvas>
+    <canvas bind:this={canvas}>Lorenz system simulation</canvas>
 </div>
