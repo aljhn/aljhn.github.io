@@ -118,7 +118,7 @@ class Particle {
             const halfAngle: number = 360 - 2 * Math.abs(rotatedAngle - 180);
             const hue: number = mod(Math.floor((halfAngle / 360) * hueRange + huePosition - hueRange / 2), 360);
 
-            const color: string = `hsla(${Math.floor(hue)}, ${Math.floor(saturation)}%, ${Math.floor(light)}%, ${Math.round(alpha * 100) / 100})`
+            const color: string = `hsla(${Math.floor(hue)}, ${Math.floor(saturation)}%, ${Math.floor(light)}%, ${Math.round(alpha * 100) / 100})`;
 
             // if (lineSegments.has(color)) {
             //     lineSegments
@@ -165,7 +165,7 @@ self.onmessage = (e: MessageEvent) => {
         const boundingBoxY0: number = -10;
         const boundingBoxY1: number = 60;
 
-        const pathLength: number = 40;
+        const pathLength: number = 60;
         const particleAmount: number = 40;
 
         const particles: Particle[] = Array.from({ length: particleAmount }, () => {
