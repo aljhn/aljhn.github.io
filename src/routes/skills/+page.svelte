@@ -42,6 +42,7 @@
             category: "Tools",
             items: [
                 { name: "Arch Linux", level: "Advanced" },
+                { name: "Hyprland", level: "Advanced" },
                 { name: "Neovim", level: "Intermediate" },
                 { name: "Git", level: "Intermediate" },
                 { name: "Docker", level: "Beginner" },
