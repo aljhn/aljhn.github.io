@@ -49,8 +49,6 @@ class Lorenz implements ODE {
     }
 }
 
-// let lineSegments: Map<string, Array<Array<number>>> = new Map<string, Array<Array<number>>>();
-
 class Particle {
     system: ODE;
     x: number;
@@ -84,7 +82,7 @@ class Particle {
             (this.y - this.pathY[this.currentIndex]) * (this.y - this.pathY[this.currentIndex]) +
             (this.z - this.pathZ[this.currentIndex]) * (this.z - this.pathZ[this.currentIndex]);
 
-        if (distSquared > 0.05) {
+        if (distSquared > 0.02) {
             this.currentIndex = mod(this.currentIndex + 1, this.pathX.length);
             this.pathX[this.currentIndex] = this.x;
             this.pathY[this.currentIndex] = this.y;
@@ -119,16 +117,6 @@ class Particle {
             const hue: number = mod(Math.floor((halfAngle / 360) * hueRange + huePosition - hueRange / 2), 360);
 
             const color: string = `hsla(${Math.floor(hue)}, ${Math.floor(saturation)}%, ${Math.floor(light)}%, ${Math.round(alpha * 100) / 100})`;
-
-            // if (lineSegments.has(color)) {
-            //     lineSegments
-            //         .get(color)
-            //         .push([this.pathX[index1], this.pathZ[index1], this.pathX[index2], this.pathZ[index2]]);
-            // } else {
-            //     lineSegments.set(color, [
-            //         [this.pathX[index1], this.pathZ[index1], this.pathX[index2], this.pathZ[index2]]
-            //     ]);
-            // }
 
             ctx.strokeStyle = color;
 
@@ -165,8 +153,16 @@ self.onmessage = (e: MessageEvent) => {
         const boundingBoxY0: number = -10;
         const boundingBoxY1: number = 60;
 
-        const pathLength: number = 50;
-        const particleAmount: number = 30;
+        let pathLength: number;
+        let particleAmount: number;
+
+        if (canvas.width > 1024 && canvas.height > 800) {
+            pathLength = 60;
+            particleAmount = 40;
+        } else {
+            pathLength = 40;
+            particleAmount = 30;
+        }
 
         const particles: Particle[] = Array.from({ length: particleAmount }, () => {
             return new Particle(system, sampleUniform(-5, 5), sampleUniform(-5, 5), sampleUniform(-5, 5), pathLength);
@@ -283,22 +279,6 @@ self.onmessage = (e: MessageEvent) => {
                         light
                     );
                 }
-
-                // for (const [key, value] of lineSegments) {
-                //     ctx.strokeStyle = key;
-                //
-                //     ctx.beginPath();
-                //
-                //     const lineLengths = value.length;
-                //     for (let i = 0; i < lineLengths; i++) {
-                //         ctx.moveTo(centerX + value[i][0] * scaleX, centerY - value[i][1] * scaleY);
-                //         ctx.lineTo(centerX + value[i][2] * scaleX, centerY - value[i][3] * scaleY);
-                //     }
-                //
-                //     ctx.stroke();
-                // }
-                //
-                // lineSegments.clear();
             }
 
             lastTimestamp = timestamp;
