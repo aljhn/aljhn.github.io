@@ -21,8 +21,8 @@
             Differential Equations, Physics-Informed Neural Networks and Fourier Neural Operators.
         </p>
         <p class="mt-4 text-gray-600 dark:text-gray-400">
-            I'm also interested in various other technical areas, including: high-performance computing, LLMs, computer
-            vision and robotics.
+            I'm also interested in various other technical areas, including: high-performance computing, probabilistic
+            AI, LLMs, computer vision and robotics.
         </p>
     </div>
 
