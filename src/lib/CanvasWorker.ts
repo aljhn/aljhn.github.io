@@ -84,7 +84,7 @@ class Particle {
             (this.y - this.pathY[this.currentIndex]) * (this.y - this.pathY[this.currentIndex]) +
             (this.z - this.pathZ[this.currentIndex]) * (this.z - this.pathZ[this.currentIndex]);
 
-        if (distSquared > 0.01) {
+        if (distSquared > 0.05) {
             this.currentIndex = mod(this.currentIndex + 1, this.pathX.length);
             this.pathX[this.currentIndex] = this.x;
             this.pathY[this.currentIndex] = this.y;
@@ -165,8 +165,8 @@ self.onmessage = (e: MessageEvent) => {
         const boundingBoxY0: number = -10;
         const boundingBoxY1: number = 60;
 
-        const pathLength: number = 60;
-        const particleAmount: number = 40;
+        const pathLength: number = 50;
+        const particleAmount: number = 30;
 
         const particles: Particle[] = Array.from({ length: particleAmount }, () => {
             return new Particle(system, sampleUniform(-5, 5), sampleUniform(-5, 5), sampleUniform(-5, 5), pathLength);
@@ -217,7 +217,7 @@ self.onmessage = (e: MessageEvent) => {
                 ctx.lineWidth = 2;
             }
 
-            if (dt <= 0.1) {
+            if (dt <= 0.05) {
                 const h: number = dt * speedScale;
 
                 if (hueRange < hueRangeTarget) {
