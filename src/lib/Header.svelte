@@ -4,16 +4,18 @@
     import { page } from "$app/stores";
     import { Switch } from "@skeletonlabs/skeleton-svelte";
 
+    // https://icon-sets.iconify.design/mdi/
     import Sun from "~icons/mdi/weather-sunny";
     import Moon from "~icons/mdi/weather-night";
     import Github from "~icons/mdi/github";
     import Linkedin from "~icons/mdi/linkedin";
     import Email from "~icons/mdi/email";
+    import Academic from "~icons/mdi/academic-cap";
 
     const links = [
         { url: base + "/", label: "Home" },
         { url: base + "/about", label: "About" },
-        { url: base + "/skills", label: "Skills" },
+        // { url: base + "/skills", label: "Skills" },
         { url: base + "/research", label: "Research" }
     ];
 
@@ -58,6 +60,7 @@
             </Switch>
             <a href="https://github.com/aljhn"><Github width="32" height="32" /></a>
             <a href="https://www.linkedin.com/in/albertjohannessen/"><Linkedin width="32" height="32" /></a>
+            <a href="https://scholar.google.com/citations?user=Bo5FC8YAAAAJ"><Academic width="32" height="32" /></a>
             <a href="mailto:albert.johannessen@gmail.com"><Email width="32" height="32" /></a>
         </div>
     </div>
