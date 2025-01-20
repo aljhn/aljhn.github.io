@@ -10,7 +10,9 @@
         "Hofstadter's law: It always takes longer than you expect, even when you take Hofstadter's law into account.",
         "It's better to keep your mouth shut and have everyone asume you're dumb, than open your mouth and remove all doubt.",
         "Only a fool learns from his own mistakes. The wise man learns from the mistakes of others.",
-        "The choice doesn't matter if the outcome is the same."
+        "The choice doesn't matter if the outcome is the same.",
+        "It is a shame for a man to grow old without seeing the beauty and strength of which his body is capable.",
+        "Dress for the job you want, not the job you have."
     ];
 </script>
 
@@ -23,9 +25,15 @@
         going through life.
     </p>
 
-    <ul class="mt-5 flex flex-col items-center space-y-4 border-t-2 border-current pt-5">
+    <ul class="items-left mt-5 flex flex-col space-y-4 border-t-2 border-current pt-5">
         {#each quotes as quote}
-            <li class="p-2"><blockquote class="blockquote text-lg">{quote}</blockquote></li>
+            <li class="p-1">
+                <blockquote
+                    class="blockquote rounded-md bg-surface-200 px-2 py-1 text-lg shadow-md dark:bg-surface-900"
+                >
+                    {quote}
+                </blockquote>
+            </li>
         {/each}
     </ul>
 </div>
