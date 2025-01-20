@@ -15,7 +15,8 @@
     const links = [
         { url: base + "/", label: "Home" },
         { url: base + "/about", label: "About" },
-        // { url: base + "/skills", label: "Skills" },
+        { url: base + "/quotes", label: "Quotes" },
+        { url: base + "/skills", label: "Skills" },
         { url: base + "/research", label: "Research" }
     ];
 

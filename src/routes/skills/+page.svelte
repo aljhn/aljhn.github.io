@@ -26,9 +26,9 @@
                 { name: "C++", level: advanced },
                 { name: "CUDA", level: beginner },
                 { name: "Java", level: intermediate },
-                { name: "SQL", level: intermediate },
                 { name: "Haskell", level: beginner },
                 { name: "MATLAB", level: beginner },
+                { name: "SQL", level: intermediate },
                 { name: "SystemVerilog", level: beginner }
             ]
         },
@@ -72,7 +72,7 @@
             <ul class="space-y-1">
                 {#each skill.items as item}
                     <li class="flex items-center justify-between">
-                        <span class="text-lg">{item.name}</span>
+                        <span class="flex text-lg"> {item.name}</span>
                         <span class="text-sm italic">{item.level}</span>
                     </li>
                 {/each}

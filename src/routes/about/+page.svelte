@@ -1,13 +1,12 @@
 <script lang="ts">
     import Meta from "$lib/Meta.svelte";
-
-    // import { base } from "$app/paths";
+    import Sections from "$lib/Sections.svelte";
 
     const sections = [
         {
             title: "About me",
             paragraphs: [
-                "Scalingpilled singularitarian. Future paperclip.",
+                // "Scalingpilled singularitarian. Future paperclip.",
                 "Software engineer, focusing on machine learning and control theory. During university, I ended up pursuing two different study programs in parallel, and now have dual MSc degrees. First degree completed was in Computer Science, and the second was in Cybernetics and Robotics. I'm generally passionate about math, programming and AI, and applying these for solving problems.",
                 "I'm particularly interested in exploring the intersection of deep learning and dynamical systems, along with applications related to scientific machine learning. This includes areas of research like: Neural Ordinary Differential Equations, Physics-Informed Neural Networks and Fourier Neural Operators.",
                 "I'm also interested in various other technical areas, including: high-performance and parallel computing, probabilistic AI, LLMs, computer vision and robotics."
@@ -25,7 +24,7 @@
         {
             title: "Other interests",
             paragraphs: [
-                "I'm also a huge fitness nerd that is currently doing a lot of powerlifting. And additionally, I like to practice and spar in boxing and MMA.",
+                "I'm also a fitness nerd that is currently doing a lot of powerlifting. And additionally, I like to practice and spar in boxing and MMA.",
                 "I have also always been fascinated by the ocean and aquatic environments, so I love to do both scuba diving and freediving."
             ]
         }
@@ -34,22 +33,4 @@
 
 <Meta name="About" />
 
-<div class="grid gap-5 px-10 pt-10">
-    {#each sections as section}
-        <section>
-            <h4 class="text-2xl font-semibold">{section.title}</h4>
-            {#each section.paragraphs as paragraph}
-                <p class="mt-4 text-gray-600 dark:text-gray-400">{paragraph}</p>
-            {/each}
-        </section>
-    {/each}
-</div>
-
-<!-- <div class="grid gap-5 pt-10 lg:grid-cols-2"> -->
-<!--     <div class="flex justify-center"> -->
-<!--         <img src="{base}/images/MassSpringDamper.jpg" alt="Mass spring damper vector field" width="600" height="450" /> -->
-<!--     </div> -->
-<!--     <div class="flex justify-center"> -->
-<!--         <img src="{base}/images/Burger.jpg" alt="Burgers' equation plot" width="600" height="450" /> -->
-<!--     </div> -->
-<!-- </div> -->
+<Sections {sections} />
