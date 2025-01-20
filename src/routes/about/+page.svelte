@@ -24,7 +24,6 @@
         {
             title: "Other interests",
             paragraphs: [
-                "I speak three languages: Norwegian (native), English (fluent) and Spanish (B1).",
                 "I'm also a fitness nerd that is currently doing a lot of powerlifting. And additionally, I like to practice and spar in boxing and MMA.",
                 "I have also always been fascinated by the ocean and aquatic environments, so I love to do both scuba diving and freediving."
             ]
