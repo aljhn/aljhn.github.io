@@ -31,6 +31,9 @@
                 worker?.postMessage({ backgroundColor: backgroundColor });
             });
             mutationObserver.observe(document.documentElement, { attributes: true, childList: true });
+
+            backgroundColor = window.getComputedStyle(mainRoot).backgroundColor;
+            worker?.postMessage({ backgroundColor: backgroundColor });
         }
     });
 
