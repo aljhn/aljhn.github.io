@@ -63,7 +63,7 @@
 
 <Meta name="Skills" />
 
-<div class="mt-10 grid gap-x-20 gap-y-5 lg:grid-cols-2">
+<div class="mt-10 grid gap-x-20 gap-y-5 px-5 pb-10 lg:grid-cols-2">
     {#each skills as skill}
         <section>
             <h2 class="mb-4 border-b-2 border-current pb-2 text-2xl">

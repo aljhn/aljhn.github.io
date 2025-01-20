@@ -42,7 +42,7 @@
 
         <nav class="flex">
             {#each links as link}
-                <a href={link.url} class="btn-lg px-2 {$page.url.pathname === link.url ? 'underline' : ''}"
+                <a href={link.url} class="btn-lg px-1 lg:px-2 {$page.url.pathname === link.url ? 'underline' : ''}"
                     >{link.label}</a
                 >
             {/each}

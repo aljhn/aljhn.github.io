@@ -16,7 +16,7 @@
 
 <Meta name="Quotes" />
 
-<div class="grid auto-rows-min gap-5 px-10 pt-10">
+<div class="grid auto-rows-min gap-5 p-10">
     <h4 class="text-2xl font-semibold">Selected quotes</h4>
     <p class="text-gray-600 dark:text-gray-400">
         Some of my favorite quotes sampled from various places on the internet, which I think about more or less while
