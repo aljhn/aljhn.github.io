@@ -11,7 +11,7 @@
     const { sections }: Sections = $props();
 </script>
 
-<div class="grid gap-5 px-10 pt-10 auto-rows-min">
+<div class="grid auto-rows-min gap-5 p-10">
     {#each sections as section}
         <section>
             <h4 class="text-2xl font-semibold">{section.title}</h4>
