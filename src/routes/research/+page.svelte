@@ -70,7 +70,7 @@
     <div>
         <Sections {sections} />
 
-        <Research papers={peerReviewedPapers} title="Peer reviewed research papers" />
+        <Research papers={peerReviewedPapers} title="Peer reviewed papers" />
         <Research papers={masterTheses} title="Master theses" />
     </div>
 

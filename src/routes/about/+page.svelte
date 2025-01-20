@@ -9,7 +9,7 @@
                 // "Scalingpilled singularitarian. Future paperclip.",
                 "Software engineer, focusing on machine learning and control theory. During university, I ended up pursuing two different study programs in parallel, and now have dual MSc degrees. First degree completed was in Computer Science, and the second was in Cybernetics and Robotics. I'm generally passionate about math, programming and AI, and applying these for solving problems.",
                 "I'm particularly interested in exploring the intersection of deep learning and dynamical systems, along with applications related to scientific machine learning. This includes areas of research like: Neural Ordinary Differential Equations, Physics-Informed Neural Networks and Fourier Neural Operators.",
-                "I'm also interested in various other technical areas, including: high-performance and parallel computing, probabilistic AI, LLMs, computer vision and robotics."
+                "I'm also interested in various other technical areas, including: high-performance and parallel computing, probabilistic AI, LLMs, computer vision and robotics. I especially try to keep up with the state of the art and open source ecosystems for LLMs and other generative models."
             ]
         },
         {
@@ -24,6 +24,7 @@
         {
             title: "Other interests",
             paragraphs: [
+                "I speak three languages: Norwegian (native), English (fluent) and Spanish (B1).",
                 "I'm also a fitness nerd that is currently doing a lot of powerlifting. And additionally, I like to practice and spar in boxing and MMA.",
                 "I have also always been fascinated by the ocean and aquatic environments, so I love to do both scuba diving and freediving."
             ]

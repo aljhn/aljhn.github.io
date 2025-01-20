@@ -16,10 +16,10 @@
 </script>
 
 <div class="mx-auto px-10 pt-10">
-    <h4 class="border-b-2 border-current text-2xl font-semibold">{title}</h4>
+    <h4 class="my-2 border-b-2 border-current text-2xl font-semibold">{title}</h4>
     <ul class="space-y-4">
         {#each papers as paper}
-            <li class="border p-5">
+            <li class="rounded-xl bg-surface-200 p-3 shadow-xl dark:bg-surface-900">
                 <h3 class="text-xl font-semibold hover:underline">
                     <a href={paper.link}>{paper.title}</a>
                 </h3>
