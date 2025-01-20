@@ -15,7 +15,7 @@
     const { papers, title }: Papers = $props();
 </script>
 
-<div class="mx-auto px-10 pt-20">
+<div class="mx-auto px-10 pt-10">
     <h4 class="border-b-2 border-current text-2xl font-semibold">{title}</h4>
     <ul class="space-y-4">
         {#each papers as paper}

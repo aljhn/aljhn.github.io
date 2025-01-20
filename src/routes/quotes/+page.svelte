@@ -23,7 +23,7 @@
         going through life.
     </p>
 
-    <ul class="flex flex-col items-center space-y-4 pt-10">
+    <ul class="mt-5 flex flex-col items-center space-y-4 border-t-2 border-current pt-5">
         {#each quotes as quote}
             <li class="p-2"><blockquote class="blockquote text-lg">{quote}</blockquote></li>
         {/each}

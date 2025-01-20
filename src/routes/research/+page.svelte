@@ -8,15 +8,24 @@
     const sections = [
         {
             title: "Overview",
-            paragraphs: ["TODO"]
+            paragraphs: [
+                "My research interests lies at the intersection of deep learning and dynamical systems. This can mean two different things. First, using deep learning methods for research related to dynamical systems theory. And the opposite, using methods from dynamical systems theory for research related to deep learning.",
+                "In practice, I end up with a little both. For example, applying deep learning to applications like system identification and optimal control theory, or numerical methods and optimization from dynamical systems to deep learning architectures."
+            ]
         },
         {
             title: "Scientific machine learning",
-            paragraphs: ["TODO"]
+            paragraphs: [
+                "Research topics like Neural Ordinary Differential Equations and Fourier Neural Operators makes it possible to learn dynamical systems from data.",
+                "This can be particularly useful for systems where its hard to explicitly model system dynamcs, in traditional machine learning fashion."
+            ]
         },
         {
             title: "Physics-informed machine learning",
-            paragraphs: ["TODO"]
+            paragraphs: [
+                "Incorporating prior physical knowledge about a system derived from first principles can greatly simplify learning a system output, instead of relying solely on the dataset.",
+                "Physics-informed neural networks are one way to achieve this result, and also makes it possible to go beyong simply learning one particular system. For example by learning unknown or missing terms of an equation, or solving optimal control problems."
+            ]
         }
     ];
 
@@ -65,7 +74,7 @@
         <Research papers={masterTheses} title="Master theses" />
     </div>
 
-    <div class="grid gap-y-10 pt-10 auto-rows-min">
+    <div class="grid auto-rows-min gap-y-10 pt-10">
         <div class="flex justify-center">
             <img
                 src="{base}/images/MassSpringDamper.jpg"
