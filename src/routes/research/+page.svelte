@@ -79,12 +79,15 @@
             <img
                 src="{base}/images/MassSpringDamper.jpg"
                 alt="Mass spring damper vector field"
-                width="600"
-                height="450"
+                class="h-[450px] w-[600px] rounded-md shadow-lg"
             />
         </div>
         <div class="flex justify-center">
-            <img src="{base}/images/Burger.jpg" alt="Burgers' equation plot" width="600" height="450" />
+            <img
+                src="{base}/images/Burger.jpg"
+                alt="Burgers' equation plot"
+                class="h-[450px] w-[600px] rounded-md shadow-lg"
+            />
         </div>
     </div>
 </div>

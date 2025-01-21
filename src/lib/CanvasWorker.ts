@@ -115,7 +115,9 @@ class Particle {
             const angle: number = Math.atan2(deltaY, deltaX) * RAD2DEG + 180;
             const rotatedAngle: number = mod(Math.floor(angle + hueRotation), 360);
             const halfAngle: number = 360 - 2 * Math.abs(rotatedAngle - 180);
-            const hue: number = Math.floor(mod(Math.floor((halfAngle / 360) * hueRange + huePosition - hueRange / 2), 360));
+            const hue: number = Math.floor(
+                mod(Math.floor((halfAngle / 360) * hueRange + huePosition - hueRange / 2), 360)
+            );
 
             const color: string = `hsla(${hue}, ${saturation}%, ${light}%, ${alphaValue})`;
             // const color: string = `oklch(${light}% ${saturation}% ${hue} / ${alphaValue})`;
