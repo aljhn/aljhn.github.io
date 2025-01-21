@@ -100,7 +100,7 @@
                 <ul class="space-y-0">
                     {#each skill.items as item}
                         <li class="flex items-center justify-between">
-                            <span class="flex text-lg"><img src={item.icon} class="size-7 pr-1" />{item.name}</span>
+                            <span class="flex text-lg"><img src={item.icon} class="size-7 pr-1" alt="Skill icon" />{item.name}</span>
                             <span class="text-sm italic">{item.level}</span>
                         </li>
                     {/each}
