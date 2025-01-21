@@ -71,7 +71,7 @@
             category: "Natural languages",
             items: [
                 { name: "Norwegian", level: "Native", icon: "icons/norway.svg" },
-                { name: "English", level: "C2", icon: "icons/unitedkingdom.svg" },
+                { name: "English", level: "C2", icon: "icons/us.svg" },
                 { name: "Spanish", level: "B1", icon: "icons/spain.svg" }
             ]
         },
