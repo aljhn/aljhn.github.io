@@ -1,5 +1,6 @@
 <script lang="ts">
     import { base } from "$app/paths";
+    import { onMount } from "svelte";
 
     import Meta from "$lib/Meta.svelte";
 
@@ -15,9 +16,10 @@
                 { name: "NumPy", level: advanced, icon: "icons/numpy.svg" },
                 { name: "SciPy", level: intermediate, icon: "icons/scipy.svg" },
                 { name: "Matplotlib", level: intermediate, icon: "icons/matplotlib.svg" },
+                { name: "scikit-learn", level: intermediate, icon: "icons/scikitlearn.svg" },
+                { name: "SymPy", level: beginner, icon: "icons/sympy.svg" },
                 { name: "Pandas", level: beginner, icon: "icons/pandas.svg" },
                 { name: "OpenCV", level: beginner, icon: "icons/opencv.svg" },
-                { name: "scikit-learn", level: intermediate, icon: "icons/scikitlearn.svg" },
                 { name: "PyTorch", level: advanced, icon: "icons/pytorch.svg" },
                 { name: "JAX", level: intermediate, icon: "icons/jax.svg" },
                 { name: "Transformers", level: beginner, icon: "icons/huggingface.svg" }
@@ -56,6 +58,7 @@
                 { name: "Arch Linux", level: advanced, icon: "icons/archlinux.svg" },
                 { name: "Neovim", level: intermediate, icon: "icons/neovim.svg" },
                 { name: "Git", level: intermediate, icon: "icons/git.svg" },
+                { name: "gTest / gMock", level: intermediate, icon: "icons/google.svg" },
                 { name: "CMake", level: beginner, icon: "icons/cmake.svg" },
                 { name: "Docker", level: beginner, icon: "icons/docker.svg" },
                 { name: "PostgreSQL", level: beginner, icon: "icons/postgresql.svg" },
@@ -80,32 +83,70 @@
             items: []
         }
     ];
+
+    onMount(() => {
+        const divPadding: number = 16;
+
+        const skillsGridRoot: HTMLElement = document.getElementById("skillsGridRoot");
+        const skillDivs: HTMLCollection = skillsGridRoot.children;
+
+        function addPadding() {
+            let columns: number = 1;
+            if (window.matchMedia("(min-width: 1024px)").matches) {
+                columns = 2;
+            }
+
+            for (let i = 0; i < columns; i++) {
+                skillDivs[i].style.transform = `translateY(0px)`;
+            }
+            
+            for(let i = columns; i < skillDivs.length; i++) {
+                const currentDiv: HTMLElement = skillDivs[i];
+                const aboveDiv: HTMLElement = skillDivs[i - columns];
+                const offset: number = currentDiv.offsetTop - aboveDiv.offsetTop - aboveDiv.clientHeight - divPadding * Math.floor(i / columns);
+
+                if (offset < 0) {
+                    currentDiv.style.transform = `translateY(${Math.abs(offset)}px)`;
+                } else {
+                    currentDiv.style.transform = `translateY(-${Math.abs(offset)}px)`;
+                }
+            }
+        }
+        addPadding();
+
+        const resizeObserver: ResizeObserver = new ResizeObserver((entries) => {
+            addPadding();
+        });
+        resizeObserver.observe(document.documentElement);
+    });
 </script>
 
 <Meta name="Skills" />
 
-<div class="flex flex-wrap justify-center pt-5">
+<div class="grid grid-cols-1 lg:grid-cols-2 pt-5" id="skillsGridRoot">
     {#each skills as skill}
-        <section
-            class="mx-10 my-2 h-min min-w-[600px] rounded-xl bg-surface-200 {skill.category !== ''
-                ? 'p-3'
-                : ''} shadow-xl dark:bg-surface-900 {skill.category === 'Tools and software'
-                ? '2xl:translate-y-[-40px]'
-                : ''} {skill.category === 'Natural languages' ? '2xl:translate-y-[-140px]' : ''}"
-        >
-            {#if skill.category !== ""}
-                <h2 class="mb-4 border-b-2 border-current pb-2 text-2xl">
-                    {skill.category}
-                </h2>
-                <ul class="space-y-0">
-                    {#each skill.items as item}
-                        <li class="flex items-center justify-between">
-                            <span class="flex text-lg"><img src={item.icon} class="size-7 pr-1" alt="Skill icon" />{item.name}</span>
-                            <span class="text-sm italic">{item.level}</span>
-                        </li>
-                    {/each}
-                </ul>
-            {/if}
-        </section>
+        <div class="px-10 h-min w-full">
+            <section
+                class="rounded-xl bg-surface-200 {skill.category !== ''
+                    ? 'p-3'
+                    : ''} shadow-xl dark:bg-surface-900"
+            >
+                {#if skill.category !== ""}
+                    <h2 class="mb-4 border-b-2 border-current pb-2 text-2xl">
+                        {skill.category}
+                    </h2>
+                    <ul class="space-y-0">
+                        {#each skill.items as item}
+                            <li class="flex items-center justify-between">
+                                <span class="flex text-lg"
+                                    ><img src={item.icon} class="size-7 pr-1" alt="Skill icon" />{item.name}</span
+                                >
+                                <span class="text-sm italic">{item.level}</span>
+                            </li>
+                        {/each}
+                    </ul>
+                {/if}
+            </section>
+        </div>
     {/each}
 </div>
