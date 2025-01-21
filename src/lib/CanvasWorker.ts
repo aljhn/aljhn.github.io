@@ -108,15 +108,17 @@ class Particle {
             const index2: number = mod(this.currentIndex + 2 + i, pathLength);
 
             const alpha: number = mod(index1 - this.currentIndex, pathLength) / pathLength;
+            const alphaValue: number = Math.round(alpha * 100) / 100;
 
             const deltaX: number = this.pathX[index2] - this.pathX[index1];
             const deltaY: number = this.pathY[index2] - this.pathY[index1];
             const angle: number = Math.atan2(deltaY, deltaX) * RAD2DEG + 180;
             const rotatedAngle: number = mod(Math.floor(angle + hueRotation), 360);
             const halfAngle: number = 360 - 2 * Math.abs(rotatedAngle - 180);
-            const hue: number = mod(Math.floor((halfAngle / 360) * hueRange + huePosition - hueRange / 2), 360);
+            const hue: number = Math.floor(mod(Math.floor((halfAngle / 360) * hueRange + huePosition - hueRange / 2), 360));
 
-            const color: string = `hsla(${Math.floor(hue)}, ${Math.floor(saturation)}%, ${Math.floor(light)}%, ${Math.round(alpha * 100) / 100})`;
+            const color: string = `hsla(${hue}, ${saturation}%, ${light}%, ${alphaValue})`;
+            // const color: string = `oklch(${light}% ${saturation}% ${hue} / ${alphaValue})`;
 
             ctx.strokeStyle = color;
 
@@ -275,8 +277,8 @@ self.onmessage = (e: MessageEvent) => {
                         huePosition,
                         hueRange,
                         hueRotation,
-                        saturation,
-                        light
+                        Math.floor(saturation),
+                        Math.floor(light)
                     );
                 }
             }
