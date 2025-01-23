@@ -1,5 +1,4 @@
 <script lang="ts">
-    import { base } from "$app/paths";
     import { onMount } from "svelte";
 
     import Meta from "$lib/Meta.svelte";
@@ -46,7 +45,7 @@
                 { name: "CSS", level: intermediate, icon: "icons/css3.svg" },
                 { name: "JavaScript", level: intermediate, icon: "icons/javascript.svg" },
                 { name: "TypeScript", level: beginner, icon: "icons/typescript.svg" },
-                { name: "Svelte (kit)", level: beginner, icon: "icons/svelte.svg" },
+                { name: "Svelte (Kit)", level: beginner, icon: "icons/svelte.svg" },
                 { name: "Tailwind CSS", level: beginner, icon: "icons/tailwindcss.svg" },
                 { name: "Node.js", level: beginner, icon: "icons/nodejs.svg" },
                 { name: "Flask", level: beginner, icon: "icons/flask.svg" }
@@ -87,7 +86,7 @@
     onMount(() => {
         const divPadding: number = 16;
 
-        const skillsGridRoot: HTMLElement = document.getElementById("skillsGridRoot");
+        const skillsGridRoot: HTMLElement = document.getElementById("skillsGridRoot")!;
         const skillDivs: HTMLCollection = skillsGridRoot.children;
 
         function addPadding() {
@@ -97,13 +96,18 @@
             }
 
             for (let i = 0; i < columns; i++) {
-                skillDivs[i].style.transform = `translateY(0px)`;
+                (skillDivs[i] as HTMLElement).style.transform = `translateY(0px)`;
             }
-            
-            for(let i = columns; i < skillDivs.length; i++) {
-                const currentDiv: HTMLElement = skillDivs[i];
-                const aboveDiv: HTMLElement = skillDivs[i - columns];
-                const offset: number = currentDiv.offsetTop - aboveDiv.offsetTop - aboveDiv.clientHeight - divPadding * Math.floor(i / columns);
+
+            for (let i = columns; i < skillDivs.length; i++) {
+                const currentDiv: HTMLElement = skillDivs[i] as HTMLElement;
+                const aboveDiv: HTMLElement = skillDivs[i - columns] as HTMLElement;
+
+                const offset: number =
+                    currentDiv.offsetTop -
+                    aboveDiv.offsetTop -
+                    aboveDiv.clientHeight -
+                    divPadding * Math.floor(i / columns);
 
                 if (offset < 0) {
                     currentDiv.style.transform = `translateY(${Math.abs(offset)}px)`;
@@ -123,13 +127,11 @@
 
 <Meta name="Skills" />
 
-<div class="grid grid-cols-1 lg:grid-cols-2 pt-5" id="skillsGridRoot">
+<div class="grid grid-cols-1 pt-5 lg:grid-cols-2" id="skillsGridRoot">
     {#each skills as skill}
-        <div class="px-10 h-min w-full">
+        <div class="h-min w-full px-10">
             <section
-                class="rounded-xl bg-surface-200 {skill.category !== ''
-                    ? 'p-3'
-                    : ''} shadow-xl dark:bg-surface-900"
+                class="rounded-xl bg-surface-200 {skill.category !== '' ? 'p-3' : ''} shadow-xl dark:bg-surface-900"
             >
                 {#if skill.category !== ""}
                     <h2 class="mb-4 border-b-2 border-current pb-2 text-2xl">
