@@ -46,7 +46,6 @@
     let dropdownMenuDiv: HTMLElement;
 
     const handleDropdownClick = () => {
-        console.log(isDropdownOpen);
         isDropdownOpen = !isDropdownOpen;
         if (isDropdownOpen && dropdownMenuButton && dropdownMenuDiv) {
             const positionLeftUnderButton: number = Math.floor(
