@@ -32,6 +32,11 @@
     function handleDarkModeStateChange() {
         darkModeState = !darkModeState;
         document.documentElement.classList.toggle("dark", !darkModeState);
+    }
+
+    function handleDarkModeStateChangePhone() {
+        darkModeState = !darkModeState;
+        document.documentElement.classList.toggle("dark", !darkModeState);
         isDropdownOpen = true;
     }
 
@@ -41,6 +46,7 @@
     let dropdownMenuDiv: HTMLElement;
 
     const handleDropdownClick = () => {
+        console.log(isDropdownOpen);
         isDropdownOpen = !isDropdownOpen;
         if (isDropdownOpen && dropdownMenuButton && dropdownMenuDiv) {
             const positionLeftUnderButton: number = Math.floor(
@@ -78,7 +84,7 @@
                 <div
                     bind:this={dropdownMenuDiv}
                     class="absolute z-10 h-min w-min bg-surface-300 p-2 shadow-xl dark:bg-surface-700"
-                    style:visibility={isDropdownOpen ? "visible" : "hidden"}
+                    style:visibility={isDropdownOpen ? "visible" : "collapse"}
                 >
                     <ul>
                         {#each links as link}
@@ -96,7 +102,7 @@
                                 controlActive="bg-surface-400"
                                 controlInactive="bg-surface-500"
                                 bind:checked={darkModeState}
-                                onCheckedChange={handleDarkModeStateChange}
+                                onCheckedChange={handleDarkModeStateChangePhone}
                             >
                                 {#snippet inactiveChild()}<Moon width="24" height="24" />{/snippet}
                                 {#snippet activeChild()}<Sun width="24" height="24" />{/snippet}
