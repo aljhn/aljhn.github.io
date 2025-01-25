@@ -9,8 +9,7 @@
         {
             title: "Overview",
             paragraphs: [
-                "My research interests lies at the intersection of deep learning and dynamical systems. This can mean two different things. First, using deep learning methods for research related to dynamical systems theory. And the opposite, using methods from dynamical systems theory for research related to deep learning.",
-                "In practice, I end up with a little both. For example, applying deep learning to applications like system identification and optimal control theory, or numerical methods and optimization from dynamical systems to deep learning architectures."
+                "My research interests lie at the intersection of deep learning and dynamical systems. This typically means to either use deep learning methods for research related to dynamical systems theory. Or the opposite, using methods from dynamical systems theory for research related to deep learning."
             ]
         },
         {
@@ -75,6 +74,9 @@
     </div>
 
     <div class="grid auto-rows-min gap-y-10 pt-10">
+        <div class="flex justify-center">
+            <p class="text-gray-600 dark:text-gray-400">I'm open for discussing concepts or collaborating on projects, so feel free to send me an email!</p>
+        </div>
         <div class="flex justify-center">
             <img
                 src="{base}/images/MassSpringDamper.jpg"
