@@ -75,60 +75,45 @@
 
             <button
                 bind:this={dropdownMenuButton}
-                class="p-1 {isDropdownOpen ? 'bg-surface-300 dark:bg-surface-700' : ''} visible lg:collapse"
+                class="{isDropdownOpen ? 'bg-surface-300 dark:bg-surface-700' : ''} p-1 inline lg:hidden"
                 onclick={handleDropdownClick}
                 onfocusout={handleDropdownFocusLoss}
             >
                 <Menu width="32" height="32" />
                 <div
                     bind:this={dropdownMenuDiv}
-                    class="absolute z-10 h-min w-min bg-surface-300 p-2 shadow-xl dark:bg-surface-700"
+                    class="absolute left-0 z-10 bg-surface-300 shadow-xl dark:bg-surface-700"
                     style:visibility={isDropdownOpen ? "visible" : "collapse"}
                 >
-                    <ul>
+                    <div class="space-y-1 flex flex-col items-center p-2">
                         {#each links as link}
-                            <li class="flex justify-center p-1">
-                                <a
-                                    href={link.url}
-                                    class="{page.url.pathname === link.url ? 'font-extrabold' : ''} hover:underline"
-                                    >{link.label}</a
-                                >
-                            </li>
+                            <a
+                                href={link.url}
+                                class="{page.url.pathname === link.url ? 'font-extrabold' : ''} hover:underline"
+                                >{link.label}</a
+                            >
                         {/each}
-                        <li class="flex justify-center p-1">
-                            <Switch
-                                name="mode"
-                                controlActive="bg-surface-400"
-                                controlInactive="bg-surface-500"
-                                bind:checked={darkModeState}
-                                onCheckedChange={handleDarkModeStateChangePhone}
-                            >
-                                {#snippet inactiveChild()}<Moon width="24" height="24" />{/snippet}
-                                {#snippet activeChild()}<Sun width="24" height="24" />{/snippet}
-                            </Switch>
-                        </li>
-                        <li class="flex justify-center p-1">
-                            <a href="https://github.com/aljhn"><Github width="32" height="32" /></a>
-                        </li>
-                        <li class="flex justify-center p-1">
-                            <a href="https://www.linkedin.com/in/albertjohannessen/"
-                                ><Linkedin width="32" height="32" /></a
-                            >
-                        </li>
-                        <li class="flex justify-center p-1">
-                            <a href="https://scholar.google.com/citations?user=Bo5FC8YAAAAJ"
-                                ><Academic width="32" height="32" /></a
-                            >
-                        </li>
-                        <li class="flex justify-center p-1">
-                            <a href="mailto:albert.johannessen@gmail.com"><Email width="32" height="32" /></a>
-                        </li>
-                    </ul>
+
+                        <Switch
+                            name="mode"
+                            controlActive="bg-surface-400"
+                            controlInactive="bg-surface-500"
+                            bind:checked={darkModeState}
+                            onCheckedChange={handleDarkModeStateChangePhone}
+                        >
+                            {#snippet inactiveChild()}<Moon width="24" height="24" />{/snippet}
+                            {#snippet activeChild()}<Sun width="24" height="24" />{/snippet}
+                        </Switch>
+                        <a href="https://github.com/aljhn"><Github width="32" height="32" /></a>
+                        <a href="https://www.linkedin.com/in/albertjohannessen/"><Linkedin width="32" height="32" /></a>
+                        <a href="https://scholar.google.com/citations?user=Bo5FC8YAAAAJ"><Academic width="32" height="32" /></a>
+                        <a href="mailto:albert.johannessen@gmail.com"><Email width="32" height="32" /></a>
+                    </div>
                 </div>
             </button>
         </div>
 
-        <nav class="collapse flex lg:visible">
+        <nav class="hidden lg:flex">
             {#each links as link}
                 <a href={link.url} class="p-1 {page.url.pathname === link.url ? 'font-extrabold' : ''} hover:underline"
                     >{link.label}</a
@@ -136,7 +121,7 @@
             {/each}
         </nav>
 
-        <div class="collapse flex gap-2 lg:visible lg:gap-1 lg:pl-5">
+        <div class="hidden lg:flex lg:gap-1 lg:pl-5">
             <Switch
                 name="mode"
                 controlActive="bg-surface-400"

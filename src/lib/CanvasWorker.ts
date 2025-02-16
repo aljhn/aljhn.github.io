@@ -164,7 +164,7 @@ self.onmessage = (e: MessageEvent) => {
             pathLength = 60;
             particleAmount = 40;
         } else {
-            pathLength = 40;
+            pathLength = 30;
             particleAmount = 30;
         }
 
