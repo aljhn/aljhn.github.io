@@ -8,11 +8,10 @@
         "If you can't explain it simply, you don't understand it well enough.",
         "Nothing is more permanent than a temporary solution.",
         "Hofstadter's law: It always takes longer than you expect, even when you take Hofstadter's law into account.",
-        "It's better to keep your mouth shut and have everyone asume you're dumb, than open your mouth and remove all doubt.",
+        "It's better to keep your mouth shut and have everyone assume you're stupid than open it and remove all doubt.",
         "Only a fool learns from his own mistakes. The wise man learns from the mistakes of others.",
         "The choice doesn't matter if the outcome is the same.",
-        "It is a shame for a man to grow old without seeing the beauty and strength of which his body is capable.",
-        "Dress for the job you want, not the job you have."
+        "It is a shame for a man to grow old without seeing the beauty and strength of which his body is capable."
     ];
 </script>
 
