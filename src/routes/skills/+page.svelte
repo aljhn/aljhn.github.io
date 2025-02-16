@@ -129,7 +129,7 @@
 
 <div class="grid grid-cols-1 pt-5 lg:grid-cols-2" id="skillsGridRoot">
     {#each skills as skill}
-        <div class="h-min w-full px-10">
+        <div class="h-min px-10">
             <section
                 class="rounded-xl bg-surface-200 {skill.category !== '' ? 'p-3' : ''} shadow-xl dark:bg-surface-900"
             >
