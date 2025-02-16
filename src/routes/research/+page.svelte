@@ -65,7 +65,7 @@
 
 <Meta name="Research" />
 
-<div class="grid gap-5 lg:grid-cols-2 pb-10">
+<div class="grid lg:grid-cols-2">
     <div>
         <Sections {sections} />
 
@@ -75,20 +75,22 @@
 
     <div class="grid auto-rows-min gap-y-10 pt-10">
         <div class="flex justify-center">
-            <p class="text-gray-600 dark:text-gray-400">I'm open for discussing concepts or collaborating on projects, so feel free to send me an email!</p>
+            <p class="text-gray-600 dark:text-gray-400">
+                I'm open for discussing concepts or collaborating on projects, so feel free to send me an email!
+            </p>
         </div>
         <div class="flex justify-center">
             <img
                 src="{base}/images/MassSpringDamper.jpg"
                 alt="Mass spring damper vector field"
-                class="h-[225] w-[300px] md:h-[450px] md:w-[600px] rounded-md shadow-lg"
+                class="h-[225] w-[300px] rounded-md shadow-lg md:h-[450px] md:w-[600px]"
             />
         </div>
         <div class="flex justify-center">
             <img
                 src="{base}/images/Burger.jpg"
                 alt="Burgers' equation plot"
-                class="h-[225] w-[300px] md:h-[450px] md:w-[600px] rounded-md shadow-lg"
+                class="h-[225] w-[300px] rounded-md shadow-lg md:h-[450px] md:w-[600px]"
             />
         </div>
     </div>

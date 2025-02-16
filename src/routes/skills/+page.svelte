@@ -115,8 +115,18 @@
                     currentDiv.style.transform = `translateY(-${Math.abs(offset)}px)`;
                 }
             }
+
+            if (columns == 1) {
+                document.getElementsByTagName("main")[0].style.height =
+                    (
+                        skillDivs[skillDivs.length - 1].getBoundingClientRect().bottom +
+                        window.pageYOffset -
+                        (skillDivs.length / 2) * divPadding
+                    ).toString() + "px";
+            } else {
+                document.getElementsByTagName("main")[0].style.height = "100%";
+            }
         }
-        addPadding();
 
         const resizeObserver: ResizeObserver = new ResizeObserver((entries) => {
             addPadding();

@@ -75,7 +75,7 @@
 
             <button
                 bind:this={dropdownMenuButton}
-                class="{isDropdownOpen ? 'bg-surface-300 dark:bg-surface-700' : ''} p-1 inline lg:hidden"
+                class="{isDropdownOpen ? 'bg-surface-300 dark:bg-surface-700' : ''} inline p-1 lg:hidden"
                 onclick={handleDropdownClick}
                 onfocusout={handleDropdownFocusLoss}
             >
@@ -85,7 +85,7 @@
                     class="absolute left-0 z-10 bg-surface-300 shadow-xl dark:bg-surface-700"
                     style:visibility={isDropdownOpen ? "visible" : "collapse"}
                 >
-                    <div class="space-y-1 flex flex-col items-center p-2">
+                    <div class="flex flex-col items-center space-y-1 p-2">
                         {#each links as link}
                             <a
                                 href={link.url}
@@ -106,7 +106,9 @@
                         </Switch>
                         <a href="https://github.com/aljhn"><Github width="32" height="32" /></a>
                         <a href="https://www.linkedin.com/in/albertjohannessen/"><Linkedin width="32" height="32" /></a>
-                        <a href="https://scholar.google.com/citations?user=Bo5FC8YAAAAJ"><Academic width="32" height="32" /></a>
+                        <a href="https://scholar.google.com/citations?user=Bo5FC8YAAAAJ"
+                            ><Academic width="32" height="32" /></a
+                        >
                         <a href="mailto:albert.johannessen@gmail.com"><Email width="32" height="32" /></a>
                     </div>
                 </div>
