@@ -12,14 +12,14 @@
 
         const mainRoot: HTMLElement = document.getElementById("mainRoot")!;
         let backgroundColor: string = window.getComputedStyle(mainRoot).backgroundColor;
-        canvas.style.backgroundColor = backgroundColor;
 
         if (worker === undefined) {
             worker = new CanvasWorker();
-            worker.postMessage({ backgroundColor: backgroundColor });
 
             const offscreenCanvas: OffscreenCanvas = canvas.transferControlToOffscreen();
             worker.postMessage({ canvas: offscreenCanvas }, [offscreenCanvas]);
+
+            worker.postMessage({ backgroundColor: backgroundColor });
 
             const resizeObserver: ResizeObserver = new ResizeObserver((entries) => {
                 worker?.postMessage({ width: canvasDiv.clientWidth, height: canvasDiv.clientHeight });
@@ -31,9 +31,6 @@
                 worker?.postMessage({ backgroundColor: backgroundColor });
             });
             mutationObserver.observe(document.documentElement, { attributes: true, childList: true });
-
-            backgroundColor = window.getComputedStyle(mainRoot).backgroundColor;
-            worker?.postMessage({ backgroundColor: backgroundColor });
         }
     });
 

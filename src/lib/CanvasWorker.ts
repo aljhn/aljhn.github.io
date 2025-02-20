@@ -68,6 +68,10 @@ class Particle {
         this.pathX = new Float32Array(pathLength);
         this.pathY = new Float32Array(pathLength);
         this.pathZ = new Float32Array(pathLength);
+
+        this.pathX.fill(x0);
+        this.pathY.fill(y0);
+        this.pathZ.fill(z0);
     }
 
     update(h: number): void {
@@ -82,7 +86,7 @@ class Particle {
             (this.y - this.pathY[this.currentIndex]) * (this.y - this.pathY[this.currentIndex]) +
             (this.z - this.pathZ[this.currentIndex]) * (this.z - this.pathZ[this.currentIndex]);
 
-        if (distSquared > 0.02) {
+        if (distSquared > 0.05) {
             this.currentIndex = mod(this.currentIndex + 1, this.pathX.length);
             this.pathX[this.currentIndex] = this.x;
             this.pathY[this.currentIndex] = this.y;
@@ -144,7 +148,7 @@ self.onmessage = (e: MessageEvent) => {
         backgroundColor = e.data.backgroundColor;
     } else if (e.data.canvas != undefined) {
         canvas = e.data.canvas;
-        const ctx: CanvasRenderingContext2D = canvas.getContext("2d", { alpha: false, desynchronized: true })!;
+        const ctx: CanvasRenderingContext2D = canvas.getContext("2d", { alpha: true, desynchronized: true })!;
 
         const rho: number = 28;
         const sigma: number = 10;
@@ -169,10 +173,10 @@ self.onmessage = (e: MessageEvent) => {
         }
 
         const particles: Particle[] = Array.from({ length: particleAmount }, () => {
-            return new Particle(system, sampleUniform(-5, 5), sampleUniform(-5, 5), sampleUniform(-5, 5), pathLength);
+            return new Particle(system, sampleUniform(-5, 5), sampleUniform(-5, 5), sampleUniform(60, 70), pathLength);
         });
 
-        const speedScale: number = 0.4;
+        const speedScale: number = 0.3;
 
         const getNextHueRangeTarget: () => number = () => {
             return Math.exp(sampleNormal(5, 0.5));
