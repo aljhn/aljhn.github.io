@@ -75,7 +75,7 @@
 
     <div class="grid auto-rows-min gap-y-10 pt-10">
         <div class="flex justify-center">
-            <p class="pt-4 px-10 text-gray-600 dark:text-gray-400">
+            <p class="px-10 pt-4 text-gray-600 dark:text-gray-400">
                 I'm open for discussing concepts or collaborating on projects, so feel free to send me an email!
             </p>
         </div>

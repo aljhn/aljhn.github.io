@@ -1,5 +1,6 @@
 <script lang="ts">
     import { onMount, onDestroy } from "svelte";
+    import { browser } from "$app/environment";
 
     import Meta from "$lib/Meta.svelte";
 
@@ -135,7 +136,9 @@
     });
 
     onDestroy(() => {
-        document.getElementsByTagName("main")[0].style.height = "100%";
+        if (browser) {
+            document.getElementsByTagName("main")[0].style.height = "100%";
+        }
     });
 </script>
 
