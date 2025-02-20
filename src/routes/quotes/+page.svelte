@@ -11,7 +11,8 @@
         "It's better to keep your mouth shut and have everyone assume you're stupid than open it and remove all doubt.",
         "Only a fool learns from his own mistakes. The wise man learns from the mistakes of others.",
         "The choice doesn't matter if the outcome is the same.",
-        "It is a shame for a man to grow old without seeing the beauty and strength of which his body is capable."
+        "It is a shame for a man to grow old without seeing the beauty and strength of which his body is capable.",
+        "All models are wrong, but some are useful."
     ];
 </script>
 

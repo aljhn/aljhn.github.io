@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { onMount } from "svelte";
+    import { onMount, onDestroy } from "svelte";
 
     import Meta from "$lib/Meta.svelte";
 
@@ -132,6 +132,10 @@
             addPadding();
         });
         resizeObserver.observe(document.documentElement);
+    });
+
+    onDestroy(() => {
+        document.getElementsByTagName("main")[0].style.height = "100%";
     });
 </script>
 
