@@ -16,7 +16,7 @@
         <section>
             <h4 class="text-2xl font-semibold">{section.title}</h4>
             {#each section.paragraphs as paragraph}
-                <p class="mt-4 text-gray-600 dark:text-gray-400">{paragraph}</p>
+                <p class="pt-4 text-gray-600 dark:text-gray-400">{paragraph}</p>
             {/each}
         </section>
     {/each}
