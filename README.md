@@ -20,6 +20,10 @@ pnpx sv create website
 
 pnpm install
 
+### Update Packages
+
+pnpm update
+
 #### Run Development Server
 
 pnpm dev
