@@ -11,8 +11,8 @@
         "It's better to keep your mouth shut and have everyone assume you're stupid than open it and remove all doubt.",
         "Only a fool learns from his own mistakes. The wise man learns from the mistakes of others.",
         "The choice doesn't matter if the outcome is the same.",
-        "It is a shame for a man to grow old without seeing the beauty and strength of which his body is capable.",
-        "All models are wrong, but some are useful."
+        "All models are wrong, but some are useful.",
+        "Kernighan's Law: Debugging is twice as hard as writing the code in the first place. Therefore, if you write the code as cleverly as possible, you are, by definition, not smart enough to debug it."
     ];
 </script>
 
