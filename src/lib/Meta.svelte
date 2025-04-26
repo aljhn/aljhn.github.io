@@ -4,7 +4,7 @@
     const meta = {
         author: "Albert Johannessen",
         title: "Albert Johannessen" + (name === "Home" ? "" : " - " + (name.charAt(0).toUpperCase() + name.slice(1))),
-        description: "Personal website - " + name + ". Resume, portfolio and interests.",
+        description: "Personal website" + (name === "Home" ? "" : " - " + name),
         keywords:
             "Personal Website, Resume, Portfolio, Projects, Publications, Interests, Computer Science, Programming, Artificial Intelligence, AI, Machine Learning, Deep Learning, Math, Dynamical Systems, Control Theory",
         url: "https://aljhn.github.io/",
