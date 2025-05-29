@@ -5,5 +5,5 @@
 <Meta name="404" />
 
 <div class="flex justify-center pt-20">
-    <h1 class="h1">404 Not Found</h1>
+    <p class="text-3xl font-bold">404 Not Found</p>
 </div>

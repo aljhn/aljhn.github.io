@@ -1,11 +1,11 @@
 <script lang="ts">
-    import { onMount } from "svelte";
+    // import { onMount } from "svelte";
     import { base } from "$app/paths";
     import { page } from "$app/state";
 
     // https://icon-sets.iconify.design/lucide/
-    import Sun from "~icons/lucide/sun";
-    import Moon from "~icons/lucide/moon";
+    // import Sun from "~icons/lucide/sun";
+    // import Moon from "~icons/lucide/moon";
     import Github from "~icons/lucide/github";
     import Linkedin from "~icons/lucide/linkedin";
     import Email from "~icons/lucide/mail";
@@ -20,23 +20,23 @@
         { url: base + "/research", label: "Research" }
     ];
 
-    let darkModeState = $state(false);
-
-    onMount(() => {
-        darkModeState = !window.matchMedia("(prefers-color-scheme: dark)").matches;
-        document.documentElement.classList.toggle("dark", !darkModeState);
-    });
-
-    function handleDarkModeStateChange() {
-        darkModeState = !darkModeState;
-        document.documentElement.classList.toggle("dark", !darkModeState);
-    }
-
-    function handleDarkModeStateChangePhone() {
-        darkModeState = !darkModeState;
-        document.documentElement.classList.toggle("dark", !darkModeState);
-        isDropdownOpen = true;
-    }
+    // let darkModeState = $state(false);
+    //
+    // onMount(() => {
+    //     darkModeState = !window.matchMedia("(prefers-color-scheme: dark)").matches;
+    //     document.documentElement.classList.toggle("dark", !darkModeState);
+    // });
+    //
+    // function handleDarkModeStateChange() {
+    //     darkModeState = !darkModeState;
+    //     document.documentElement.classList.toggle("dark", !darkModeState);
+    // }
+    //
+    // function handleDarkModeStateChangePhone() {
+    //     darkModeState = !darkModeState;
+    //     document.documentElement.classList.toggle("dark", !darkModeState);
+    //     isDropdownOpen = true;
+    // }
 
     let isDropdownOpen = $state(false);
 
@@ -65,43 +65,34 @@
     };
 </script>
 
-<header class="bg-surface-200 dark:bg-surface-900">
+<header class="bg-neutral-200">
     <div class="container mx-auto flex flex-col items-center py-2 lg:flex-row lg:justify-between">
         <div class="flex grow items-center">
             <a href="{base}/"><img src="{base}/images/Hex.png" width="75" height="75" alt="Logo" /></a>
-            <h4 class="h5 lg:h4 px-2"><a href="{base}/">Albert Johannessen</a></h4>
+            <a href="{base}/"><p class="px-2 text-2xl font-bold lg:text-3xl">Albert Johannessen</p></a>
 
             <button
                 bind:this={dropdownMenuButton}
-                class="{isDropdownOpen ? 'bg-surface-300 dark:bg-surface-700' : ''} inline p-1 lg:hidden"
+                class="{isDropdownOpen ? 'bg-neutral-300' : ''} inline p-1 lg:hidden"
                 onclick={handleDropdownClick}
                 onfocusout={handleDropdownFocusLoss}
             >
                 <Menu width="32" height="32" />
                 <div
                     bind:this={dropdownMenuDiv}
-                    class="bg-surface-300 dark:bg-surface-700 absolute left-0 z-10 shadow-xl"
+                    class="absolute left-0 z-10 bg-neutral-300 shadow-xl"
                     style:visibility={isDropdownOpen ? "visible" : "collapse"}
                 >
                     <div class="flex flex-col items-center space-y-1 p-2">
                         {#each links as link}
                             <a
                                 href={link.url}
-                                class="{page.url.pathname === link.url ? 'font-extrabold' : ''} hover:underline"
-                                >{link.label}</a
+                                class="{page.url.pathname === link.url
+                                    ? 'font-extrabold'
+                                    : 'font-medium'} hover:underline">{link.label}</a
                             >
                         {/each}
 
-                        <!-- <Switch -->
-                        <!--     name="mode" -->
-                        <!--     controlActive="bg-surface-400" -->
-                        <!--     controlInactive="bg-surface-500" -->
-                        <!--     bind:checked={darkModeState} -->
-                        <!--     onCheckedChange={handleDarkModeStateChangePhone} -->
-                        <!-- > -->
-                        <!--     {#snippet inactiveChild()}<Moon width="24" height="24" />{/snippet} -->
-                        <!--     {#snippet activeChild()}<Sun width="24" height="24" />{/snippet} -->
-                        <!-- </Switch> -->
                         <a href="https://github.com/aljhn"><Github width="32" height="32" /></a>
                         <a href="https://www.linkedin.com/in/albertjohannessen/"><Linkedin width="32" height="32" /></a>
                         <a href="https://scholar.google.com/citations?user=Bo5FC8YAAAAJ"
@@ -115,23 +106,16 @@
 
         <nav class="hidden lg:flex">
             {#each links as link}
-                <a href={link.url} class="p-1 {page.url.pathname === link.url ? 'font-extrabold' : ''} hover:underline"
-                    >{link.label}</a
+                <a
+                    href={link.url}
+                    class="p-1 text-lg {page.url.pathname === link.url
+                        ? 'font-extrabold'
+                        : 'font-medium'} hover:underline">{link.label}</a
                 >
             {/each}
         </nav>
 
         <div class="hidden lg:flex lg:gap-1 lg:pl-5">
-            <!-- <Switch -->
-            <!--     name="mode" -->
-            <!--     controlActive="bg-surface-400" -->
-            <!--     controlInactive="bg-surface-500" -->
-            <!--     bind:checked={darkModeState} -->
-            <!--     onCheckedChange={handleDarkModeStateChange} -->
-            <!-- > -->
-            <!--     {#snippet inactiveChild()}<Moon width="24" height="24" />{/snippet} -->
-            <!--     {#snippet activeChild()}<Sun width="24" height="24" />{/snippet} -->
-            <!-- </Switch> -->
             <a href="https://github.com/aljhn"><Github width="32" height="32" /></a>
             <a href="https://www.linkedin.com/in/albertjohannessen/"><Linkedin width="32" height="32" /></a>
             <a href="https://scholar.google.com/citations?user=Bo5FC8YAAAAJ"><Academic width="32" height="32" /></a>
