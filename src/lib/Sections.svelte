@@ -16,7 +16,7 @@
         <section>
             <p class="text-2xl font-semibold">{section.title}</p>
             {#each section.paragraphs as paragraph}
-                <p class="pt-4 text-gray-600">{paragraph}</p>
+                <p class="pt-4">{paragraph}</p>
             {/each}
         </section>
     {/each}

@@ -65,7 +65,7 @@
     };
 </script>
 
-<header class="bg-neutral-300">
+<header class="bg-neutral-300 text-gray-800 dark:bg-neutral-800 dark:text-gray-300">
     <div class="container mx-auto flex flex-col items-center py-2 lg:flex-row lg:justify-between">
         <div class="flex grow items-center">
             <a href="{base}/"><img src="{base}/images/Hex.png" width="75" height="75" alt="Logo" /></a>
@@ -73,14 +73,14 @@
 
             <button
                 bind:this={dropdownMenuButton}
-                class="{isDropdownOpen ? 'bg-neutral-400' : ''} inline p-1 lg:hidden"
+                class="{isDropdownOpen ? 'bg-neutral-400 dark:bg-neutral-950' : ''} inline p-1 lg:hidden"
                 onclick={handleDropdownClick}
                 onfocusout={handleDropdownFocusLoss}
             >
                 <Menu width="32" height="32" />
                 <div
                     bind:this={dropdownMenuDiv}
-                    class="absolute left-0 z-10 bg-neutral-300 shadow-xl"
+                    class="absolute left-0 z-10 bg-neutral-300 shadow-lg dark:bg-neutral-800"
                     style:visibility={isDropdownOpen ? "visible" : "collapse"}
                 >
                     <div class="flex flex-col items-center space-y-1 p-2">

@@ -8,7 +8,7 @@
 <div class="grid min-h-screen max-w-screen grid-rows-[auto_1fr]">
     <Header />
 
-    <div class="bg-neutral-200" id="mainRoot">
+    <div class="bg-neutral-200 text-gray-600 dark:bg-neutral-700 dark:text-gray-300" id="mainRoot">
         <main class="container mx-auto h-full pb-10">
             {@render children()}
         </main>

@@ -30,13 +30,13 @@
 <Meta name="Quotes" />
 
 <div class="grid auto-rows-min gap-5 p-10">
-    <h4 class="text-2xl font-semibold">Selected quotes</h4>
-    <p class="text-gray-600">Some interesting quotes sampled from various places on the internet</p>
+    <p class="text-2xl font-semibold">Selected quotes</p>
+    <p>Some interesting quotes sampled from various places on the internet</p>
 
     <ul class="items-left mt-5 flex flex-col space-y-4 border-t-2 border-current pt-5">
         {#each quotes as quote}
             <li class="p-1">
-                <blockquote class="blockquote rounded-md bg-neutral-100 px-2 py-1 text-lg shadow-lg">
+                <blockquote class="blockquote rounded-md bg-neutral-100 dark:bg-neutral-800 px-2 py-1 text-lg shadow-lg">
                     {quote}
                 </blockquote>
             </li>
