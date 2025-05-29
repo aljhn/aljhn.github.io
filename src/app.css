@@ -1,9 +1,1 @@
-@import "tailwindcss/base";
-@import "tailwindcss/components";
-@import "tailwindcss/utilities";
-
-html,
-body {
-    @apply h-full;
-    @apply transition-colors duration-500;
-}
+@import "tailwindcss";

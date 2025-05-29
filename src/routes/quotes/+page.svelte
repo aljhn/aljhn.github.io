@@ -29,7 +29,7 @@
         {#each quotes as quote}
             <li class="p-1">
                 <blockquote
-                    class="blockquote rounded-md bg-surface-200 px-2 py-1 text-lg shadow-md dark:bg-surface-900"
+                    class="blockquote bg-surface-200 dark:bg-surface-900 rounded-md px-2 py-1 text-lg shadow-md"
                 >
                     {quote}
                 </blockquote>

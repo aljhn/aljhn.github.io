@@ -6,8 +6,8 @@
 - Svelte + SvelteKit
 - TypeScript
 - Prettier + ESLint
-- Tailwind CSS + Skeleton
-- unplugin-icons + Iconify with Material Design Icons
+- Tailwind CSS
+- unplugin-icons + Iconify + Lucide
 - GitHub Pages + GitHub Actions
 
 ## Commands

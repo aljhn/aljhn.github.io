@@ -3,16 +3,14 @@
     import { base } from "$app/paths";
     import { page } from "$app/state";
 
-    import { Switch } from "@skeletonlabs/skeleton-svelte";
-
-    // https://icon-sets.iconify.design/mdi/
-    import Sun from "~icons/mdi/weather-sunny";
-    import Moon from "~icons/mdi/weather-night";
-    import Github from "~icons/mdi/github";
-    import Linkedin from "~icons/mdi/linkedin";
-    import Email from "~icons/mdi/email";
-    import Academic from "~icons/mdi/academic-cap";
-    import Menu from "~icons/mdi/menu";
+    // https://icon-sets.iconify.design/lucide/
+    import Sun from "~icons/lucide/sun";
+    import Moon from "~icons/lucide/moon";
+    import Github from "~icons/lucide/github";
+    import Linkedin from "~icons/lucide/linkedin";
+    import Email from "~icons/lucide/mail";
+    import Academic from "~icons/lucide/graduation-cap";
+    import Menu from "~icons/lucide/menu";
 
     const links = [
         { url: base + "/", label: "Home" },
@@ -71,7 +69,7 @@
     <div class="container mx-auto flex flex-col items-center py-2 lg:flex-row lg:justify-between">
         <div class="flex grow items-center">
             <a href="{base}/"><img src="{base}/images/Hex.png" width="75" height="75" alt="Logo" /></a>
-            <h4 class="h5 px-2 lg:h4"><a href="{base}/">Albert Johannessen</a></h4>
+            <h4 class="h5 lg:h4 px-2"><a href="{base}/">Albert Johannessen</a></h4>
 
             <button
                 bind:this={dropdownMenuButton}
@@ -82,7 +80,7 @@
                 <Menu width="32" height="32" />
                 <div
                     bind:this={dropdownMenuDiv}
-                    class="absolute left-0 z-10 bg-surface-300 shadow-xl dark:bg-surface-700"
+                    class="bg-surface-300 dark:bg-surface-700 absolute left-0 z-10 shadow-xl"
                     style:visibility={isDropdownOpen ? "visible" : "collapse"}
                 >
                     <div class="flex flex-col items-center space-y-1 p-2">
@@ -94,16 +92,16 @@
                             >
                         {/each}
 
-                        <Switch
-                            name="mode"
-                            controlActive="bg-surface-400"
-                            controlInactive="bg-surface-500"
-                            bind:checked={darkModeState}
-                            onCheckedChange={handleDarkModeStateChangePhone}
-                        >
-                            {#snippet inactiveChild()}<Moon width="24" height="24" />{/snippet}
-                            {#snippet activeChild()}<Sun width="24" height="24" />{/snippet}
-                        </Switch>
+                        <!-- <Switch -->
+                        <!--     name="mode" -->
+                        <!--     controlActive="bg-surface-400" -->
+                        <!--     controlInactive="bg-surface-500" -->
+                        <!--     bind:checked={darkModeState} -->
+                        <!--     onCheckedChange={handleDarkModeStateChangePhone} -->
+                        <!-- > -->
+                        <!--     {#snippet inactiveChild()}<Moon width="24" height="24" />{/snippet} -->
+                        <!--     {#snippet activeChild()}<Sun width="24" height="24" />{/snippet} -->
+                        <!-- </Switch> -->
                         <a href="https://github.com/aljhn"><Github width="32" height="32" /></a>
                         <a href="https://www.linkedin.com/in/albertjohannessen/"><Linkedin width="32" height="32" /></a>
                         <a href="https://scholar.google.com/citations?user=Bo5FC8YAAAAJ"
@@ -124,16 +122,16 @@
         </nav>
 
         <div class="hidden lg:flex lg:gap-1 lg:pl-5">
-            <Switch
-                name="mode"
-                controlActive="bg-surface-400"
-                controlInactive="bg-surface-500"
-                bind:checked={darkModeState}
-                onCheckedChange={handleDarkModeStateChange}
-            >
-                {#snippet inactiveChild()}<Moon width="24" height="24" />{/snippet}
-                {#snippet activeChild()}<Sun width="24" height="24" />{/snippet}
-            </Switch>
+            <!-- <Switch -->
+            <!--     name="mode" -->
+            <!--     controlActive="bg-surface-400" -->
+            <!--     controlInactive="bg-surface-500" -->
+            <!--     bind:checked={darkModeState} -->
+            <!--     onCheckedChange={handleDarkModeStateChange} -->
+            <!-- > -->
+            <!--     {#snippet inactiveChild()}<Moon width="24" height="24" />{/snippet} -->
+            <!--     {#snippet activeChild()}<Sun width="24" height="24" />{/snippet} -->
+            <!-- </Switch> -->
             <a href="https://github.com/aljhn"><Github width="32" height="32" /></a>
             <a href="https://www.linkedin.com/in/albertjohannessen/"><Linkedin width="32" height="32" /></a>
             <a href="https://scholar.google.com/citations?user=Bo5FC8YAAAAJ"><Academic width="32" height="32" /></a>
