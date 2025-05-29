@@ -1,7 +1,7 @@
 <script lang="ts">
     import Meta from "$lib/Meta.svelte";
 
-    const quotes = [
+    const quotes: string[] = [
         "You're always higher up on mount stupid than you realize, even when Dunning-Kruger is taken into account.",
         "Teach a person to make an engine, and they will never make another game in their life.",
         "If you can't explain it simply, you don't understand it well enough.",
@@ -13,6 +13,18 @@
         "Be first or be best.",
         "Kernighan's Law: Debugging is twice as hard as writing the code in the first place. Therefore, if you write the code as cleverly as possible, you are, by definition, not smart enough to debug it."
     ];
+
+    function shuffleArray<T>(array: T[]): void {
+        const n: number = array.length;
+        for (let i: number = 0; i < n; i++) {
+            const j: number = Math.floor(Math.random() * n);
+            const temp: T = array[i];
+            array[i] = array[j];
+            array[j] = temp;
+        }
+    }
+
+    shuffleArray(quotes);
 </script>
 
 <Meta name="Quotes" />
