@@ -68,7 +68,7 @@
 <header class="bg-neutral-300 text-gray-800 dark:bg-neutral-800 dark:text-gray-300">
     <div class="container mx-auto flex flex-col items-center py-2 lg:flex-row lg:justify-between">
         <div class="flex grow items-center">
-            <a href="{base}/"><enhanced:img src="/static/images/Hex.png?w=75" width="75" height="75" alt="Logo" /></a>
+            <a href="{base}/"><enhanced:img src="/static/images/Hex.png?w=75" alt="Logo" /></a>
             <a href="{base}/"><h3 class="px-2 text-2xl font-bold lg:text-3xl">Albert Johannessen</h3></a>
 
             <button
@@ -76,7 +76,7 @@
                 class="{isDropdownOpen ? 'bg-neutral-400 dark:bg-neutral-950' : ''} inline p-1 lg:hidden"
                 onclick={handleDropdownClick}
                 onfocusout={handleDropdownFocusLoss}
-                name="Navigation menu"
+                aria-label="Navigation menu"
             >
                 <Menu width="32" height="32" />
                 <div
