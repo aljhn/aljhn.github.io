@@ -151,9 +151,9 @@
                 class="rounded-xl bg-neutral-100 dark:bg-neutral-800 {skill.category !== '' ? 'p-3' : ''} shadow-xl"
             >
                 {#if skill.category !== ""}
-                    <h2 class="mb-4 border-b-2 border-current pb-2 text-2xl">
+                    <h3 class="mb-4 border-b-2 border-current pb-2 text-2xl">
                         {skill.category}
-                    </h2>
+                    </h3>
                     <ul class="space-y-0">
                         {#each skill.items as item}
                             <li class="flex items-center justify-between">

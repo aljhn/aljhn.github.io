@@ -69,7 +69,7 @@
     <div class="container mx-auto flex flex-col items-center py-2 lg:flex-row lg:justify-between">
         <div class="flex grow items-center">
             <a href="{base}/"><img src="{base}/images/Hex.png" width="75" height="75" alt="Logo" /></a>
-            <a href="{base}/"><p class="px-2 text-2xl font-bold lg:text-3xl">Albert Johannessen</p></a>
+            <a href="{base}/"><h3 class="px-2 text-2xl font-bold lg:text-3xl">Albert Johannessen</h3></a>
 
             <button
                 bind:this={dropdownMenuButton}

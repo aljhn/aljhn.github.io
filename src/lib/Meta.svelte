@@ -4,16 +4,21 @@
     const meta = {
         author: "Albert Johannessen",
         title: "Albert Johannessen" + (name === "Home" ? "" : " - " + (name.charAt(0).toUpperCase() + name.slice(1))),
-        description: "Personal website" + (name === "Home" ? "" : " - " + name),
+        description:
+            "Personal website" + (name === "Home" ? "" : " - " + (name.charAt(0).toUpperCase() + name.slice(1))),
         keywords:
             "Personal Website, Resume, Portfolio, Projects, Publications, Interests, Computer Science, Programming, Artificial Intelligence, AI, Machine Learning, Deep Learning, Math, Dynamical Systems, Control Theory",
-        url: "https://aljhn.github.io/",
+        url: "https://aljhn.github.io",
+        pageUrl:
+            "https://aljhn.github.io" + (name === "Home" ? "" : "/" + name.charAt(0).toLowerCase() + name.slice(1)),
         image: "https://aljhn.github.io/images/Hex.png"
     };
 </script>
 
 <svelte:head>
     <title>{meta.title}</title>
+
+    <link rel="canonical" href={meta.pageUrl} />
 
     <meta name="title" content={meta.title} />
     <meta name="description" content={meta.description} />

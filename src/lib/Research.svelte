@@ -20,9 +20,9 @@
     <ul class="space-y-4">
         {#each papers as paper}
             <li class="rounded-xl bg-neutral-100 p-3 shadow-xl dark:bg-neutral-800">
-                <h3 class="text-xl font-semibold hover:underline">
+                <h4 class="text-xl font-semibold hover:underline">
                     <a href={paper.link}>{paper.title}</a>
-                </h3>
+                </h4>
                 <div class="flex">
                     <p class="text-lg">{paper.authors}</p>
                     <p class="text-md grow text-right">{paper.year}</p>

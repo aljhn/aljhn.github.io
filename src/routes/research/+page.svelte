@@ -1,6 +1,4 @@
 <script lang="ts">
-    import { base } from "$app/paths";
-
     import Meta from "$lib/Meta.svelte";
     import Sections from "$lib/Sections.svelte";
     import Research from "$lib/Research.svelte";

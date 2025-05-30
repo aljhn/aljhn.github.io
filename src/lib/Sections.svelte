@@ -14,7 +14,7 @@
 <div class="grid auto-rows-min gap-5 p-10">
     {#each sections as section}
         <section>
-            <p class="text-2xl font-semibold">{section.title}</p>
+            <h5 class="text-2xl font-semibold">{section.title}</h5>
             {#each section.paragraphs as paragraph}
                 <p class="pt-4">{paragraph}</p>
             {/each}
