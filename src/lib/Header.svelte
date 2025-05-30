@@ -4,8 +4,6 @@
     import { page } from "$app/state";
 
     // https://icon-sets.iconify.design/lucide/
-    // import Sun from "~icons/lucide/sun";
-    // import Moon from "~icons/lucide/moon";
     import Github from "~icons/lucide/github";
     import Linkedin from "~icons/lucide/linkedin";
     import Email from "~icons/lucide/mail";
@@ -68,7 +66,7 @@
 <header class="bg-neutral-300 text-gray-800 dark:bg-neutral-800 dark:text-gray-300">
     <div class="container mx-auto flex flex-col items-center py-2 lg:flex-row lg:justify-between">
         <div class="flex grow items-center">
-            <a href="{base}/"><enhanced:img src="/static/images/Hex.png?w=75" alt="Logo" /></a>
+            <a href="{base}/"><enhanced:img src="/static/images/Hex.png?w=150" alt="Logo" width="75" height="75" /></a>
             <a href="{base}/"><h1 class="px-2 text-2xl font-bold lg:text-3xl">Albert Johannessen</h1></a>
 
             <button
@@ -94,14 +92,20 @@
                             >
                         {/each}
 
-                        <a href="https://github.com/aljhn"><Github width="32" height="32" alt="GitHub" /></a>
-                        <a href="https://www.linkedin.com/in/albertjohannessen/"
+                        <a href="https://github.com/aljhn" aria-label="GitHub profile"
+                            ><Github width="32" height="32" alt="GitHub" /></a
+                        >
+                        <a href="https://www.linkedin.com/in/albertjohannessen/" aria-label="LinkedIn profile"
                             ><Linkedin width="32" height="32" alt="LinkedIn" /></a
                         >
-                        <a href="https://scholar.google.com/citations?user=Bo5FC8YAAAAJ"
+                        <a
+                            href="https://scholar.google.com/citations?user=Bo5FC8YAAAAJ"
+                            aria-label="Google Scholar profile"
                             ><Academic width="32" height="32" alt="Google Scholar" /></a
                         >
-                        <a href="mailto:albert.johannessen@gmail.com"><Email width="32" height="32" alt="Email" /></a>
+                        <a href="mailto:albert.johannessen@gmail.com" aria-label="Email"
+                            ><Email width="32" height="32" alt="Email" /></a
+                        >
                     </div>
                 </div>
             </button>
@@ -119,14 +123,18 @@
         </nav>
 
         <div class="hidden lg:flex lg:gap-1 lg:pl-5">
-            <a href="https://github.com/aljhn"><Github width="32" height="32" alt="GitHub" /></a>
-            <a href="https://www.linkedin.com/in/albertjohannessen/"
+            <a href="https://github.com/aljhn" aria-label="GitHub profile"
+                ><Github width="32" height="32" alt="GitHub" /></a
+            >
+            <a href="https://www.linkedin.com/in/albertjohannessen/" aria-label="LinkedIn profile"
                 ><Linkedin width="32" height="32" alt="LinkedIn" /></a
             >
-            <a href="https://scholar.google.com/citations?user=Bo5FC8YAAAAJ"
+            <a href="https://scholar.google.com/citations?user=Bo5FC8YAAAAJ" aria-label="Google Scholar profile"
                 ><Academic width="32" height="32" alt="Google Scholar" /></a
             >
-            <a href="mailto:albert.johannessen@gmail.com"><Email width="32" height="32" alt="Email" /></a>
+            <a href="mailto:albert.johannessen@gmail.com" aria-label="Email"
+                ><Email width="32" height="32" alt="Email" /></a
+            >
         </div>
     </div>
 </header>
