@@ -30,7 +30,7 @@
 <Meta name="Quotes" />
 
 <div class="grid auto-rows-min gap-5 p-10">
-    <h3 class="text-2xl font-semibold">Selected quotes</h3>
+    <h2 class="text-2xl font-semibold">Selected quotes</h2>
     <p>Some interesting quotes sampled from various places on the internet</p>
 
     <ul class="items-left mt-5 flex flex-col space-y-4 border-t-2 border-current pt-5">

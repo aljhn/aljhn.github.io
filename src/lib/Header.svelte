@@ -69,7 +69,7 @@
     <div class="container mx-auto flex flex-col items-center py-2 lg:flex-row lg:justify-between">
         <div class="flex grow items-center">
             <a href="{base}/"><enhanced:img src="/static/images/Hex.png?w=75" alt="Logo" /></a>
-            <a href="{base}/"><h3 class="px-2 text-2xl font-bold lg:text-3xl">Albert Johannessen</h3></a>
+            <a href="{base}/"><h1 class="px-2 text-2xl font-bold lg:text-3xl">Albert Johannessen</h1></a>
 
             <button
                 bind:this={dropdownMenuButton}
@@ -94,12 +94,14 @@
                             >
                         {/each}
 
-                        <a href="https://github.com/aljhn"><Github width="32" height="32" /></a>
-                        <a href="https://www.linkedin.com/in/albertjohannessen/"><Linkedin width="32" height="32" /></a>
-                        <a href="https://scholar.google.com/citations?user=Bo5FC8YAAAAJ"
-                            ><Academic width="32" height="32" /></a
+                        <a href="https://github.com/aljhn"><Github width="32" height="32" alt="GitHub" /></a>
+                        <a href="https://www.linkedin.com/in/albertjohannessen/"
+                            ><Linkedin width="32" height="32" alt="LinkedIn" /></a
                         >
-                        <a href="mailto:albert.johannessen@gmail.com"><Email width="32" height="32" /></a>
+                        <a href="https://scholar.google.com/citations?user=Bo5FC8YAAAAJ"
+                            ><Academic width="32" height="32" alt="Google Scholar" /></a
+                        >
+                        <a href="mailto:albert.johannessen@gmail.com"><Email width="32" height="32" alt="Email" /></a>
                     </div>
                 </div>
             </button>
@@ -117,10 +119,14 @@
         </nav>
 
         <div class="hidden lg:flex lg:gap-1 lg:pl-5">
-            <a href="https://github.com/aljhn"><Github width="32" height="32" /></a>
-            <a href="https://www.linkedin.com/in/albertjohannessen/"><Linkedin width="32" height="32" /></a>
-            <a href="https://scholar.google.com/citations?user=Bo5FC8YAAAAJ"><Academic width="32" height="32" /></a>
-            <a href="mailto:albert.johannessen@gmail.com"><Email width="32" height="32" /></a>
+            <a href="https://github.com/aljhn"><Github width="32" height="32" alt="GitHub" /></a>
+            <a href="https://www.linkedin.com/in/albertjohannessen/"
+                ><Linkedin width="32" height="32" alt="LinkedIn" /></a
+            >
+            <a href="https://scholar.google.com/citations?user=Bo5FC8YAAAAJ"
+                ><Academic width="32" height="32" alt="Google Scholar" /></a
+            >
+            <a href="mailto:albert.johannessen@gmail.com"><Email width="32" height="32" alt="Email" /></a>
         </div>
     </div>
 </header>
