@@ -151,13 +151,13 @@
                 class="rounded-xl bg-neutral-100 dark:bg-neutral-800 {skill.category !== '' ? 'p-3' : ''} shadow-xl"
             >
                 {#if skill.category !== ""}
-                    <h2 class="mb-4 border-b-2 border-current pb-2 text-2xl">
+                    <h2 class="mb-4 border-b-2 border-current pb-2 font-mono text-2xl font-semibold">
                         {skill.category}
                     </h2>
                     <ul class="space-y-0">
                         {#each skill.items as item}
                             <li class="flex items-center justify-between">
-                                <span class="flex text-lg"
+                                <span class="flex font-mono text-lg"
                                     ><img src={item.icon} class="size-7 pr-1" alt="Skill icon" />{item.name}</span
                                 >
                                 <span class="text-sm italic">{item.level}</span>

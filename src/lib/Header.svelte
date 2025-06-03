@@ -63,7 +63,7 @@
     };
 </script>
 
-<header class="bg-neutral-300 text-gray-800 dark:bg-neutral-800 dark:text-gray-300">
+<header class="bg-neutral-300 font-mono text-gray-800 dark:bg-neutral-800 dark:text-gray-300">
     <div class="container mx-auto flex flex-col items-center py-2 lg:flex-row lg:justify-between">
         <div class="flex grow items-center">
             <a href="{base}/"><enhanced:img src="/static/images/Hex.png?w=150" alt="Logo" width="75" height="75" /></a>
