@@ -20,23 +20,30 @@
         { url: base + "/research", label: "Research" }
     ];
 
-    let darkModeState = $state(false);
+    let darkModeState = $state(true);
 
     onMount(() => {
-        darkModeState = !window.matchMedia("(prefers-color-scheme: dark)").matches;
-        document.documentElement.classList.toggle("dark", !darkModeState);
+        const localStorageDarkMode: string | null = localStorage.getItem("darkMode");
+        if (localStorageDarkMode !== null) {
+            darkModeState = localStorageDarkMode === "true";
+        } else {
+            darkModeState = window.matchMedia("(prefers-color-scheme: dark)").matches;
+        }
+
+        document.documentElement.classList.toggle("dark", darkModeState);
     });
 
-    function handleDarkModeStateChange() {
+    function handleDarkModeToggle() {
         darkModeState = !darkModeState;
-        document.documentElement.classList.toggle("dark", !darkModeState);
+        localStorage.setItem("darkMode", darkModeState ? "true" : "false");
+        document.documentElement.classList.toggle("dark", darkModeState);
     }
 
-    function handleDarkModeStateChangePhone() {
-        darkModeState = !darkModeState;
-        document.documentElement.classList.toggle("dark", !darkModeState);
-        isDropdownOpen = true;
-    }
+    // function handleDarkModeStateChangePhone() {
+    //     darkModeState = !darkModeState;
+    //     document.documentElement.classList.toggle("dark", !darkModeState);
+    //     isDropdownOpen = true;
+    // }
 
     let isDropdownOpen = $state(false);
 
@@ -113,7 +120,7 @@
             </button>
         </div>
 
-        <nav class="hidden lg:flex">
+        <nav class="hidden lg:flex lg:pr-3">
             {#each links as link}
                 <a
                     href={link.url}
@@ -124,9 +131,19 @@
             {/each}
         </nav>
 
-        <button><Sun width="32" height="32" /></button>
+        <button
+            aria-label="Dark mode toggle"
+            onclick={handleDarkModeToggle}
+            class="hidden rounded-2xl p-1 hover:bg-neutral-400 lg:flex hover:dark:bg-neutral-800 "
+        >
+            {#if darkModeState}
+                <Moon width="32" height="32" />
+            {:else}
+                <Sun width="32" height="32" />
+            {/if}
+        </button>
 
-        <div class="hidden lg:flex lg:gap-1 lg:pl-5">
+        <div class="hidden lg:flex lg:gap-1 lg:pl-3">
             <a href="https://github.com/aljhn" aria-label="GitHub profile"
                 ><Github width="32" height="32" alt="GitHub" /></a
             >
