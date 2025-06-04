@@ -36,7 +36,6 @@
     import SciPy from "$lib/icons/scipy.svelte";
     import Spain from "$lib/icons/spain.svelte";
     import Svelte from "$lib/icons/svelte.svelte";
-    import SymPy from "$lib/icons/sympy.svelte";
     import TailwindCSS from "$lib/icons/tailwindcss.svelte";
     import TypeScript from "$lib/icons/typescript.svelte";
     import US from "$lib/icons/us.svelte";
@@ -68,7 +67,6 @@
                 { name: "SciPy", level: intermediate, icon: SciPy },
                 { name: "Matplotlib", level: intermediate, icon: Matplotlib },
                 { name: "scikit-learn", level: intermediate, icon: scikitlearn },
-                { name: "SymPy", level: beginner, icon: SymPy },
                 { name: "Pandas", level: beginner, icon: Pandas },
                 { name: "PyTorch", level: advanced, icon: PyTorch },
                 { name: "JAX", level: advanced, icon: JAX },
@@ -181,8 +179,11 @@
                     <ul class="space-y-0">
                         {#each skill.items as item}
                             <li class="flex items-center justify-between">
-                                <span class="flex font-mono text-lg"><item.icon />{item.name}</span>
-                                <span class="text-sm italic">{item.level}</span>
+                                <span class="flex space-x-1"
+                                    ><item.icon />
+                                    <p class="font-mono text-lg">{item.name}</p></span
+                                >
+                                <p class="text-sm italic">{item.level}</p>
                             </li>
                         {/each}
                     </ul>

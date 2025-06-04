@@ -1,4 +1,4 @@
-<svg width="128px" height="128px" viewBox="0 0 128 128" version="1.1" id="svg182">
+<svg width="24px" height="24px" viewBox="0 0 128 128" version="1.1" id="svg182">
     <g id="surface1" transform="translate(-4.06e-4,-20.973375)">
         <path
             style="fill:#1791cf;fill-opacity:1;fill-rule:evenodd;stroke:none"

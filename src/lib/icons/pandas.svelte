@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128"
+<svg width="24px" height="24px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128"
     ><path fill="#130754" d="M46.236 7.567h13.99v29.047h-13.99Zm0 59.668h13.99V96.28h-13.99Z" /><path
         fill="#ffca00"
         d="M46.236 45.092h13.99v13.705h-13.99Z"
