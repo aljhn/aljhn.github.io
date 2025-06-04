@@ -170,7 +170,7 @@
     {#each skills as skill}
         <div class="h-min px-10">
             <section
-                class="rounded-xl bg-neutral-100 dark:bg-neutral-800 {skill.category !== '' ? 'p-3' : ''} shadow-xl"
+                class="rounded-xl bg-neutral-100 dark:bg-neutral-900 {skill.category !== '' ? 'p-3' : ''} shadow-xl"
             >
                 {#if skill.category !== ""}
                     <h2 class="mb-4 border-b-2 border-current pb-2 font-mono text-2xl font-semibold">

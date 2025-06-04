@@ -1,9 +1,11 @@
 <script lang="ts">
-    // import { onMount } from "svelte";
+    import { onMount } from "svelte";
     import { base } from "$app/paths";
     import { page } from "$app/state";
 
     // https://icon-sets.iconify.design/lucide/
+    import Sun from "~icons/lucide/sun";
+    import Moon from "~icons/lucide/moon";
     import Github from "~icons/lucide/github";
     import Linkedin from "~icons/lucide/linkedin";
     import Email from "~icons/lucide/mail";
@@ -18,23 +20,23 @@
         { url: base + "/research", label: "Research" }
     ];
 
-    // let darkModeState = $state(false);
-    //
-    // onMount(() => {
-    //     darkModeState = !window.matchMedia("(prefers-color-scheme: dark)").matches;
-    //     document.documentElement.classList.toggle("dark", !darkModeState);
-    // });
-    //
-    // function handleDarkModeStateChange() {
-    //     darkModeState = !darkModeState;
-    //     document.documentElement.classList.toggle("dark", !darkModeState);
-    // }
-    //
-    // function handleDarkModeStateChangePhone() {
-    //     darkModeState = !darkModeState;
-    //     document.documentElement.classList.toggle("dark", !darkModeState);
-    //     isDropdownOpen = true;
-    // }
+    let darkModeState = $state(false);
+
+    onMount(() => {
+        darkModeState = !window.matchMedia("(prefers-color-scheme: dark)").matches;
+        document.documentElement.classList.toggle("dark", !darkModeState);
+    });
+
+    function handleDarkModeStateChange() {
+        darkModeState = !darkModeState;
+        document.documentElement.classList.toggle("dark", !darkModeState);
+    }
+
+    function handleDarkModeStateChangePhone() {
+        darkModeState = !darkModeState;
+        document.documentElement.classList.toggle("dark", !darkModeState);
+        isDropdownOpen = true;
+    }
 
     let isDropdownOpen = $state(false);
 
@@ -63,7 +65,7 @@
     };
 </script>
 
-<header class="bg-neutral-300 font-mono text-gray-800 dark:bg-neutral-800 dark:text-gray-300">
+<header class="bg-neutral-300 font-mono text-gray-800 dark:bg-neutral-900 dark:text-gray-300">
     <div class="container mx-auto flex flex-col items-center py-2 lg:flex-row lg:justify-between">
         <div class="flex grow items-center">
             <a href="{base}/"><enhanced:img src="/static/images/Hex.png?w=150" alt="Logo" width="75" height="75" /></a>
@@ -121,6 +123,8 @@
                 >
             {/each}
         </nav>
+
+        <button><Sun width="32" height="32" /></button>
 
         <div class="hidden lg:flex lg:gap-1 lg:pl-5">
             <a href="https://github.com/aljhn" aria-label="GitHub profile"
