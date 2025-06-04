@@ -2,6 +2,45 @@
     import { onMount, onDestroy } from "svelte";
     import { browser } from "$app/environment";
 
+    import Archlinux from "$lib/icons/archlinux.svelte";
+    import Blender from "$lib/icons/blender.svelte";
+    import C from "$lib/icons/c.svelte";
+    import CMake from "$lib/icons/cmake.svelte";
+    import Cplusplus from "$lib/icons/cplusplus.svelte";
+    import CSS3 from "$lib/icons/css3.svelte";
+    import Database from "$lib/icons/database.svelte";
+    import Docker from "$lib/icons/docker.svelte";
+    import Flask from "$lib/icons/flask.svelte";
+    import GIMP from "$lib/icons/gimp.svelte";
+    import Git from "$lib/icons/git.svelte";
+    import Google from "$lib/icons/google.svelte";
+    import Haskell from "$lib/icons/haskell.svelte";
+    import HTML5 from "$lib/icons/html5.svelte";
+    import HuggingFace from "$lib/icons/huggingface.svelte";
+    import Java from "$lib/icons/java.svelte";
+    import JavaScript from "$lib/icons/javascript.svelte";
+    import JAX from "$lib/icons/jax.svelte";
+    import MATLAB from "$lib/icons/matlab.svelte";
+    import Matplotlib from "$lib/icons/matplotlib.svelte";
+    import Neovim from "$lib/icons/neovim.svelte";
+    import Norway from "$lib/icons/norway.svelte";
+    import NumPy from "$lib/icons/numpy.svelte";
+    import Nvidia from "$lib/icons/nvidia.svelte";
+    import OpenCV from "$lib/icons/opencv.svelte";
+    import Pandas from "$lib/icons/pandas.svelte";
+    import PostgreSQL from "$lib/icons/postgresql.svelte";
+    import Python from "$lib/icons/python.svelte";
+    import PyTorch from "$lib/icons/pytorch.svelte";
+    import ROS from "$lib/icons/ros.svelte";
+    import scikitlearn from "$lib/icons/scikitlearn.svelte";
+    import SciPy from "$lib/icons/scipy.svelte";
+    import Spain from "$lib/icons/spain.svelte";
+    import Svelte from "$lib/icons/svelte.svelte";
+    import SymPy from "$lib/icons/sympy.svelte";
+    import TailwindCSS from "$lib/icons/tailwindcss.svelte";
+    import TypeScript from "$lib/icons/typescript.svelte";
+    import US from "$lib/icons/us.svelte";
+
     import Meta from "$lib/Meta.svelte";
 
     const beginner: string = "Beginner";
@@ -12,64 +51,64 @@
         {
             category: "Programming languages",
             items: [
-                { name: "Python", level: advanced, icon: "icons/python.svg" },
-                { name: "C++", level: advanced, icon: "icons/cplusplus.svg" },
-                { name: "C", level: intermediate, icon: "icons/c.svg" },
-                { name: "CUDA", level: beginner, icon: "icons/nvidia.svg" },
-                { name: "Java", level: intermediate, icon: "icons/java.svg" },
-                { name: "MATLAB", level: intermediate, icon: "icons/matlab.svg" },
-                { name: "Haskell", level: beginner, icon: "icons/haskell.svg" },
-                { name: "SQL", level: intermediate, icon: "icons/database.svg" }
+                { name: "Python", level: advanced, icon: Python },
+                { name: "C++", level: advanced, icon: Cplusplus },
+                { name: "C", level: intermediate, icon: C },
+                { name: "CUDA", level: beginner, icon: Nvidia },
+                { name: "Java", level: intermediate, icon: Java },
+                { name: "MATLAB", level: intermediate, icon: MATLAB },
+                { name: "Haskell", level: beginner, icon: Haskell },
+                { name: "SQL", level: intermediate, icon: Database }
             ]
         },
         {
             category: "Machine learning and scientific computing",
             items: [
-                { name: "NumPy", level: advanced, icon: "icons/numpy.svg" },
-                { name: "SciPy", level: intermediate, icon: "icons/scipy.svg" },
-                { name: "Matplotlib", level: intermediate, icon: "icons/matplotlib.svg" },
-                { name: "scikit-learn", level: intermediate, icon: "icons/scikitlearn.svg" },
-                { name: "SymPy", level: beginner, icon: "icons/sympy.svg" },
-                { name: "Pandas", level: beginner, icon: "icons/pandas.svg" },
-                { name: "PyTorch", level: advanced, icon: "icons/pytorch.svg" },
-                { name: "JAX", level: advanced, icon: "icons/jax.svg" },
-                { name: "Transformers", level: beginner, icon: "icons/huggingface.svg" },
-                { name: "OpenCV", level: beginner, icon: "icons/opencv.svg" },
-                { name: "ROS", level: beginner, icon: "icons/ros.svg" }
+                { name: "NumPy", level: advanced, icon: NumPy },
+                { name: "SciPy", level: intermediate, icon: SciPy },
+                { name: "Matplotlib", level: intermediate, icon: Matplotlib },
+                { name: "scikit-learn", level: intermediate, icon: scikitlearn },
+                { name: "SymPy", level: beginner, icon: SymPy },
+                { name: "Pandas", level: beginner, icon: Pandas },
+                { name: "PyTorch", level: advanced, icon: PyTorch },
+                { name: "JAX", level: advanced, icon: JAX },
+                { name: "Transformers", level: beginner, icon: HuggingFace },
+                { name: "OpenCV", level: beginner, icon: OpenCV },
+                { name: "ROS", level: beginner, icon: ROS }
             ]
         },
         {
             category: "Web technologies",
             items: [
-                { name: "HTML", level: intermediate, icon: "icons/html5.svg" },
-                { name: "CSS", level: intermediate, icon: "icons/css3.svg" },
-                { name: "JavaScript", level: intermediate, icon: "icons/javascript.svg" },
-                { name: "TypeScript", level: beginner, icon: "icons/typescript.svg" },
-                { name: "Svelte (Kit)", level: beginner, icon: "icons/svelte.svg" },
-                { name: "Tailwind CSS", level: beginner, icon: "icons/tailwindcss.svg" },
-                { name: "Flask", level: beginner, icon: "icons/flask.svg" }
+                { name: "HTML", level: intermediate, icon: HTML5 },
+                { name: "CSS", level: intermediate, icon: CSS3 },
+                { name: "JavaScript", level: intermediate, icon: JavaScript },
+                { name: "TypeScript", level: beginner, icon: TypeScript },
+                { name: "Svelte (Kit)", level: beginner, icon: Svelte },
+                { name: "Tailwind CSS", level: beginner, icon: TailwindCSS },
+                { name: "Flask", level: beginner, icon: Flask }
             ]
         },
         {
             category: "Tools and software",
             items: [
-                { name: "Arch Linux", level: advanced, icon: "icons/archlinux.svg" },
-                { name: "Neovim", level: intermediate, icon: "icons/neovim.svg" },
-                { name: "Git", level: intermediate, icon: "icons/git.svg" },
-                { name: "Docker", level: beginner, icon: "icons/docker.svg" },
-                { name: "PostgreSQL", level: beginner, icon: "icons/postgresql.svg" },
-                { name: "gTest / gMock", level: intermediate, icon: "icons/google.svg" },
-                { name: "CMake", level: beginner, icon: "icons/cmake.svg" },
-                { name: "GIMP", level: intermediate, icon: "icons/gimp.svg" },
-                { name: "Blender", level: beginner, icon: "icons/blender.svg" }
+                { name: "Arch Linux", level: advanced, icon: Archlinux },
+                { name: "Neovim", level: intermediate, icon: Neovim },
+                { name: "Git", level: intermediate, icon: Git },
+                { name: "Docker", level: beginner, icon: Docker },
+                { name: "PostgreSQL", level: beginner, icon: PostgreSQL },
+                { name: "gTest / gMock", level: intermediate, icon: Google },
+                { name: "CMake", level: beginner, icon: CMake },
+                { name: "GIMP", level: intermediate, icon: GIMP },
+                { name: "Blender", level: beginner, icon: Blender }
             ]
         },
         {
             category: "Natural languages",
             items: [
-                { name: "Norwegian", level: "Native", icon: "icons/norway.svg" },
-                { name: "English", level: "C2", icon: "icons/us.svg" },
-                { name: "Spanish", level: "B1", icon: "icons/spain.svg" }
+                { name: "Norwegian", level: "Native", icon: Norway },
+                { name: "English", level: "C2", icon: US },
+                { name: "Spanish", level: "B1", icon: Spain }
             ]
         }
     ];
@@ -142,9 +181,7 @@
                     <ul class="space-y-0">
                         {#each skill.items as item}
                             <li class="flex items-center justify-between">
-                                <span class="flex font-mono text-lg"
-                                    ><img src={item.icon} class="size-7 pr-1" alt="Skill icon" />{item.name}</span
-                                >
+                                <span class="flex font-mono text-lg"><item.icon />{item.name}</span>
                                 <span class="text-sm italic">{item.level}</span>
                             </li>
                         {/each}
