@@ -5,7 +5,7 @@
     let { children } = $props();
 </script>
 
-<div class="grid min-h-screen max-w-screen grid-rows-[auto_1fr]">
+<div class="grid min-h-screen max-w-screen grid-rows-[auto_1fr] font-sans">
     <Header />
 
     <div class="bg-neutral-200 text-gray-600 dark:bg-neutral-700 dark:text-gray-300" id="mainRoot">

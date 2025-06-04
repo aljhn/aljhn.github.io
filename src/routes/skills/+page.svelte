@@ -10,33 +10,32 @@
 
     const skills = [
         {
-            category: "Machine learning and data science",
+            category: "Programming languages",
             items: [
                 { name: "Python", level: advanced, icon: "icons/python.svg" },
+                { name: "C++", level: advanced, icon: "icons/cplusplus.svg" },
+                { name: "C", level: intermediate, icon: "icons/c.svg" },
+                { name: "CUDA", level: beginner, icon: "icons/nvidia.svg" },
+                { name: "Java", level: intermediate, icon: "icons/java.svg" },
+                { name: "MATLAB", level: intermediate, icon: "icons/matlab.svg" },
+                { name: "Haskell", level: beginner, icon: "icons/haskell.svg" },
+                { name: "SQL", level: intermediate, icon: "icons/database.svg" }
+            ]
+        },
+        {
+            category: "Machine learning and scientific computing",
+            items: [
                 { name: "NumPy", level: advanced, icon: "icons/numpy.svg" },
                 { name: "SciPy", level: intermediate, icon: "icons/scipy.svg" },
                 { name: "Matplotlib", level: intermediate, icon: "icons/matplotlib.svg" },
                 { name: "scikit-learn", level: intermediate, icon: "icons/scikitlearn.svg" },
                 { name: "SymPy", level: beginner, icon: "icons/sympy.svg" },
                 { name: "Pandas", level: beginner, icon: "icons/pandas.svg" },
-                { name: "OpenCV", level: beginner, icon: "icons/opencv.svg" },
                 { name: "PyTorch", level: advanced, icon: "icons/pytorch.svg" },
-                { name: "JAX", level: intermediate, icon: "icons/jax.svg" },
-                { name: "Transformers", level: beginner, icon: "icons/huggingface.svg" }
-            ]
-        },
-        {
-            category: "Other programming",
-            items: [
-                { name: "C", level: advanced, icon: "icons/c.svg" },
-                { name: "C++", level: advanced, icon: "icons/cplusplus.svg" },
-                { name: "CUDA", level: beginner, icon: "icons/nvidia.svg" },
-                { name: "Java", level: intermediate, icon: "icons/java.svg" },
-                { name: "Haskell", level: beginner, icon: "icons/haskell.svg" },
-                { name: "MATLAB", level: intermediate, icon: "icons/matlab.svg" },
-                { name: "ROS", level: beginner, icon: "icons/ros.svg" },
-                { name: "SQL", level: intermediate, icon: "icons/database.svg" },
-                { name: "SystemVerilog", level: beginner, icon: "icons/systemverilog.svg" }
+                { name: "JAX", level: advanced, icon: "icons/jax.svg" },
+                { name: "Transformers", level: beginner, icon: "icons/huggingface.svg" },
+                { name: "OpenCV", level: beginner, icon: "icons/opencv.svg" },
+                { name: "ROS", level: beginner, icon: "icons/ros.svg" }
             ]
         },
         {
@@ -48,7 +47,6 @@
                 { name: "TypeScript", level: beginner, icon: "icons/typescript.svg" },
                 { name: "Svelte (Kit)", level: beginner, icon: "icons/svelte.svg" },
                 { name: "Tailwind CSS", level: beginner, icon: "icons/tailwindcss.svg" },
-                { name: "Node.js", level: beginner, icon: "icons/nodejs.svg" },
                 { name: "Flask", level: beginner, icon: "icons/flask.svg" }
             ]
         },
@@ -58,16 +56,12 @@
                 { name: "Arch Linux", level: advanced, icon: "icons/archlinux.svg" },
                 { name: "Neovim", level: intermediate, icon: "icons/neovim.svg" },
                 { name: "Git", level: intermediate, icon: "icons/git.svg" },
-                { name: "gTest / gMock", level: intermediate, icon: "icons/google.svg" },
-                { name: "CMake", level: beginner, icon: "icons/cmake.svg" },
                 { name: "Docker", level: beginner, icon: "icons/docker.svg" },
                 { name: "PostgreSQL", level: beginner, icon: "icons/postgresql.svg" },
-                { name: "Simulink", level: beginner, icon: "icons/simulink.png" },
+                { name: "gTest / gMock", level: intermediate, icon: "icons/google.svg" },
+                { name: "CMake", level: beginner, icon: "icons/cmake.svg" },
                 { name: "GIMP", level: intermediate, icon: "icons/gimp.svg" },
-                { name: "Blender", level: beginner, icon: "icons/blender.svg" },
-                { name: "llama.cpp", level: intermediate, icon: "icons/llamacpp.png" },
-                { name: "vLLM", level: beginner, icon: "icons/vllm.png" },
-                { name: "LangChain", level: beginner, icon: "icons/langchain.svg" }
+                { name: "Blender", level: beginner, icon: "icons/blender.svg" }
             ]
         },
         {
@@ -77,10 +71,6 @@
                 { name: "English", level: "C2", icon: "icons/us.svg" },
                 { name: "Spanish", level: "B1", icon: "icons/spain.svg" }
             ]
-        },
-        {
-            category: "",
-            items: []
         }
     ];
 
@@ -96,7 +86,7 @@
                 columns = 2;
             }
 
-            for (let i = 0; i < columns; i++) {
+            for (let i = 0; i < skillDivs.length; i++) {
                 (skillDivs[i] as HTMLElement).style.transform = `translateY(0px)`;
             }
 
@@ -105,10 +95,7 @@
                 const aboveDiv: HTMLElement = skillDivs[i - columns] as HTMLElement;
 
                 const offset: number =
-                    currentDiv.offsetTop -
-                    aboveDiv.offsetTop -
-                    aboveDiv.clientHeight -
-                    divPadding * Math.floor(i / columns);
+                    currentDiv.getBoundingClientRect().top - aboveDiv.getBoundingClientRect().bottom - divPadding;
 
                 if (offset < 0) {
                     currentDiv.style.transform = `translateY(${Math.abs(offset)}px)`;
@@ -117,16 +104,14 @@
                 }
             }
 
-            if (columns == 1) {
-                document.getElementsByTagName("main")[0].style.height =
-                    (
-                        skillDivs[skillDivs.length - 1].getBoundingClientRect().bottom +
-                        window.pageYOffset -
-                        (skillDivs.length / 2) * divPadding
-                    ).toString() + "px";
-            } else {
-                document.getElementsByTagName("main")[0].style.height = "100%";
-            }
+            const mainHeight: number =
+                window.pageYOffset +
+                skillDivs[skillDivs.length - 1].getBoundingClientRect().bottom -
+                document.getElementsByTagName("header")[0].getBoundingClientRect().height +
+                divPadding;
+
+            skillsGridRoot.style.height = "100%";
+            document.getElementsByTagName("main")[0].style.height = mainHeight.toString() + "px";
         }
 
         const resizeObserver: ResizeObserver = new ResizeObserver((entries) => {
@@ -144,7 +129,7 @@
 
 <Meta name="Skills" />
 
-<div class="grid grid-cols-1 pt-5 lg:grid-cols-2" id="skillsGridRoot">
+<div class="mt-5 grid grid-cols-1 pt-5 lg:grid-cols-2" id="skillsGridRoot">
     {#each skills as skill}
         <div class="h-min px-10">
             <section

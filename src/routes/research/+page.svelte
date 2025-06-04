@@ -7,7 +7,8 @@
         {
             title: "Overview",
             paragraphs: [
-                "My research interests lie at the intersection of deep learning and dynamical systems. This typically means to either use deep learning methods for research related to dynamical systems theory. Or the opposite, using methods from dynamical systems theory for research related to deep learning."
+                "My research interests are at the intersection of deep learning and dynamical systems. This can mean one of two things. Either using deep learning methods for research related to dynamical systems theory. Or the opposite, using methods from dynamical systems theory for research related to deep learning.",
+                "I'm not currently affiliated with any research institutions, so I'm working on a research project independently."
             ]
         },
         {
