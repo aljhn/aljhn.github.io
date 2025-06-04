@@ -81,12 +81,19 @@ class Particle {
         this.y += dy * h;
         this.z += dz * h;
 
+        const velSquared: number = dx * dx + dy * dy + dz * dz;
+        if (velSquared < 50) {
+            this.x += sampleNormal(0.0, 0.2);
+            this.y += sampleNormal(0.0, 0.2);
+            this.z += sampleNormal(0.0, 0.2);
+        }
+
         const distSquared: number =
             (this.x - this.pathX[this.currentIndex]) * (this.x - this.pathX[this.currentIndex]) +
             (this.y - this.pathY[this.currentIndex]) * (this.y - this.pathY[this.currentIndex]) +
             (this.z - this.pathZ[this.currentIndex]) * (this.z - this.pathZ[this.currentIndex]);
 
-        if (distSquared > 0.05) {
+        if (distSquared > 0.01) {
             this.currentIndex = mod(this.currentIndex + 1, this.pathX.length);
             this.pathX[this.currentIndex] = this.x;
             this.pathY[this.currentIndex] = this.y;
@@ -136,164 +143,183 @@ class Particle {
     }
 }
 
-let canvas: HTMLCanvasElement;
+function getNextHueRangeTarget(): number {
+    return Math.exp(sampleNormal(5, 0.5));
+}
+
+function getNextSaturationTarget(): number {
+    return sampleUniform(30, 70);
+}
+
+function getNextLightTarget(): number {
+    return sampleUniform(40, 60);
+}
+
+let canvasWidth: number;
+let canvasHeight: number;
+let ctx: CanvasRenderingContext2D;
+
+let particles: Particle[];
 
 let backgroundColor: string = "#000000";
+let lineWidth: number = 4;
 
-self.onmessage = (e: MessageEvent) => {
-    if (e.data.width != undefined && e.data.height != undefined) {
-        canvas.width = e.data.width;
-        canvas.height = e.data.height;
-    } else if (e.data.backgroundColor != undefined) {
-        backgroundColor = e.data.backgroundColor;
-    } else if (e.data.canvas != undefined) {
-        canvas = e.data.canvas;
-        const ctx: CanvasRenderingContext2D = canvas.getContext("2d", { alpha: true, desynchronized: true })!;
+let hueRange: number = 90;
+let hueRangeTarget: number = getNextHueRangeTarget();
 
-        const rho: number = 28;
-        const sigma: number = 10;
-        const beta: number = 8 / 3;
+let huePosition: number = 0;
+let hueRotation: number = 0;
 
-        const system: ODE = new Lorenz(rho, sigma, beta);
+let saturation: number = 40;
+let saturationTarget: number = getNextSaturationTarget();
 
-        const boundingBoxX0: number = -25;
-        const boundingBoxX1: number = 25;
-        const boundingBoxY0: number = -10;
-        const boundingBoxY1: number = 60;
+let light: number = 50;
+let lightTarget: number = getNextLightTarget();
 
-        let pathLength: number;
-        let particleAmount: number;
+const rho: number = 28;
+const sigma: number = 10;
+const beta: number = 8 / 3;
 
-        if (canvas.width > 1024 && canvas.height > 800) {
-            pathLength = 60;
-            particleAmount = 40;
+const system: ODE = new Lorenz(rho, sigma, beta);
+
+const boundingBoxX0: number = -25;
+const boundingBoxX1: number = 25;
+const boundingBoxY0: number = -10;
+const boundingBoxY1: number = 60;
+
+const speedScale: number = 0.3;
+
+function initialize(canvas: HTMLCanvasElement, pathLength: number, particleAmount: number) {
+    canvasWidth = canvas.width;
+    canvasHeight = canvas.height;
+    ctx = canvas.getContext("2d", { alpha: true, desynchronized: true })!;
+
+    particles = Array.from({ length: particleAmount }, () => {
+        return new Particle(system, sampleUniform(-5, 5), sampleUniform(-5, 5), sampleUniform(60, 70), pathLength);
+    });
+
+    lastTimestamp = performance.now();
+    requestAnimationFrame(draw);
+}
+
+let lastTimestamp: DOMHighResTimeStamp = performance.now();
+
+function draw(timestamp: DOMHighResTimeStamp): void {
+    const dt: number = (timestamp - lastTimestamp) / 1000;
+
+    const scaleY: number = canvasHeight / (boundingBoxY1 - boundingBoxY0);
+    const scaleX = ((boundingBoxY1 - boundingBoxY0) / (boundingBoxX1 - boundingBoxX0)) * scaleY;
+    const centerX: number = canvasWidth / 2 + ((boundingBoxX1 + boundingBoxX0) / 2) * scaleX;
+    const centerY: number = canvasHeight / 2 + ((boundingBoxY1 + boundingBoxY0) / 2) * scaleY;
+
+    ctx.fillStyle = backgroundColor;
+    ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+
+    ctx.lineWidth = lineWidth;
+
+    if (dt <= 0.05) {
+        const h: number = dt * speedScale;
+
+        if (hueRange < hueRangeTarget) {
+            hueRange += ((hueRangeTarget - hueRange) * 0.5 + 10) * h;
+            if (hueRange >= hueRangeTarget) {
+                hueRangeTarget = getNextHueRangeTarget();
+            }
         } else {
-            pathLength = 30;
-            particleAmount = 30;
+            hueRange += ((hueRangeTarget - hueRange) * 0.5 - 10) * h;
+            if (hueRange <= hueRangeTarget) {
+                hueRangeTarget = getNextHueRangeTarget();
+            }
         }
 
-        const particles: Particle[] = Array.from({ length: particleAmount }, () => {
-            return new Particle(system, sampleUniform(-5, 5), sampleUniform(-5, 5), sampleUniform(60, 70), pathLength);
-        });
+        const huePositionChange: number = sampleNormal(50, 15);
+        huePosition += huePositionChange * h;
+        if (huePosition >= 360) {
+            huePosition = 0;
+        }
 
-        const speedScale: number = 0.3;
+        const hueRotationChange: number = sampleNormal(30, 10);
+        hueRotation += hueRotationChange * h;
+        if (hueRotation >= 360) {
+            hueRotation = 0;
+        }
 
-        const getNextHueRangeTarget: () => number = () => {
-            return Math.exp(sampleNormal(5, 0.5));
-        };
+        if (saturation < saturationTarget) {
+            saturation += 10 * h;
+            if (saturation >= saturationTarget) {
+                saturationTarget = getNextSaturationTarget();
+            }
+        } else {
+            saturation -= 10 * h;
+            if (saturation <= saturationTarget) {
+                saturationTarget = getNextSaturationTarget();
+            }
+        }
 
-        const getNextSaturationTarget: () => number = () => {
-            return sampleUniform(30, 70);
-        };
+        if (light < lightTarget) {
+            light += 10 * h;
+            if (light >= lightTarget) {
+                lightTarget = getNextLightTarget();
+            }
+        } else {
+            light -= 10 * h;
+            if (light <= lightTarget) {
+                lightTarget = getNextLightTarget();
+            }
+        }
 
-        const getNextLightTarget: () => number = () => {
-            return sampleUniform(40, 60);
-        };
+        for (const particle of particles) {
+            particle.update(h);
+            particle.draw(
+                ctx,
+                centerX,
+                centerY,
+                scaleX,
+                scaleY,
+                huePosition,
+                hueRange,
+                hueRotation,
+                Math.floor(saturation),
+                Math.floor(light)
+            );
+        }
+    }
 
-        let hueRange: number = 90;
-        let hueRangeTarget: number = getNextHueRangeTarget();
+    lastTimestamp = timestamp;
+    requestAnimationFrame(draw);
+}
 
-        let huePosition: number = 0;
-        let hueRotation: number = 0;
+let canvas: HTMLCanvasElement | undefined = undefined;
 
-        let saturation: number = 40;
-        let saturationTarget: number = getNextSaturationTarget();
+self.onmessage = (event: MessageEvent) => {
+    if (event.data.width != undefined && event.data.height != undefined) {
+        if (canvas !== undefined) {
+            canvas.width = event.data.width;
+            canvas.height = event.data.height;
+        }
+        canvasWidth = event.data.width;
+        canvasHeight = event.data.height;
+    } else if (event.data.backgroundColor != undefined) {
+        backgroundColor = event.data.backgroundColor;
+    } else if (event.data.canvas != undefined) {
+        canvas = event.data.canvas;
 
-        let light: number = 50;
-        let lightTarget: number = getNextLightTarget();
-
-        let lastTimestamp: DOMHighResTimeStamp = performance.now();
-
-        function draw(timestamp: DOMHighResTimeStamp): void {
-            const dt: number = (timestamp - lastTimestamp) / 1000;
-
-            const scaleY: number = canvas.height / (boundingBoxY1 - boundingBoxY0);
-            const scaleX = ((boundingBoxY1 - boundingBoxY0) / (boundingBoxX1 - boundingBoxX0)) * scaleY;
-            const centerX: number = canvas.width / 2 + ((boundingBoxX1 + boundingBoxX0) / 2) * scaleX;
-            const centerY: number = canvas.height / 2 + ((boundingBoxY1 + boundingBoxY0) / 2) * scaleY;
-
-            ctx.fillStyle = backgroundColor;
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        if (canvas !== undefined) {
+            let pathLength: number = 0;
+            let particleAmount: number = 0;
 
             if (canvas.width > 1024 && canvas.height > 800) {
-                ctx.lineWidth = 4;
+                pathLength = 70;
+                particleAmount = 40;
+                lineWidth = 4;
             } else {
-                ctx.lineWidth = 2;
+                pathLength = 30;
+                particleAmount = 30;
+                lineWidth = 2;
             }
 
-            if (dt <= 0.05) {
-                const h: number = dt * speedScale;
-
-                if (hueRange < hueRangeTarget) {
-                    hueRange += ((hueRangeTarget - hueRange) * 0.5 + 10) * h;
-                    if (hueRange >= hueRangeTarget) {
-                        hueRangeTarget = getNextHueRangeTarget();
-                    }
-                } else {
-                    hueRange += ((hueRangeTarget - hueRange) * 0.5 - 10) * h;
-                    if (hueRange <= hueRangeTarget) {
-                        hueRangeTarget = getNextHueRangeTarget();
-                    }
-                }
-
-                const huePositionChange: number = sampleNormal(50, 15);
-                huePosition += huePositionChange * h;
-                if (huePosition >= 360) {
-                    huePosition = 0;
-                }
-
-                const hueRotationChange: number = sampleNormal(30, 10);
-                hueRotation += hueRotationChange * h;
-                if (hueRotation >= 360) {
-                    hueRotation = 0;
-                }
-
-                if (saturation < saturationTarget) {
-                    saturation += 10 * h;
-                    if (saturation >= saturationTarget) {
-                        saturationTarget = getNextSaturationTarget();
-                    }
-                } else {
-                    saturation -= 10 * h;
-                    if (saturation <= saturationTarget) {
-                        saturationTarget = getNextSaturationTarget();
-                    }
-                }
-
-                if (light < lightTarget) {
-                    light += 10 * h;
-                    if (light >= lightTarget) {
-                        lightTarget = getNextLightTarget();
-                    }
-                } else {
-                    light -= 10 * h;
-                    if (light <= lightTarget) {
-                        lightTarget = getNextLightTarget();
-                    }
-                }
-
-                for (const particle of particles) {
-                    particle.update(h);
-                    particle.draw(
-                        ctx,
-                        centerX,
-                        centerY,
-                        scaleX,
-                        scaleY,
-                        huePosition,
-                        hueRange,
-                        hueRotation,
-                        Math.floor(saturation),
-                        Math.floor(light)
-                    );
-                }
-            }
-
-            lastTimestamp = timestamp;
-            requestAnimationFrame(draw);
+            initialize(canvas, pathLength, particleAmount);
         }
-
-        requestAnimationFrame(draw);
     }
 };
 

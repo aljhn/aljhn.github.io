@@ -27,8 +27,19 @@
             resizeObserver.observe(canvasDiv);
 
             const mutationObserver: MutationObserver = new MutationObserver((mutationList, observer) => {
-                backgroundColor = window.getComputedStyle(mainRoot).backgroundColor;
-                worker?.postMessage({ backgroundColor: backgroundColor });
+                let iterations: number = 0;
+
+                function sendBackgroundColor() {
+                    backgroundColor = window.getComputedStyle(mainRoot).backgroundColor;
+                    worker?.postMessage({ backgroundColor: backgroundColor });
+
+                    if (iterations < 1000) {
+                        iterations++;
+                        setTimeout(sendBackgroundColor, 1);
+                    }
+                }
+
+                sendBackgroundColor();
             });
             mutationObserver.observe(document.documentElement, { attributes: true, childList: true });
         }
@@ -40,5 +51,5 @@
 </script>
 
 <div class="size-full" id="canvasDiv">
-    <canvas bind:this={canvas}>Lorenz system simulation</canvas>
+    <canvas bind:this={canvas}>Dynamical system simulation</canvas>
 </div>

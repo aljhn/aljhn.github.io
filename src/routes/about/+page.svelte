@@ -23,8 +23,8 @@
         {
             title: "Other interests",
             paragraphs: [
-                "I'm also a fitness nerd that is currently doing a lot of powerlifting. And I enjoy practicing and sparring in boxing and MMA.",
-                "I have also always been fascinated by the ocean and aquatic environments, so I love to do both scuba diving and freediving."
+                "I'm a fitness nerd that is currently doing a lot of powerlifting. And I enjoy practicing and sparring in boxing and MMA.",
+                "I have also always been fascinated by the ocean and aquatic environments, and I enjoy both scuba diving and freediving."
             ]
         }
     ];
