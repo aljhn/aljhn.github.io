@@ -39,11 +39,10 @@
         document.documentElement.classList.toggle("dark", darkModeState);
     }
 
-    // function handleDarkModeStateChangePhone() {
-    //     darkModeState = !darkModeState;
-    //     document.documentElement.classList.toggle("dark", !darkModeState);
-    //     isDropdownOpen = true;
-    // }
+    function handleDarkModeToggleMenu() {
+        handleDarkModeToggle();
+        isDropdownOpen = false;
+    }
 
     let isDropdownOpen = $state(false);
 
@@ -68,6 +67,7 @@
     const handleDropdownFocusLoss = (event: FocusEvent) => {
         if (!event.relatedTarget || !(event.target as HTMLElement).contains(event.relatedTarget as HTMLElement)) {
             isDropdownOpen = false;
+            console.log(true);
         }
     };
 </script>
@@ -101,6 +101,18 @@
                             >
                         {/each}
 
+                        <div
+                            onclick={handleDarkModeToggleMenu}
+                            class="flex rounded-2xl p-1 hover:bg-neutral-400 hover:dark:bg-neutral-900"
+                            aria-hidden="true"
+                        >
+                            {#if darkModeState}
+                                <Moon width="32" height="32" />
+                            {:else}
+                                <Sun width="32" height="32" />
+                            {/if}
+                        </div>
+
                         <a href="https://github.com/aljhn" aria-label="GitHub profile"
                             ><Github width="32" height="32" alt="GitHub" /></a
                         >
@@ -132,9 +144,9 @@
         </nav>
 
         <button
-            aria-label="Dark mode toggle"
             onclick={handleDarkModeToggle}
-            class="hidden rounded-2xl p-1 hover:bg-neutral-400 lg:flex hover:dark:bg-neutral-800 "
+            class="hidden rounded-2xl p-1 hover:bg-neutral-400 lg:flex hover:dark:bg-neutral-800"
+            aria-label="Dark mode toggle"
         >
             {#if darkModeState}
                 <Moon width="32" height="32" />
