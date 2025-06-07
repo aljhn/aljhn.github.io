@@ -145,7 +145,7 @@
 
         <button
             onclick={handleDarkModeToggle}
-            class="hidden rounded-2xl p-1 hover:bg-neutral-400 lg:flex hover:dark:bg-neutral-800"
+            class="hidden rounded-2xl p-1 hover:bg-neutral-400 lg:flex hover:dark:bg-neutral-700"
             aria-label="Dark mode toggle"
         >
             {#if darkModeState}

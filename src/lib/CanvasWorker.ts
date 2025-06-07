@@ -83,9 +83,9 @@ class Particle {
 
         const velSquared: number = dx * dx + dy * dy + dz * dz;
         if (velSquared < 50) {
-            this.x += sampleNormal(0.0, 0.2);
-            this.y += sampleNormal(0.0, 0.2);
-            this.z += sampleNormal(0.0, 0.2);
+            this.x += sampleNormal(0.0, 0.1);
+            this.y += sampleNormal(0.0, 0.1);
+            this.z += sampleNormal(0.0, 0.1);
         }
 
         const distSquared: number =

@@ -11,7 +11,6 @@
         canvas.height = canvasDiv.clientHeight;
 
         const mainRoot: HTMLElement = document.getElementById("mainRoot")!;
-        let backgroundColor: string = window.getComputedStyle(mainRoot).backgroundColor;
 
         if (worker === undefined) {
             worker = new CanvasWorker();
@@ -19,34 +18,36 @@
             const offscreenCanvas: OffscreenCanvas = canvas.transferControlToOffscreen();
             worker.postMessage({ canvas: offscreenCanvas }, [offscreenCanvas]);
 
-            worker.postMessage({ backgroundColor: backgroundColor });
-
             const resizeObserver: ResizeObserver = new ResizeObserver((entries) => {
                 worker?.postMessage({ width: canvasDiv.clientWidth, height: canvasDiv.clientHeight });
             });
             resizeObserver.observe(canvasDiv);
 
-            const mutationObserver: MutationObserver = new MutationObserver((mutationList, observer) => {
-                let iterations: number = 0;
+            let lastBackgroundColor: string = window.getComputedStyle(mainRoot).backgroundColor;
+            worker.postMessage({ backgroundColor: lastBackgroundColor });
 
-                function sendBackgroundColor() {
-                    backgroundColor = window.getComputedStyle(mainRoot).backgroundColor;
-                    worker?.postMessage({ backgroundColor: backgroundColor });
-
-                    if (iterations < 1000) {
-                        iterations++;
-                        setTimeout(sendBackgroundColor, 1);
-                    }
+            function sendBackgroundColor() {
+                if (worker === undefined) {
+                    return;
                 }
 
-                sendBackgroundColor();
-            });
-            mutationObserver.observe(document.documentElement, { attributes: true, childList: true });
+                const backgroundColor: string = window.getComputedStyle(mainRoot).backgroundColor;
+                if (backgroundColor !== lastBackgroundColor) {
+                    worker?.postMessage({ backgroundColor: backgroundColor });
+                    lastBackgroundColor = backgroundColor;
+                    setTimeout(sendBackgroundColor, 10);
+                } else {
+                    setTimeout(sendBackgroundColor, 100);
+                }
+            }
+
+            sendBackgroundColor();
         }
     });
 
     onDestroy(() => {
         worker?.terminate();
+        worker = undefined;
     });
 </script>
 
