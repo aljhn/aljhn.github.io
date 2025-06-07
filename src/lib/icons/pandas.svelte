@@ -1,12 +1,1 @@
-<svg width="24px" height="24px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128"
-    ><path fill="#130754" d="M46.236 7.567h13.99v29.047h-13.99Zm0 59.668h13.99V96.28h-13.99Z" /><path
-        fill="#ffca00"
-        d="M46.236 45.092h13.99v13.705h-13.99Z"
-    /><path
-        fill="#130754"
-        d="M23.763 31.446h13.989V128h-13.99ZM68.245 91.2h13.99v29.046h-13.99Zm0-59.72h13.99v29.047h-13.99Z"
-    /><path fill="#e70488" d="M68.245 69.011h13.99v13.705h-13.99Z" /><path
-        fill="#130754"
-        d="M90.248 0h13.99v96.554h-13.99Z"
-    /></svg
->
+<svg width="24" height="24" viewBox="0 0 128 128"><path fill="#130754" d="M46 8h14v29H46Zm0 59h14v29H46Z"/><path fill="#ffca00" d="M46 45h14v14H46Z"/><path fill="#130754" d="M24 31h14v97H24Zm44 60h14v29H68Zm0-60h14v30H68Z"/><path fill="#e70488" d="M68 69h14v14H68Z"/><path fill="#130754" d="M90 0h14v97H90Z"/></svg>
