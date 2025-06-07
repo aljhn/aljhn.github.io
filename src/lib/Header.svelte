@@ -114,18 +114,17 @@
                         </div>
 
                         <a href="https://github.com/aljhn" aria-label="GitHub profile"
-                            ><Github width="32" height="32" alt="GitHub" /></a
+                            ><Github width="32" height="32" /></a
                         >
                         <a href="https://www.linkedin.com/in/albertjohannessen/" aria-label="LinkedIn profile"
-                            ><Linkedin width="32" height="32" alt="LinkedIn" /></a
+                            ><Linkedin width="32" height="32" /></a
                         >
                         <a
                             href="https://scholar.google.com/citations?user=Bo5FC8YAAAAJ"
-                            aria-label="Google Scholar profile"
-                            ><Academic width="32" height="32" alt="Google Scholar" /></a
+                            aria-label="Google Scholar profile"><Academic width="32" height="32" /></a
                         >
                         <a href="mailto:albert.johannessen@gmail.com" aria-label="Email"
-                            ><Email width="32" height="32" alt="Email" /></a
+                            ><Email width="32" height="32" /></a
                         >
                     </div>
                 </div>
@@ -156,18 +155,14 @@
         </button>
 
         <div class="hidden lg:flex lg:gap-1 lg:pl-3">
-            <a href="https://github.com/aljhn" aria-label="GitHub profile"
-                ><Github width="32" height="32" alt="GitHub" /></a
-            >
+            <a href="https://github.com/aljhn" aria-label="GitHub profile"><Github width="32" height="32" /></a>
             <a href="https://www.linkedin.com/in/albertjohannessen/" aria-label="LinkedIn profile"
-                ><Linkedin width="32" height="32" alt="LinkedIn" /></a
+                ><Linkedin width="32" height="32" /></a
             >
             <a href="https://scholar.google.com/citations?user=Bo5FC8YAAAAJ" aria-label="Google Scholar profile"
-                ><Academic width="32" height="32" alt="Google Scholar" /></a
+                ><Academic width="32" height="32" /></a
             >
-            <a href="mailto:albert.johannessen@gmail.com" aria-label="Email"
-                ><Email width="32" height="32" alt="Email" /></a
-            >
+            <a href="mailto:albert.johannessen@gmail.com" aria-label="Email"><Email width="32" height="32" /></a>
         </div>
     </div>
 </header>
