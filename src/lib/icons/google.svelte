@@ -1,1 +1,0 @@
-<svg width="24" height="24"><path fill="currentColor" d="M21 11h-9v3h7c-1 4-4 5-7 5-4 0-7-3-7-7s3-7 7-7c3 0 5 2 5 2l2-2s-2-3-7-3a10 10 0 0 0 0 20c6 0 10-4 10-9l-1-2"/></svg>

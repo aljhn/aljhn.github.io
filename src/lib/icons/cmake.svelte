@@ -1,1 +1,0 @@
-<svg width="24" height="24" viewBox="0 0 128 128"><path fill="#064F8C" d="M63 0 0 124l68-58z"/><path fill="#249847" d="M124 128 40 94 0 128z"/><path fill="#BE2128" d="M128 127 66 3l9 102z"/><path fill="#CDCDCE" d="m72 104-3-35-27 23z"/></svg>

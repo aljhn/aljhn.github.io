@@ -1,1 +1,0 @@
-<svg width="24" height="24" viewBox="0 0 128 128"><path fill="#130754" d="M46 8h14v29H46Zm0 59h14v29H46Z"/><path fill="#ffca00" d="M46 45h14v14H46Z"/><path fill="#130754" d="M24 31h14v97H24Zm44 60h14v29H68Zm0-60h14v30H68Z"/><path fill="#e70488" d="M68 69h14v14H68Z"/><path fill="#130754" d="M90 0h14v97H90Z"/></svg>
