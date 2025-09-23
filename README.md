@@ -17,11 +17,12 @@
 ---
 
 ## Commands
+
 ```bash
 pnpx sv create website # initial setup
 pnpm install           # install packages
 pnpm update            # update packages
-pnpm dev               # run development server  
+pnpm dev               # run development server
 pnpm build             # build locally
-pnpm preview           # run local build  
+pnpm preview           # run local build
 ```

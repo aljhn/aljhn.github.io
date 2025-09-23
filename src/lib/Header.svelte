@@ -1,6 +1,6 @@
 <script lang="ts">
     import { onMount } from "svelte";
-    import { base } from "$app/paths";
+    import { resolve } from "$app/paths";
     import { page } from "$app/state";
 
     // https://icon-sets.iconify.design/lucide/
@@ -12,11 +12,11 @@
     import Menu from "~icons/lucide/menu";
 
     const links = [
-        { url: base + "/", label: "Home" },
-        { url: base + "/about", label: "About" },
-        { url: base + "/quotes", label: "Quotes" },
-        { url: base + "/skills", label: "Skills" },
-        { url: base + "/research", label: "Research" }
+        { url: resolve("/"), label: "Home" },
+        { url: resolve("/about"), label: "About" },
+        { url: resolve("/quotes"), label: "Quotes" },
+        { url: resolve("/skills"), label: "Skills" },
+        { url: resolve("/research"), label: "Research" }
     ];
 
     let darkModeState = $state(true);
@@ -74,8 +74,8 @@
 <header class="bg-neutral-300 font-mono text-gray-800 dark:bg-neutral-900 dark:text-gray-300">
     <div class="container mx-auto flex flex-col items-center py-2 lg:flex-row lg:justify-between">
         <div class="flex grow items-center">
-            <a href="{base}/"><enhanced:img src="/static/images/Hex.png?w=150" alt="Logo" width="75" height="75" /></a>
-            <a href="{base}/"><h1 class="px-2 text-2xl font-bold lg:text-3xl">Albert Johannessen</h1></a>
+            <a href="/"><enhanced:img src="/static/images/Hex.png?w=150" alt="Logo" width="75" height="75" /></a>
+            <a href="/"><h1 class="px-2 text-2xl font-bold lg:text-3xl">Albert Johannessen</h1></a>
 
             <button
                 bind:this={dropdownMenuButton}
