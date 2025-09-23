@@ -7,22 +7,22 @@
         {
             title: "Overview",
             paragraphs: [
-                "My research interests are at the intersection of deep learning and dynamical systems. This can mean one of two things. Either using deep learning methods for research related to dynamical systems theory. Or the opposite, using methods from dynamical systems theory for research related to deep learning.",
+                "My research interests lie at the intersection of deep learning and dynamical systems. This can mean one of two things: using deep learning methods for research related to dynamical systems theory. Or the opposite, using methods from dynamical systems theory for research related to deep learning.",
                 "I'm not currently affiliated with any research institution, so I'm working on a research project independently."
             ]
         },
         {
-            title: "Scientific machine learning",
+            title: "Scientific Machine Learning",
             paragraphs: [
-                "Research topics like Neural Ordinary Differential Equations and Fourier Neural Operators makes it possible to learn dynamical systems from data.",
-                "This can be particularly useful for systems where its hard to explicitly model system dynamcs, in traditional machine learning fashion."
+                "Research topics like Neural Ordinary Differential Equations and Fourier Neural Operators make it possible to learn dynamical systems from data.",
+                "This can be particularly useful for systems where it's hard to model system dynamics explicitly. Or if the dataset is impractical to use, for example from irregular samples."
             ]
         },
         {
-            title: "Physics-informed machine learning",
+            title: "Physics-Informed Machine Learning",
             paragraphs: [
-                "Incorporating prior physical knowledge about a system derived from first principles can greatly simplify learning a system output, instead of relying solely on the dataset.",
-                "Physics-informed neural networks are one way to achieve this result, and also makes it possible to go beyong simply learning one particular system. For example by learning unknown or missing terms of an equation, or solving optimal control problems."
+                "Incorporating prior physical knowledge about a system derived from first principles can greatly simplify learning the system solution, instead of relying solely on the dataset.",
+                "Physics-informed neural networks are one way to achieve this, and also make it possible to go beyond simply learning one particular system. Examples include learning unknown or missing terms of an equation, or solving optimal control problems."
             ]
         }
     ];
@@ -68,16 +68,11 @@
     <div>
         <Sections {sections} />
 
-        <Research papers={peerReviewedPapers} title="Peer reviewed papers" />
-        <Research papers={masterTheses} title="Master theses" />
+        <Research papers={peerReviewedPapers} title="Peer Reviewed Papers" />
+        <Research papers={masterTheses} title="Master Theses" />
     </div>
 
     <div class="grid auto-rows-min gap-y-10 pt-10">
-        <div class="flex justify-center">
-            <p class="px-10 pt-4">
-                I'm open for discussing concepts or collaborating on projects, so feel free to send me an email!
-            </p>
-        </div>
         <div class="flex justify-center">
             <enhanced:img
                 src="/static/images/MassSpringDamper.jpg?w=600;300"

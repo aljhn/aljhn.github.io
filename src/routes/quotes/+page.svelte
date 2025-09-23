@@ -8,10 +8,11 @@
         "Nothing is more permanent than a temporary solution.",
         "Hofstadter's law: It always takes longer than you expect, even when you take Hofstadter's law into account.",
         "It's better to keep your mouth shut and have everyone assume you're stupid than open it and remove all doubt.",
-        "Only a fool learns from his own mistakes. The wise man learns from the mistakes of others.",
+        // "Only a fool learns from his own mistakes. The wise man learns from the mistakes of others.",
         "The choice doesn't matter if the outcome is the same.",
-        "Be first or be best.",
-        "Kernighan's Law: Debugging is twice as hard as writing the code in the first place. Therefore, if you write the code as cleverly as possible, you are, by definition, not smart enough to debug it."
+        // "Be first or be best.",
+        // "Kernighan's Law: Debugging is twice as hard as writing the code in the first place. Therefore, if you write the code as cleverly as possible, you are, by definition, not smart enough to debug it.",
+        "Bench more to bench more."
     ];
 
     function shuffleArray<T>(array: T[]): void {
@@ -30,8 +31,8 @@
 <Meta name="Quotes" />
 
 <div class="grid auto-rows-min gap-5 p-10">
-    <h2 class="font-mono text-2xl font-semibold">Selected quotes</h2>
-    <p>Some interesting quotes sampled from various places on the internet. Order randomized.</p>
+    <h2 class="font-mono text-2xl font-semibold">Selected Quotes</h2>
+    <p>Interesting quotes sampled from various places on the internet. Order randomized.</p>
 
     <ul class="items-left mt-5 flex flex-col space-y-4 border-t-2 border-current pt-5">
         {#each quotes as quote}

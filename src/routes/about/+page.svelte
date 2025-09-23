@@ -4,7 +4,7 @@
 
     const sections = [
         {
-            title: "About me",
+            title: "About Me",
             paragraphs: [
                 "Software engineer, specializing in machine learning and control theory. I'm generally passionate about math, programming and AI, and applying these for solving problems.",
                 "I studied at NTNU in Trondheim, and ended up pursuing two different study programs in parallel, now holding dual MSc degrees. First degree completed was in Computer Science, and the second was in Cybernetics and Robotics.",
@@ -21,7 +21,7 @@
             ]
         },
         {
-            title: "Other interests",
+            title: "Other Interests",
             paragraphs: [
                 "I'm a fitness nerd that is currently doing a lot of powerlifting. Also a big fan of both scuba diving and freediving."
             ]

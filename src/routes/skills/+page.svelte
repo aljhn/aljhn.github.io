@@ -10,7 +10,7 @@
 
     const skills = [
         {
-            category: "Programming languages",
+            category: "Programming Languages",
             items: [
                 { name: "Python", level: advanced, icon: "/icons/python.svg" },
                 { name: "C++", level: advanced, icon: "/icons/cplusplus.svg" },
@@ -23,7 +23,7 @@
             ]
         },
         {
-            category: "Machine learning and scientific computing",
+            category: "Machine Learning and Scientific Computing",
             items: [
                 { name: "NumPy", level: advanced, icon: "/icons/numpy.svg" },
                 { name: "SciPy", level: intermediate, icon: "/icons/scipy.svg" },
@@ -38,7 +38,7 @@
             ]
         },
         {
-            category: "Web technologies",
+            category: "Web",
             items: [
                 { name: "HTML", level: intermediate, icon: "/icons/html5.svg" },
                 { name: "CSS", level: intermediate, icon: "/icons/css3.svg" },
@@ -50,7 +50,7 @@
             ]
         },
         {
-            category: "Tools and software",
+            category: "Tools",
             items: [
                 { name: "Arch Linux", level: advanced, icon: "/icons/archlinux.svg" },
                 { name: "Neovim", level: intermediate, icon: "/icons/neovim.svg" },
@@ -64,11 +64,11 @@
             ]
         },
         {
-            category: "Natural languages",
+            category: "Natural Languages",
             items: [
                 { name: "Norwegian", level: "Native", icon: "/icons/norway.svg" },
-                { name: "English", level: "C2", icon: "/icons/us.svg" },
-                { name: "Spanish", level: "B1", icon: "/icons/spain.svg" }
+                { name: "English", level: "C1", icon: "/icons/us.svg" },
+                { name: "Spanish", level: "A2", icon: "/icons/spain.svg" }
             ]
         }
     ];

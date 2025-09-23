@@ -8,7 +8,6 @@
     import Moon from "~icons/lucide/moon";
     import Github from "~icons/lucide/github";
     import Linkedin from "~icons/lucide/linkedin";
-    import Email from "~icons/lucide/mail";
     import Academic from "~icons/lucide/graduation-cap";
     import Menu from "~icons/lucide/menu";
 
@@ -123,9 +122,6 @@
                             href="https://scholar.google.com/citations?user=Bo5FC8YAAAAJ"
                             aria-label="Google Scholar profile"><Academic width="32" height="32" /></a
                         >
-                        <a href="mailto:albert.johannessen@gmail.com" aria-label="Email"
-                            ><Email width="32" height="32" /></a
-                        >
                     </div>
                 </div>
             </button>
@@ -162,7 +158,6 @@
             <a href="https://scholar.google.com/citations?user=Bo5FC8YAAAAJ" aria-label="Google Scholar profile"
                 ><Academic width="32" height="32" /></a
             >
-            <a href="mailto:albert.johannessen@gmail.com" aria-label="Email"><Email width="32" height="32" /></a>
         </div>
     </div>
 </header>
