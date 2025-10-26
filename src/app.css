@@ -5,3 +5,17 @@
 * {
     @apply transition-colors duration-300;
 }
+
+@theme {
+    --color-bgdark-1: hsl(200, 10%, 10%);
+    --color-bgdark-2: hsl(200, 10%, 15%);
+    --color-bgdark-3: hsl(200, 10%, 20%);
+    --color-textdark-1: hsl(0, 0%, 95%);
+    --color-textdark-2: hsl(0, 0%, 80%);
+
+    --color-bglight-1: hsl(200, 10%, 80%);
+    --color-bglight-2: hsl(200, 10%, 85%);
+    --color-bglight-3: hsl(200, 10%, 90%);
+    --color-textlight-1: hsl(0, 0%, 5%);
+    --color-textlight-2: hsl(0, 0%, 20%);
+}
