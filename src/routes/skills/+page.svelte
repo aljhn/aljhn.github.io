@@ -15,11 +15,10 @@
                 { name: "Python", level: advanced, icon: "/icons/python.svg" },
                 { name: "C++", level: advanced, icon: "/icons/cplusplus.svg" },
                 { name: "C", level: intermediate, icon: "/icons/c.svg" },
-                { name: "CUDA", level: beginner, icon: "/icons/nvidia.svg" },
+                //{ name: "CUDA", level: beginner, icon: "/icons/nvidia.svg" },
                 { name: "Java", level: intermediate, icon: "/icons/java.svg" },
                 { name: "MATLAB", level: intermediate, icon: "/icons/matlab.svg" },
-                { name: "Haskell", level: beginner, icon: "/icons/haskell.svg" },
-                { name: "SQL", level: intermediate, icon: "/icons/database.svg" }
+                { name: "Haskell", level: beginner, icon: "/icons/haskell.svg" }
             ]
         },
         {
@@ -45,32 +44,33 @@
                 { name: "JavaScript", level: intermediate, icon: "/icons/javascript.svg" },
                 { name: "TypeScript", level: beginner, icon: "/icons/typescript.svg" },
                 { name: "Svelte (Kit)", level: beginner, icon: "/icons/svelte.svg" },
-                { name: "Tailwind CSS", level: beginner, icon: "/icons/tailwindcss.svg" },
+                //{ name: "Tailwind CSS", level: beginner, icon: "/icons/tailwindcss.svg" },
                 { name: "Flask", level: beginner, icon: "/icons/flask.svg" }
             ]
         },
         {
             category: "Tools",
             items: [
-                { name: "Arch Linux", level: advanced, icon: "/icons/archlinux.svg" },
-                { name: "Neovim", level: intermediate, icon: "/icons/neovim.svg" },
+                { name: "Linux", level: advanced, icon: "/icons/archlinux.svg" },
+                { name: "Vim", level: intermediate, icon: "/icons/neovim.svg" },
                 { name: "Git", level: intermediate, icon: "/icons/git.svg" },
                 { name: "Docker", level: beginner, icon: "/icons/docker.svg" },
-                { name: "PostgreSQL", level: beginner, icon: "/icons/postgresql.svg" },
-                { name: "gTest / gMock", level: intermediate, icon: "/icons/google.svg" },
-                { name: "CMake", level: beginner, icon: "/icons/cmake.svg" },
-                { name: "GIMP", level: intermediate, icon: "/icons/gimp.svg" },
-                { name: "Blender", level: beginner, icon: "/icons/blender.svg" }
+                //{ name: "PostgreSQL", level: beginner, icon: "/icons/postgresql.svg" },
+                { name: "gTest", level: intermediate, icon: "/icons/google.svg" },
+                //{ name: "CMake", level: beginner, icon: "/icons/cmake.svg" },
+                //{ name: "GIMP", level: intermediate, icon: "/icons/gimp.svg" },
+                //{ name: "Blender", level: beginner, icon: "/icons/blender.svg" },
+                { name: "SQL", level: intermediate, icon: "/icons/database.svg" }
             ]
-        },
-        {
+        }
+        /*{
             category: "Natural Languages",
             items: [
                 { name: "Norwegian", level: "Native", icon: "/icons/norway.svg" },
                 { name: "English", level: "C1", icon: "/icons/us.svg" },
                 { name: "Spanish", level: "A2", icon: "/icons/spain.svg" }
             ]
-        }
+        }*/
     ];
 
     onMount(() => {
@@ -145,7 +145,7 @@
                                     <img src={item.icon} class="size-7 pr-1" alt="Skill icon" />
                                     <p class="font-mono text-lg">{item.name}</p>
                                 </span>
-                                <p class="text-sm italic">{item.level}</p>
+                                <!--<p class="text-sm italic">{item.level}</p>-->
                             </li>
                         {/each}
                     </ul>

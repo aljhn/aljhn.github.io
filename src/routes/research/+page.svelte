@@ -7,22 +7,9 @@
         {
             title: "Overview",
             paragraphs: [
-                "My research interests lie at the intersection of deep learning and dynamical systems. This can mean one of two things: using deep learning methods for research related to dynamical systems theory. Or the opposite, using methods from dynamical systems theory for research related to deep learning.",
-                "I'm not currently affiliated with any research institution, so I'm working on a research project independently."
-            ]
-        },
-        {
-            title: "Scientific Machine Learning",
-            paragraphs: [
-                "Research topics like Neural Ordinary Differential Equations and Fourier Neural Operators make it possible to learn dynamical systems from data.",
-                "This can be particularly useful for systems where it's hard to model system dynamics explicitly. Or if the dataset is impractical to use, for example from irregular samples."
-            ]
-        },
-        {
-            title: "Physics-Informed Machine Learning",
-            paragraphs: [
-                "Incorporating prior physical knowledge about a system derived from first principles can greatly simplify learning the system solution, instead of relying solely on the dataset.",
-                "Physics-informed neural networks are one way to achieve this, and also make it possible to go beyond simply learning one particular system. Examples include learning unknown or missing terms of an equation, or solving optimal control problems."
+                "My research interests lie at the intersection of deep learning and dynamical systems.",
+                "This typically includes topics related to scientific machine learning and data-driven dynamical systems, with applications like system identification, time-series modeling and optimal control.",
+                "I'm not affiliated with any research institution, so I'm currently working on a research project independently."
             ]
         }
     ];
