@@ -71,7 +71,7 @@
     };
 </script>
 
-<header class="bg-bglight-2 font-mono text-textlight-1 dark:bg-bgdark-2 dark:text-textdark-1">
+<header class="bg-bglight-2 text-textlight-1 dark:bg-bgdark-2 dark:text-textdark-1 font-mono">
     <div class="container mx-auto flex flex-col items-center py-2 lg:flex-row lg:justify-between">
         <div class="flex grow items-center">
             <a href="/"><enhanced:img src="/static/images/Hex.png?w=150" alt="Logo" width="75" height="75" /></a>
@@ -87,7 +87,7 @@
                 <Menu width="32" height="32" />
                 <div
                     bind:this={dropdownMenuDiv}
-                    class="absolute left-0 z-10 bg-bglight-3 shadow-lg dark:bg-bgdark-3"
+                    class="bg-bglight-3 dark:bg-bgdark-3 absolute left-0 z-10 shadow-lg"
                     style:visibility={isDropdownOpen ? "visible" : "collapse"}
                 >
                     <div class="flex flex-col items-center space-y-1 p-2">
@@ -102,7 +102,7 @@
 
                         <div
                             onclick={handleDarkModeToggleMenu}
-                            class="flex rounded-2xl p-1 hover:bg-bglight-1 hover:dark:bg-bgdark-1"
+                            class="hover:bg-bglight-1 hover:dark:bg-bgdark-1 flex rounded-2xl p-1"
                             aria-hidden="true"
                         >
                             {#if darkModeState}
@@ -140,7 +140,7 @@
 
         <button
             onclick={handleDarkModeToggle}
-            class="hidden rounded-2xl p-1 hover:bg-bglight-1 lg:flex hover:dark:bg-bgdark-1"
+            class="hover:bg-bglight-1 hover:dark:bg-bgdark-1 hidden rounded-2xl p-1 lg:flex"
             aria-label="Dark mode toggle"
         >
             {#if darkModeState}

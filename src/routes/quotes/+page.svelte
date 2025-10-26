@@ -30,15 +30,17 @@
 
 <Meta name="Quotes" />
 
-<div class="grid auto-rows-min gap-5 p-10 text-textlight-2 dark:text-textdark-2">
-    <h2 class="font-mono text-2xl font-semibold text-textlight-1 dark:text-textdark-1">Selected Quotes</h2>
-    <p>Interesting quotes sampled from various places on the internet. Order randomized.</p>
+<div class="grid auto-rows-min gap-5 p-10">
+    <h2 class="text-textlight-1 dark:text-textdark-1 font-mono text-2xl font-semibold">Selected Quotes</h2>
+    <p class="text-textlight-2 dark:text-textdark-2">
+        Interesting quotes sampled from various places on the internet. Order randomized.
+    </p>
 
     <ul class="items-left mt-5 flex flex-col space-y-4 border-t-2 border-current pt-5">
         {#each quotes as quote}
             <li class="p-1">
                 <blockquote
-                    class="blockquote rounded-md bg-bglight-2 px-3 py-3 text-lg shadow-lg dark:bg-bgdark-2"
+                    class="blockquote bg-bglight-2 dark:bg-bgdark-2 text-textlight-1 dark:text-textdark-1 rounded-md px-3 py-3 text-lg shadow-lg"
                 >
                     {quote}
                 </blockquote>

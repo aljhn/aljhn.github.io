@@ -131,11 +131,11 @@
 <div class="mt-5 grid grid-cols-1 pt-5 lg:grid-cols-2" id="skillsGridRoot">
     {#each skills as skill}
         <div class="h-min px-10">
-            <section
-                class="rounded-xl bg-bglight-2 dark:bg-bgdark-2 {skill.category !== '' ? 'p-3' : ''} shadow-xl"
-            >
+            <section class="bg-bglight-2 dark:bg-bgdark-2 rounded-xl {skill.category !== '' ? 'p-3' : ''} shadow-xl">
                 {#if skill.category !== ""}
-                    <h2 class="mb-4 border-b-2 border-current pb-2 font-mono text-2xl font-semibold">
+                    <h2
+                        class="text-textlight-1 dark:text-textdark-1 mb-4 border-b-2 border-current pb-2 font-mono text-2xl font-semibold"
+                    >
                         {skill.category}
                     </h2>
                     <ul class="space-y-0">
