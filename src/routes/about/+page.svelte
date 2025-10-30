@@ -22,7 +22,7 @@
             title: "Miscellaneous",
             paragraphs: [
                 "I'm a fitness nerd that is currently doing a lot of powerlifting.",
-                "Also a big fan of scuba diving and freediving, as well as doing MMA."
+                "Also a big fan of scuba diving and freediving."
             ]
         }
     ];
