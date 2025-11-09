@@ -1,0 +1,11 @@
+# Albert Johannessen
+
+> Personal portfolio website
+
+## Pages
+
+- [Home](https://aljhn.github.io/): Homepage with an animated canvas background
+- [About](https://aljhn.github.io/about): Short bio
+- [Quotes](https://aljhn.github.io/quotes): Various quotes I like
+- [Skills](https://aljhn.github.io/skills): A list of some of my technical skills
+- [Research](https://aljhn.github.io/research): More detailed description of my research interests, along with publications
