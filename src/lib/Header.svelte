@@ -74,7 +74,7 @@
 <header class="bg-bglight-2 text-textlight-1 dark:bg-bgdark-2 dark:text-textdark-1 font-mono">
     <div class="container mx-auto flex flex-col items-center py-2 lg:flex-row lg:justify-between">
         <div class="flex grow items-center">
-            <a href="/"><enhanced:img src="/static/images/Hex.png?w=150" alt="Logo" width="75" height="75" /></a>
+            <a href="/"><img src="images/Logo.svg" alt="Logo" width="75" height="75" /></a>
             <a href="/"><h1 class="px-2 text-2xl font-bold lg:text-3xl">Albert Johannessen</h1></a>
 
             <button
