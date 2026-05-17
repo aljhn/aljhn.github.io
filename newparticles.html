@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>Particles</title>
+    <style>
+        html,
+        body {
+            margin: 0;
+            overflow: hidden;
+            height: 100%;
+        }
+
+        #canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="canvas"></canvas>
+    <script type="module">
+        import * as THREE from "three";
+        import {OrbitControls} from "three/addons/controls/OrbitControls.js";
+
+        const canvas = document.getElementById("canvas");
+
+        function resize(renderer) {
+            const canvas = renderer.domElement;
+            const width = canvas.clientWidth;
+            const height = canvas.clientHeight;
+            const devicePixelRatio = window.devicePixelRatio;
+            const needResize = canvas.width !== width || canvas.height !== height;
+            if (needResize) {
+                renderer.setSize(width, height, false);
+                renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+            }
+            return needResize;
+        }
+
+        const sigma = 10.0;
+        const rho = 28.0;
+        const beta = 8.0 / 3.0;
+
+        function lorenz(x, y, z, out) {
+            out.x = sigma * (y - x);
+            out.y = x * (rho - z) - y;
+            out.z = x * y - beta * z;
+        }
+
+        function euler(x, y, z, dx, dy, dz, h, out) {
+            out.x = x + dx * h;
+            out.y = y + dy * h;
+            out.z = z + dz * h;
+        }
+
+        function sampleUniform(low, high) {
+            return Math.random() * (high - low) + low;
+        }
+
+        function sampleStandardNormal() {
+            const u1 = Math.max(sampleUniform(0, 1), 1e-6);
+            const u2 = sampleUniform(0, 1);
+
+            const r = Math.sqrt(-2 * Math.log(u1));
+            const theta = 2 * Math.PI * u2;
+
+            const z0 = r * Math.cos(theta);
+            // const z1 = r * Math.sin(theta);
+            return z0;
+        }
+
+        function sampleNormal(mean, std) {
+            const z = sampleStandardNormal();
+            return mean + std * z;
+        }
+
+        function sampleLogNormal(mean, std) {
+            return Math.exp(sampleNormal(mean, std));
+        }
+
+        function sampleExponential(mean) {
+            let u = sampleUniform(0.0, 1.0);
+            if (u < 1e-6) {
+                u = 1e-6;
+            }
+            return -Math.log(u) * mean;
+        }
+
+        function getNextHueRangeTarget() {
+            return Math.exp(sampleNormal(4, 0.5));
+        }
+
+        function getNextSaturationTarget() {
+            return sampleUniform(30, 70);
+        }
+
+        function getNextLightTarget() {
+            return sampleUniform(40, 60);
+        }
+
+        const RAD2DEG = 180 / Math.PI;
+
+        function mod(n, d) {
+            return ((n % d) + d) % d;
+        }
+
+        class Vector {
+            constructor(x, y, z) {
+                this.x = x;
+                this.y = y;
+                this.z = z;
+            }
+
+            length() {
+                return Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
+            }
+
+            normalize() {
+                const invLength = 1.0 / this.length();
+                this.x *= invLength;
+                this.y *= invLength;
+                this.z *= invLength;
+            }
+        }
+
+        function sphericalVector(r, az, el, vector) {
+            vector.x = r * Math.cos(el) * Math.cos(az);
+            vector.y = r * Math.cos(el) * Math.sin(az);
+            vector.z = r * Math.sin(el);
+        }
+
+        function getRandomTarget() {
+            const az = Math.random() * 2.0 * Math.PI;
+            const z = Math.random() * 2.0 - 1.0;
+            const el = Math.asin(z);
+            return [az, el];
+        }
+
+        class Quaternion {
+            constructor(w, x, y, z) {
+                this.w = w;
+                this.x = x;
+                this.y = y;
+                this.z = z;
+            }
+
+            multiply(other) {
+                const w = this.w * other.w - this.x * other.x - this.y * other.y - this.z * other.z;
+                const x = this.w * other.x + this.x * other.w + this.y * other.z - this.z * other.y;
+                const y = this.w * other.y - this.x * other.z + this.y * other.w + this.z * other.x;
+                const z = this.w * other.z + this.x * other.y - this.y * other.x + this.z * other.w;
+
+                this.w = w;
+                this.x = x;
+                this.y = y;
+                this.z = z;
+            }
+
+            length() {
+                return Math.sqrt(this.w * this.w + this.x * this.x + this.y * this.y + this.z * this.z);
+            }
+
+            normalize() {
+                const invLength = 1.0 / this.length();
+                this.w *= invLength;
+                this.x *= invLength;
+                this.y *= invLength;
+                this.z *= invLength;
+            }
+        }
+
+        function deltaQuaternion(omega, dt, dq) {
+            const omegaLength = omega.length();
+
+            if (omegaLength < 1e-6) {
+                dq.w = 1.0;
+                dq.x = 0.0;
+                dq.y = 0.0;
+                dq.z = 0.0;
+                return;
+            }
+
+            const angle = omegaLength * dt;
+            const halfAngle = angle * 0.5;
+            const s = Math.sin(halfAngle);
+            const c = Math.cos(halfAngle);
+
+            const invOmegaLength = 1.0 / omegaLength;
+            const nx = omega.x * invOmegaLength;
+            const ny = omega.y * invOmegaLength;
+            const nz = omega.z * invOmegaLength;
+
+            dq.w = c;
+            dq.x = nx * s;
+            dq.y = ny * s;
+            dq.z = nz * s;
+        }
+
+        function rotateVector(q, v, out) {
+            const tx = 2.0 * (q.y * v.z - q.z * v.y);
+            const ty = 2.0 * (q.z * v.x - q.x * v.z);
+            const tz = 2.0 * (q.x * v.y - q.y * v.x);
+
+            out.x = v.x + q.w * tx + (q.y * tz - q.z * ty);
+            out.y = v.y + q.w * ty + (q.z * tx - q.x * tz);
+            out.z = v.z + q.w * tz + (q.x * ty - q.y * tx);
+        }
+
+        function hslToRgb(h, s, l, out) {
+            const hh = h * 6.0;
+
+            let r = Math.abs(hh - 3.0) - 1.0;
+            let g = 2.0 - Math.abs(hh - 2.0);
+            let b = 2.0 - Math.abs(hh - 4.0);
+
+            r = Math.min(Math.max(r, 0.0), 1.0);
+            g = Math.min(Math.max(g, 0.0), 1.0);
+            b = Math.min(Math.max(b, 0.0), 1.0);
+
+            const c = (1.0 - Math.abs(2.0 * l - 1.0)) * s;
+            const m = l - 0.5 * c;
+
+            out.x = r * c + m;
+            out.y = g * c + m;
+            out.z = b * c + m;
+        }
+
+        function start() {
+            const FOV = 60;
+            const camera = new THREE.PerspectiveCamera(FOV, canvas.clientWidth / canvas.clientHeight, 0.1, 1000.0);
+            camera.position.set(0, 0, 100);
+            camera.lookAt(0, 0, 0);
+
+            const scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x444444);
+
+            const renderer = new THREE.WebGLRenderer({canvas, antialias: true, alpha: true});
+
+
+
+            const perfDiv = document.createElement("div");
+            perfDiv.style.position = "absolute";
+            perfDiv.style.top = "10px";
+            perfDiv.style.left = "10px";
+            perfDiv.style.color = "white";
+            perfDiv.style.fontFamily = "monospace";
+            perfDiv.style.fontSize = "14px";
+            perfDiv.style.background = "rgba(0,0,0,0.5)";
+            perfDiv.style.padding = "6px 10px";
+            perfDiv.style.borderRadius = "4px";
+            perfDiv.style.pointerEvents = "none";
+            document.body.appendChild(perfDiv);
+
+            let perfAccum = 0.0;
+            let perfFrames = 0;
+
+
+
+
+
+            const controls = new OrbitControls(camera, canvas);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.1;
+
+            const speedScale = 0.2;
+
+            const PARTICLES = 100;
+            const TRAIL = 400;
+            const WIDTH = 0.1;
+
+            const particleStates = new Float32Array(PARTICLES * 3);
+            for (let i = 0; i < PARTICLES; i++) {
+                const index = i * 3;
+                particleStates[index] = sampleUniform(-5.0, 5.0);
+                particleStates[index + 1] = sampleUniform(-5.0, 5.0);
+                particleStates[index + 2] = sampleUniform(60.0, 70.0);
+            }
+
+            const particleVelocities = new Float32Array(PARTICLES * 3);
+
+            const vertices = new Float32Array(2 * PARTICLES * TRAIL * 3);
+            for (let i = 0; i < PARTICLES; i++) {
+                for (let j = 0; j < TRAIL; j++) {
+                    let vertexIndex = (i * TRAIL + j) * 6;
+                    let positionIndex = i * 3;
+
+                    vertices[vertexIndex] = particleStates[positionIndex];
+                    vertices[vertexIndex + 1] = particleStates[positionIndex + 1];
+                    vertices[vertexIndex + 2] = particleStates[positionIndex + 2];
+
+                    vertices[vertexIndex + 3] = particleStates[positionIndex];
+                    vertices[vertexIndex + 4] = particleStates[positionIndex + 1];
+                    vertices[vertexIndex + 5] = particleStates[positionIndex + 2];
+                }
+            }
+
+            const indexes = new Uint32Array(2 * PARTICLES * TRAIL * 3);
+            const maxIndex = TRAIL * 2;
+            for (let i = 0; i < PARTICLES; i++) {
+                for (let j = 0; j < TRAIL; j++) {
+                    const insertIndex = (i * TRAIL + j) * 6;
+                    const index = j * 2;
+                    const indexOffset = i * maxIndex;
+
+                    indexes[insertIndex] = index % maxIndex + indexOffset;
+                    indexes[insertIndex + 1] = (index + 1) % maxIndex + indexOffset;
+                    indexes[insertIndex + 2] = (index + 2) % maxIndex + indexOffset;
+
+                    indexes[insertIndex + 3] = (index + 1) % maxIndex + indexOffset;
+                    indexes[insertIndex + 4] = (index + 3) % maxIndex + indexOffset;
+                    indexes[insertIndex + 5] = (index + 2) % maxIndex + indexOffset;
+                }
+            }
+
+            const colors = new Float32Array(2 * PARTICLES * TRAIL * 4);
+
+            const geometry = new THREE.BufferGeometry();
+            geometry.setAttribute("position", new THREE.BufferAttribute(vertices, 3));
+            geometry.setAttribute("color", new THREE.BufferAttribute(colors, 4));
+            geometry.setIndex(new THREE.BufferAttribute(indexes, 1));
+
+            const material = new THREE.MeshBasicMaterial({
+                vertexColors: true,
+                transparent: true,
+                side: THREE.DoubleSide,
+                depthWrite: false
+            });
+
+            const mesh = new THREE.Mesh(geometry, material);
+            mesh.position.set(0.0, -50.0, 0.0);
+            mesh.rotation.x = -Math.PI / 2.0;
+            mesh.rotation.z = -Math.PI / 4.0;
+            mesh.scale.set(2.0, 2.0, 2.0);
+            mesh.frustumCulled = false;
+            scene.add(mesh);
+
+            const positionAttribute = mesh.geometry.getAttribute("position");
+            positionAttribute.setUsage(THREE.DynamicDrawUsage);
+
+            const colorAttribute = mesh.geometry.getAttribute("color");
+            colorAttribute.setUsage(THREE.DynamicDrawUsage);
+
+            if (resize(renderer)) {
+                camera.aspect = canvas.clientWidth / canvas.clientHeight;
+                camera.updateProjectionMatrix();
+            }
+
+            renderer.render(scene, camera);
+
+            const cameraDir = new THREE.Vector3();
+            const meshNormalMatrix = new THREE.Matrix3();
+            meshNormalMatrix.getNormalMatrix(mesh.matrixWorld);
+            const meshNormalMatrixTransposed = meshNormalMatrix.transpose();
+
+            let currentStartIndex = 0;
+
+            const MAX_DT = 0.05;
+
+            let lastTimestamp = performance.now();
+
+            const omegaNorm = 0.1;
+            let omegaAz = 0.0;
+            let omegaEl = 0.0;
+            let omega = new Vector(0.0, 0.0, 0.0);
+
+            const omegaChangeSpeed = 2.0;
+            let omegaTargetAz = 0.0;
+            let omegaTargetEl = 0.0;
+            let omegaTarget = new Vector(0.0, 0.0, 0.0);
+
+            let colorFrameRotation = new Quaternion(1.0, 0.0, 0.0, 0.0);
+            let dq = new Quaternion(1.0, 0.0, 0.0, 0.0);
+            let normalizeCounter = 0;
+
+            let hueRange = 90;
+            let hueRangeTarget = getNextHueRangeTarget();
+
+            let huePosition = 0;
+            let hueRotation = 0;
+
+            let saturation = 40;
+            let saturationTarget = getNextSaturationTarget();
+
+            let light = 50;
+            let lightTarget = getNextLightTarget();
+
+            const integrateOutput = new Vector(0.0, 0.0, 0.0);
+            let rotateOutput = new Vector(0.0, 0.0, 0.0);
+            let rgbOut = new Vector(0.0, 0.0, 0.0);
+
+            const alphaRamp = new Float32Array(TRAIL);
+            for (let j = 0; j < TRAIL; j++) {
+                const alpha = j / (TRAIL - 1);
+                alphaRamp[j] = Math.pow(alpha, 3.0);
+            }
+
+            function updateColorFrameRotation(h){
+                let omegaErrorAz = omegaTargetAz - omegaAz;
+                while (omegaErrorAz > Math.PI) {
+                    omegaErrorAz -= 2.0 * Math.PI;
+                }
+                while (omegaErrorAz < -Math.PI) {
+                    omegaErrorAz += 2.0 * Math.PI;
+                }
+
+                const omegaErrorEl = omegaTargetEl - omegaEl;
+                const omegaErorNormSquared = omegaErrorAz * omegaErrorAz + omegaErrorEl * omegaErrorEl;
+                if (omegaErorNormSquared > 1e-3) {
+                    omegaAz += omegaErrorAz * omegaChangeSpeed * dt;
+                    omegaEl += omegaErrorEl * omegaChangeSpeed * dt;
+                } else {
+                    [omegaTargetAz, omegaTargetEl] = getRandomTarget();
+                    sphericalVector(omegaNorm, omegaTargetAz, omegaTargetEl, omegaTarget);
+                }
+
+                sphericalVector(omegaNorm, omegaAz, omegaEl, omega);
+
+                deltaQuaternion(omega, h, dq);
+                colorFrameRotation.multiply(dq);
+                if (normalizeCounter % 100 == 0) {
+                    colorFrameRotation.normalize();
+                }
+                normalizeCounter++;
+            }
+
+            function updateColorValues(h) {
+                if (hueRange < hueRangeTarget) {
+                    hueRange += ((hueRangeTarget - hueRange) * 0.5 + 10) * h;
+                    if (hueRange >= hueRangeTarget) {
+                        hueRangeTarget = getNextHueRangeTarget();
+                    }
+                } else {
+                    hueRange += ((hueRangeTarget - hueRange) * 0.5 - 10) * h;
+                    if (hueRange <= hueRangeTarget) {
+                        hueRangeTarget = getNextHueRangeTarget();
+                    }
+                }
+
+                const huePositionChange = sampleNormal(50, 15);
+                huePosition += huePositionChange * h;
+                if (huePosition >= 360) {
+                    huePosition = 0;
+                }
+
+                const hueRotationChange = sampleNormal(30, 10);
+                hueRotation += hueRotationChange * h;
+                if (hueRotation >= 360) {
+                    hueRotation = 0;
+                }
+
+                if (saturation < saturationTarget) {
+                    saturation += 10 * h;
+                    if (saturation >= saturationTarget) {
+                        saturationTarget = getNextSaturationTarget();
+                    }
+                } else {
+                    saturation -= 10 * h;
+                    if (saturation <= saturationTarget) {
+                        saturationTarget = getNextSaturationTarget();
+                    }
+                }
+
+                if (light < lightTarget) {
+                    light += 10 * h;
+                    if (light >= lightTarget) {
+                        lightTarget = getNextLightTarget();
+                    }
+                } else {
+                    light -= 10 * h;
+                    if (light <= lightTarget) {
+                        lightTarget = getNextLightTarget();
+                    }
+                }
+            }
+
+            function updateParticles(h) {
+                for (let i = 0; i < PARTICLES; i++) {
+                    const particleIndex = i * 3;
+                    const x = particleStates[particleIndex];
+                    const y = particleStates[particleIndex + 1];
+                    const z = particleStates[particleIndex + 2];
+
+                    lorenz(x, y, z, integrateOutput);
+                    const dx = integrateOutput.x;
+                    const dy = integrateOutput.y;
+                    const dz = integrateOutput.z;
+                    particleVelocities[particleIndex] = dx;
+                    particleVelocities[particleIndex + 1] = dy;
+                    particleVelocities[particleIndex + 2] = dz;
+
+                    euler(x, y, z, dx, dy, dz, h, integrateOutput);
+                    particleStates[particleIndex] = integrateOutput.x;
+                    particleStates[particleIndex + 1] = integrateOutput.y;
+                    particleStates[particleIndex + 2] = integrateOutput.z;
+                }
+            }
+
+            function updateVertices() {
+                for (let i = 0; i < PARTICLES; i++) {
+                    const particleIndex = i * 3;
+
+                    const x = particleStates[particleIndex];
+                    const y = particleStates[particleIndex + 1];
+                    const z = particleStates[particleIndex + 2];
+
+                    const dx = particleVelocities[particleIndex];
+                    const dy = particleVelocities[particleIndex + 1];
+                    const dz = particleVelocities[particleIndex + 2];
+
+                    const nx = cameraDir.y * dz - cameraDir.z * dy;
+                    const ny = cameraDir.z * dx - cameraDir.x * dz;
+                    const nz = cameraDir.x * dy - cameraDir.y * dx;
+
+                    const normalLength = WIDTH / Math.max(Math.sqrt(nx * nx + ny * ny + nz * nz), 1e-6);
+                    const offsetX = nx * normalLength;
+                    const offsetY = ny * normalLength;
+                    const offsetZ = nz * normalLength;
+
+                    const vertexIndex = (i * TRAIL + currentStartIndex) * 6;
+
+                    vertices[vertexIndex] = x - offsetX;
+                    vertices[vertexIndex + 1] = y - offsetY;
+                    vertices[vertexIndex + 2] = z - offsetZ;
+
+                    vertices[vertexIndex + 3] = x + offsetX;
+                    vertices[vertexIndex + 4] = y + offsetY;
+                    vertices[vertexIndex + 5] = z + offsetZ;
+
+                    const vertexIndexNext = (i * TRAIL + (currentStartIndex + 1) % TRAIL) * 6;
+
+                    vertices[vertexIndexNext] = integrateOutput.x;
+                    vertices[vertexIndexNext + 1] = integrateOutput.y;
+                    vertices[vertexIndexNext + 2] = integrateOutput.z;
+
+                    vertices[vertexIndexNext + 3] = integrateOutput.x;
+                    vertices[vertexIndexNext + 4] = integrateOutput.y;
+                    vertices[vertexIndexNext + 5] = integrateOutput.z;
+
+                    const vertexIndexNextNext = (i * TRAIL + (currentStartIndex + 2) % TRAIL) * 6;
+
+                    const xLast = (vertices[vertexIndexNextNext] + vertices[vertexIndexNextNext + 3]) / 2.0;
+                    const yLast = (vertices[vertexIndexNextNext + 1] + vertices[vertexIndexNextNext + 4]) / 2.0;
+                    const zLast = (vertices[vertexIndexNextNext + 2] + vertices[vertexIndexNextNext + 5]) / 2.0;
+
+                    vertices[vertexIndexNextNext] = xLast;
+                    vertices[vertexIndexNextNext + 1] = yLast;
+                    vertices[vertexIndexNextNext + 2] = zLast;
+
+                    vertices[vertexIndexNextNext + 3] = xLast;
+                    vertices[vertexIndexNextNext + 4] = yLast;
+                    vertices[vertexIndexNextNext + 5] = zLast;
+                }
+            }
+
+            function updateColors() {
+                for (let i = 0; i < PARTICLES; i++) {
+                    const particleIndex = i * 3;
+                    const dx = particleVelocities[particleIndex];
+                    const dy = particleVelocities[particleIndex + 1];
+                    const dz = particleVelocities[particleIndex + 2];
+
+                    const velocityLengthSquared = dx * dx + dy * dy + dz * dz;
+
+                    const angle = Math.atan2(dy, dx) * RAD2DEG;
+                    const rotatedAngle = mod(angle + hueRotation + 180, 360);
+                    const halfAngle = 360 - 2 * Math.abs(rotatedAngle - 180);
+                    const hue = mod(halfAngle / 360 * hueRange + huePosition - hueRange / 2 + velocityLengthSquared * 0.0002, 360);
+
+                    hslToRgb(hue / 360.0, saturation / 100.0, light / 100.0, rgbOut);
+
+                    const indexColor = (i * TRAIL + currentStartIndex) * 8;
+
+                    rotateVector(colorFrameRotation, rgbOut, rotateOutput);
+                    rgbOut.x = Math.min(Math.max(rotateOutput.x, 0.0), 1.0);
+                    rgbOut.y = Math.min(Math.max(rotateOutput.y, 0.0), 1.0);
+                    rgbOut.z = Math.min(Math.max(rotateOutput.z, 0.0), 1.0);
+
+                    colors[indexColor] = rgbOut.x;
+                    colors[indexColor + 1] = rgbOut.y;
+                    colors[indexColor + 2] = rgbOut.z;
+
+                    colors[indexColor + 4] = rgbOut.x;
+                    colors[indexColor + 5] = rgbOut.y;
+                    colors[indexColor + 6] = rgbOut.z;
+
+                    for (let j = 0; j < TRAIL; j++) {
+                        const indexAlpha = (j - currentStartIndex + TRAIL) % TRAIL;
+                        const a = alphaRamp[indexAlpha];
+
+                        const indexColor = (i * TRAIL + j) * 8;
+                        colors[indexColor + 3] = a;
+                        colors[indexColor + 7] = a;
+                    }
+                }
+            }
+
+            function animate(timestamp) {
+                const animateStart = performance.now();
+
+                const dt = Math.min((timestamp - lastTimestamp) / 1000.0, MAX_DT);
+                lastTimestamp = timestamp;
+
+                const h = dt * speedScale;
+
+                if (resize(renderer)) {
+                    camera.aspect = canvas.clientWidth / canvas.clientHeight;
+                    camera.updateProjectionMatrix();
+                }
+
+                camera.getWorldDirection(cameraDir);
+                cameraDir.applyMatrix3(meshNormalMatrixTransposed);
+
+                updateColorFrameRotation(h);
+                updateColorValues(h);
+                updateParticles(h);
+                updateVertices();
+                updateColors();
+
+                currentStartIndex = (currentStartIndex + 1) % TRAIL;
+
+                positionAttribute.needsUpdate = true;
+                colorAttribute.needsUpdate = true;
+
+                controls.update();
+                renderer.render(scene, camera);
+
+
+
+                const animateEnd = performance.now();
+                perfAccum += animateEnd - animateStart;
+                perfFrames++;
+
+                if (perfFrames >= 20) {
+                    const avg = perfAccum / perfFrames;
+                    const fps = 1000.0 / avg;
+
+                    perfDiv.textContent = `${avg.toFixed(2)} ms | ${fps.toFixed(1)} FPS`;
+
+                    perfAccum = 0.0;
+                    perfFrames = 0;
+                }
+            }
+            renderer.setAnimationLoop(animate);
+        }
+        start();
+    </script>
+</body>
+
+</html>
