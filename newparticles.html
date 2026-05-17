@@ -83,10 +83,7 @@
         }
 
         function sampleExponential(mean) {
-            let u = sampleUniform(0.0, 1.0);
-            if (u < 1e-6) {
-                u = 1e-6;
-            }
+            let u = sampleUniform(1e-6, 1.0);
             return -Math.log(u) * mean;
         }
 
@@ -95,11 +92,19 @@
         }
 
         function getNextSaturationTarget() {
-            return sampleUniform(30, 70);
+            return sampleUniform(40.0, 90.0);
         }
 
         function getNextLightTarget() {
-            return sampleUniform(40, 60);
+            return sampleUniform(30.0, 70.0);
+        }
+
+        function getHuePositionChange() {
+            return sampleNormal(50.0, 15.0);
+        }
+
+        function getHueRotationChange() {
+            return sampleNormal(30.0, 10.0);
         }
 
         const RAD2DEG = 180 / Math.PI;
@@ -175,14 +180,6 @@
 
         function deltaQuaternion(omega, dt, dq) {
             const omegaLength = omega.length();
-
-            if (omegaLength < 1e-6) {
-                dq.w = 1.0;
-                dq.x = 0.0;
-                dq.y = 0.0;
-                dq.z = 0.0;
-                return;
-            }
 
             const angle = omegaLength * dt;
             const halfAngle = angle * 0.5;
@@ -272,12 +269,12 @@
             const TRAIL = 400;
             const WIDTH = 0.1;
 
-            const particleStates = new Float32Array(PARTICLES * 3);
+            const particlePositions = new Float32Array(PARTICLES * 3);
             for (let i = 0; i < PARTICLES; i++) {
                 const index = i * 3;
-                particleStates[index] = sampleUniform(-5.0, 5.0);
-                particleStates[index + 1] = sampleUniform(-5.0, 5.0);
-                particleStates[index + 2] = sampleUniform(60.0, 70.0);
+                particlePositions[index] = sampleUniform(-5.0, 5.0);
+                particlePositions[index + 1] = sampleUniform(-5.0, 5.0);
+                particlePositions[index + 2] = sampleUniform(60.0, 70.0);
             }
 
             const particleVelocities = new Float32Array(PARTICLES * 3);
@@ -288,13 +285,13 @@
                     let vertexIndex = (i * TRAIL + j) * 6;
                     let positionIndex = i * 3;
 
-                    vertices[vertexIndex] = particleStates[positionIndex];
-                    vertices[vertexIndex + 1] = particleStates[positionIndex + 1];
-                    vertices[vertexIndex + 2] = particleStates[positionIndex + 2];
+                    vertices[vertexIndex] = particlePositions[positionIndex];
+                    vertices[vertexIndex + 1] = particlePositions[positionIndex + 1];
+                    vertices[vertexIndex + 2] = particlePositions[positionIndex + 2];
 
-                    vertices[vertexIndex + 3] = particleStates[positionIndex];
-                    vertices[vertexIndex + 4] = particleStates[positionIndex + 1];
-                    vertices[vertexIndex + 5] = particleStates[positionIndex + 2];
+                    vertices[vertexIndex + 3] = particlePositions[positionIndex];
+                    vertices[vertexIndex + 4] = particlePositions[positionIndex + 1];
+                    vertices[vertexIndex + 5] = particlePositions[positionIndex + 2];
                 }
             }
 
@@ -360,7 +357,7 @@
 
             const MAX_DT = 0.05;
 
-            let lastTimestamp = performance.now();
+            let timestampPrevious = performance.now();
 
             const omegaNorm = 0.1;
             let omegaAz = 0.0;
@@ -376,17 +373,19 @@
             let dq = new Quaternion(1.0, 0.0, 0.0, 0.0);
             let normalizeCounter = 0;
 
-            let hueRange = 90;
+            let hueRange = 20;
             let hueRangeTarget = getNextHueRangeTarget();
 
-            let huePosition = 0;
+            let huePosition = sampleUniform(0.0, 360.0);
             let hueRotation = 0;
 
-            let saturation = 40;
+            let saturation = 60;
             let saturationTarget = getNextSaturationTarget();
 
             let light = 50;
             let lightTarget = getNextLightTarget();
+
+            const velocityHueFactor = 0.0001;
 
             const integrateOutput = new Vector(0.0, 0.0, 0.0);
             let rotateOutput = new Vector(0.0, 0.0, 0.0);
@@ -398,7 +397,7 @@
                 alphaRamp[j] = Math.pow(alpha, 3.0);
             }
 
-            function updateColorFrameRotation(h){
+            function updateColorFrameRotation(dt) {
                 let omegaErrorAz = omegaTargetAz - omegaAz;
                 while (omegaErrorAz > Math.PI) {
                     omegaErrorAz -= 2.0 * Math.PI;
@@ -419,7 +418,7 @@
 
                 sphericalVector(omegaNorm, omegaAz, omegaEl, omega);
 
-                deltaQuaternion(omega, h, dq);
+                deltaQuaternion(omega, dt, dq);
                 colorFrameRotation.multiply(dq);
                 if (normalizeCounter % 100 == 0) {
                     colorFrameRotation.normalize();
@@ -427,62 +426,58 @@
                 normalizeCounter++;
             }
 
-            function updateColorValues(h) {
+            function updateColorValues(dt) {
+                const hueRangeChangeFactor = 0.2;
+                const hueRangeChangeDefault = 10.0;
                 if (hueRange < hueRangeTarget) {
-                    hueRange += ((hueRangeTarget - hueRange) * 0.5 + 10) * h;
+                    hueRange += ((hueRangeTarget - hueRange) * hueRangeChangeFactor + hueRangeChangeDefault) * dt;
                     if (hueRange >= hueRangeTarget) {
                         hueRangeTarget = getNextHueRangeTarget();
                     }
                 } else {
-                    hueRange += ((hueRangeTarget - hueRange) * 0.5 - 10) * h;
+                    hueRange += ((hueRangeTarget - hueRange) * hueRangeChangeFactor - hueRangeChangeDefault) * dt;
                     if (hueRange <= hueRangeTarget) {
                         hueRangeTarget = getNextHueRangeTarget();
                     }
                 }
 
-                const huePositionChange = sampleNormal(50, 15);
-                huePosition += huePositionChange * h;
-                if (huePosition >= 360) {
-                    huePosition = 0;
+                const huePositionChangeFactor = 0.05;
+                const huePositionChange = getHuePositionChange();
+                huePosition += huePositionChange * huePositionChangeFactor * dt;
+                if (huePosition >= 360.0) {
+                    huePosition = 0.0;
                 }
 
-                const hueRotationChange = sampleNormal(30, 10);
-                hueRotation += hueRotationChange * h;
-                if (hueRotation >= 360) {
-                    hueRotation = 0;
+                const hueRotationChangeFactor = 0.1;
+                const hueRotationChange = getHueRotationChange();
+                hueRotation += hueRotationChange * hueRotationChangeFactor * dt;
+                if (hueRotation >= 360.0) {
+                    hueRotation = 0.0;
                 }
 
-                if (saturation < saturationTarget) {
-                    saturation += 10 * h;
-                    if (saturation >= saturationTarget) {
-                        saturationTarget = getNextSaturationTarget();
-                    }
+                const saturationChangeFactor = 0.5;
+                const saturationError = saturationTarget - saturation;
+                if (Math.abs(saturationError) > 1e-1) {
+                    saturation += saturationError * saturationChangeFactor * dt;
                 } else {
-                    saturation -= 10 * h;
-                    if (saturation <= saturationTarget) {
-                        saturationTarget = getNextSaturationTarget();
-                    }
+                    saturationTarget = getNextSaturationTarget();
                 }
 
-                if (light < lightTarget) {
-                    light += 10 * h;
-                    if (light >= lightTarget) {
-                        lightTarget = getNextLightTarget();
-                    }
+                const lightChangeFactor = 0.1;
+                const lightError = lightTarget - light;
+                if (Math.abs(lightError) > 1e-1) {
+                    light += lightError * lightChangeFactor * dt;
                 } else {
-                    light -= 10 * h;
-                    if (light <= lightTarget) {
-                        lightTarget = getNextLightTarget();
-                    }
+                    lightTarget = getNextLightTarget();
                 }
             }
 
-            function updateParticles(h) {
+            function updateParticles(dt) {
                 for (let i = 0; i < PARTICLES; i++) {
                     const particleIndex = i * 3;
-                    const x = particleStates[particleIndex];
-                    const y = particleStates[particleIndex + 1];
-                    const z = particleStates[particleIndex + 2];
+                    const x = particlePositions[particleIndex];
+                    const y = particlePositions[particleIndex + 1];
+                    const z = particlePositions[particleIndex + 2];
 
                     lorenz(x, y, z, integrateOutput);
                     const dx = integrateOutput.x;
@@ -492,10 +487,11 @@
                     particleVelocities[particleIndex + 1] = dy;
                     particleVelocities[particleIndex + 2] = dz;
 
+                    const h = dt * speedScale;
                     euler(x, y, z, dx, dy, dz, h, integrateOutput);
-                    particleStates[particleIndex] = integrateOutput.x;
-                    particleStates[particleIndex + 1] = integrateOutput.y;
-                    particleStates[particleIndex + 2] = integrateOutput.z;
+                    particlePositions[particleIndex] = integrateOutput.x;
+                    particlePositions[particleIndex + 1] = integrateOutput.y;
+                    particlePositions[particleIndex + 2] = integrateOutput.z;
                 }
             }
 
@@ -503,9 +499,9 @@
                 for (let i = 0; i < PARTICLES; i++) {
                     const particleIndex = i * 3;
 
-                    const x = particleStates[particleIndex];
-                    const y = particleStates[particleIndex + 1];
-                    const z = particleStates[particleIndex + 2];
+                    const x = particlePositions[particleIndex];
+                    const y = particlePositions[particleIndex + 1];
+                    const z = particlePositions[particleIndex + 2];
 
                     const dx = particleVelocities[particleIndex];
                     const dy = particleVelocities[particleIndex + 1];
@@ -568,7 +564,7 @@
                     const angle = Math.atan2(dy, dx) * RAD2DEG;
                     const rotatedAngle = mod(angle + hueRotation + 180, 360);
                     const halfAngle = 360 - 2 * Math.abs(rotatedAngle - 180);
-                    const hue = mod(halfAngle / 360 * hueRange + huePosition - hueRange / 2 + velocityLengthSquared * 0.0002, 360);
+                    const hue = mod(halfAngle / 360 * hueRange + huePosition - hueRange / 2 + velocityLengthSquared * velocityHueFactor, 360);
 
                     hslToRgb(hue / 360.0, saturation / 100.0, light / 100.0, rgbOut);
 
@@ -601,10 +597,8 @@
             function animate(timestamp) {
                 const animateStart = performance.now();
 
-                const dt = Math.min((timestamp - lastTimestamp) / 1000.0, MAX_DT);
-                lastTimestamp = timestamp;
-
-                const h = dt * speedScale;
+                const dt = Math.min((timestamp - timestampPrevious) / 1000.0, MAX_DT);
+                timestampPrevious = timestamp;
 
                 if (resize(renderer)) {
                     camera.aspect = canvas.clientWidth / canvas.clientHeight;
@@ -614,12 +608,12 @@
                 camera.getWorldDirection(cameraDir);
                 cameraDir.applyMatrix3(meshNormalMatrixTransposed);
 
-                updateColorFrameRotation(h);
-                updateColorValues(h);
-                updateParticles(h);
+                updateColorFrameRotation(dt);
+                updateColorValues(dt);
+                updateParticles(dt);
+
                 updateVertices();
                 updateColors();
-
                 currentStartIndex = (currentStartIndex + 1) % TRAIL;
 
                 positionAttribute.needsUpdate = true;
