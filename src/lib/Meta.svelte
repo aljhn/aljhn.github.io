@@ -1,18 +1,21 @@
 <script lang="ts">
     let { name } = $props();
 
-    const meta = {
-        author: "Albert Johannessen",
-        title: "Albert Johannessen" + (name === "Home" ? "" : " - " + (name.charAt(0).toUpperCase() + name.slice(1))),
-        description:
-            "Personal website" + (name === "Home" ? "" : " - " + (name.charAt(0).toUpperCase() + name.slice(1))),
-        keywords:
-            "Personal Website, Resume, Portfolio, Projects, Publications, Interests, Computer Science, Programming, Artificial Intelligence, AI, Machine Learning, Deep Learning, Math, Dynamical Systems, Control Theory",
-        url: "https://aljhn.github.io",
-        pageUrl:
-            "https://aljhn.github.io" + (name === "Home" ? "" : "/" + name.charAt(0).toLowerCase() + name.slice(1)),
-        image: "https://aljhn.github.io/images/Hex.png"
-    };
+    const meta = $derived.by(() => {
+        const pageTitle = name === "Home" ? "" : " - " + (name.charAt(0).toUpperCase() + name.slice(1));
+        const pageUrl = name === "Home" ? "" : "/" + name.charAt(0).toLowerCase() + name.slice(1);
+
+        return {
+            author: "Albert Johannessen",
+            title: "Albert Johannessen" + pageTitle,
+            description: "Personal website" + pageTitle,
+            keywords:
+                "Personal Website, Resume, Portfolio, Projects, Publications, Interests, Computer Science, Programming, Artificial Intelligence, AI, Machine Learning, Deep Learning, Math, Dynamical Systems, Control Theory",
+            url: "https://aljhn.github.io",
+            pageUrl: "https://aljhn.github.io" + pageUrl,
+            image: "https://aljhn.github.io/images/Hex.png"
+        };
+    });
 </script>
 
 <svelte:head>
