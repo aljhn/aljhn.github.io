@@ -28,15 +28,15 @@
 
         const canvas = document.getElementById("canvas");
 
-        function resize(renderer) {
-            const canvas = renderer.domElement;
+        function resize(threeRenderer) {
+            const canvas = threeRenderer.domElement;
             const width = canvas.clientWidth;
             const height = canvas.clientHeight;
             const devicePixelRatio = window.devicePixelRatio;
             const needResize = canvas.width !== width || canvas.height !== height;
             if (needResize) {
-                renderer.setSize(width, height, false);
-                renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+                threeRenderer.setSize(width, height, false);
+                threeRenderer.setPixelRatio(Math.min(devicePixelRatio, 2));
             }
             return needResize;
         }
@@ -107,81 +107,36 @@
             return sampleNormal(30.0, 10.0);
         }
 
-        const RAD2DEG = 180 / Math.PI;
+        const RAD2DEG = 180.0 / Math.PI;
 
         function mod(n, d) {
             return ((n % d) + d) % d;
         }
 
-        class Vector {
-            constructor(x, y, z) {
-                this.x = x;
-                this.y = y;
-                this.z = z;
-            }
-
-            length() {
-                return Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
-            }
-
-            normalize() {
-                const invLength = 1.0 / this.length();
-                this.x *= invLength;
-                this.y *= invLength;
-                this.z *= invLength;
-            }
+        function shortestAngleDifference(a, b) {
+            return Math.atan2(Math.sin(b - a), Math.cos(b - a));
         }
 
-        function sphericalVector(r, az, el, vector) {
-            vector.x = r * Math.cos(el) * Math.cos(az);
-            vector.y = r * Math.cos(el) * Math.sin(az);
-            vector.z = r * Math.sin(el);
+        function lerp(a, b, t) {
+            return a + (b - a) * t;
         }
 
-        function getRandomTarget() {
+        function getRandomTarget(out) {
             const az = Math.random() * 2.0 * Math.PI;
             const z = Math.random() * 2.0 - 1.0;
             const el = Math.asin(z);
-            return [az, el];
-        }
-
-        class Quaternion {
-            constructor(w, x, y, z) {
-                this.w = w;
-                this.x = x;
-                this.y = y;
-                this.z = z;
-            }
-
-            multiply(other) {
-                const w = this.w * other.w - this.x * other.x - this.y * other.y - this.z * other.z;
-                const x = this.w * other.x + this.x * other.w + this.y * other.z - this.z * other.y;
-                const y = this.w * other.y - this.x * other.z + this.y * other.w + this.z * other.x;
-                const z = this.w * other.z + this.x * other.y - this.y * other.x + this.z * other.w;
-
-                this.w = w;
-                this.x = x;
-                this.y = y;
-                this.z = z;
-            }
-
-            length() {
-                return Math.sqrt(this.w * this.w + this.x * this.x + this.y * this.y + this.z * this.z);
-            }
-
-            normalize() {
-                const invLength = 1.0 / this.length();
-                this.w *= invLength;
-                this.x *= invLength;
-                this.y *= invLength;
-                this.z *= invLength;
-            }
+            out.phi = az;
+            out.theta = el;
         }
 
         function deltaQuaternion(omega, dt, dq) {
             const omegaLength = omega.length();
-
             const angle = omegaLength * dt;
+
+            if (angle < 1e-6) {
+                dq.identity();
+                return;
+            }
             const halfAngle = angle * 0.5;
             const s = Math.sin(halfAngle);
             const c = Math.cos(halfAngle);
@@ -197,35 +152,6 @@
             dq.z = nz * s;
         }
 
-        function rotateVector(q, v, out) {
-            const tx = 2.0 * (q.y * v.z - q.z * v.y);
-            const ty = 2.0 * (q.z * v.x - q.x * v.z);
-            const tz = 2.0 * (q.x * v.y - q.y * v.x);
-
-            out.x = v.x + q.w * tx + (q.y * tz - q.z * ty);
-            out.y = v.y + q.w * ty + (q.z * tx - q.x * tz);
-            out.z = v.z + q.w * tz + (q.x * ty - q.y * tx);
-        }
-
-        function hslToRgb(h, s, l, out) {
-            const hh = h * 6.0;
-
-            let r = Math.abs(hh - 3.0) - 1.0;
-            let g = 2.0 - Math.abs(hh - 2.0);
-            let b = 2.0 - Math.abs(hh - 4.0);
-
-            r = Math.min(Math.max(r, 0.0), 1.0);
-            g = Math.min(Math.max(g, 0.0), 1.0);
-            b = Math.min(Math.max(b, 0.0), 1.0);
-
-            const c = (1.0 - Math.abs(2.0 * l - 1.0)) * s;
-            const m = l - 0.5 * c;
-
-            out.x = r * c + m;
-            out.y = g * c + m;
-            out.z = b * c + m;
-        }
-
         function start() {
             const FOV = 60;
             const camera = new THREE.PerspectiveCamera(FOV, canvas.clientWidth / canvas.clientHeight, 0.1, 1000.0);
@@ -235,7 +161,7 @@
             const scene = new THREE.Scene();
             scene.background = new THREE.Color(0x444444);
 
-            const renderer = new THREE.WebGLRenderer({canvas, antialias: true, alpha: true});
+            const threeRenderer = new THREE.WebGLRenderer({canvas, antialias: true, alpha: true});
 
 
 
@@ -263,38 +189,11 @@
             controls.enableDamping = true;
             controls.dampingFactor = 0.1;
 
-            const speedScale = 0.2;
-
             const PARTICLES = 100;
             const TRAIL = 400;
             const WIDTH = 0.1;
 
-            const particlePositions = new Float32Array(PARTICLES * 3);
-            for (let i = 0; i < PARTICLES; i++) {
-                const index = i * 3;
-                particlePositions[index] = sampleUniform(-5.0, 5.0);
-                particlePositions[index + 1] = sampleUniform(-5.0, 5.0);
-                particlePositions[index + 2] = sampleUniform(60.0, 70.0);
-            }
-
-            const particleVelocities = new Float32Array(PARTICLES * 3);
-
             const vertices = new Float32Array(2 * PARTICLES * TRAIL * 3);
-            for (let i = 0; i < PARTICLES; i++) {
-                for (let j = 0; j < TRAIL; j++) {
-                    let vertexIndex = (i * TRAIL + j) * 6;
-                    let positionIndex = i * 3;
-
-                    vertices[vertexIndex] = particlePositions[positionIndex];
-                    vertices[vertexIndex + 1] = particlePositions[positionIndex + 1];
-                    vertices[vertexIndex + 2] = particlePositions[positionIndex + 2];
-
-                    vertices[vertexIndex + 3] = particlePositions[positionIndex];
-                    vertices[vertexIndex + 4] = particlePositions[positionIndex + 1];
-                    vertices[vertexIndex + 5] = particlePositions[positionIndex + 2];
-                }
-            }
-
             const indexes = new Uint32Array(2 * PARTICLES * TRAIL * 3);
             const maxIndex = TRAIL * 2;
             for (let i = 0; i < PARTICLES; i++) {
@@ -341,258 +240,444 @@
             const colorAttribute = mesh.geometry.getAttribute("color");
             colorAttribute.setUsage(THREE.DynamicDrawUsage);
 
-            if (resize(renderer)) {
+            if (resize(threeRenderer)) {
                 camera.aspect = canvas.clientWidth / canvas.clientHeight;
                 camera.updateProjectionMatrix();
             }
 
-            renderer.render(scene, camera);
+            threeRenderer.render(scene, camera);
 
             const cameraDir = new THREE.Vector3();
             const meshNormalMatrix = new THREE.Matrix3();
             meshNormalMatrix.getNormalMatrix(mesh.matrixWorld);
             const meshNormalMatrixTransposed = meshNormalMatrix.transpose();
 
-            let currentStartIndex = 0;
+            function initializeVertices(simulationState) {
+                const particlePositions = simulationState.particlePositions;
+
+                for (let i = 0; i < PARTICLES; i++) {
+                    for (let j = 0; j < TRAIL; j++) {
+                        let vertexIndex = (i * TRAIL + j) * 6;
+                        let positionIndex = i * 3;
+
+                        vertices[vertexIndex] = particlePositions[positionIndex];
+                        vertices[vertexIndex + 1] = particlePositions[positionIndex + 1];
+                        vertices[vertexIndex + 2] = particlePositions[positionIndex + 2];
+
+                        vertices[vertexIndex + 3] = particlePositions[positionIndex];
+                        vertices[vertexIndex + 4] = particlePositions[positionIndex + 1];
+                        vertices[vertexIndex + 5] = particlePositions[positionIndex + 2];
+                    }
+                }
+            }
+
+            class SimulationState {
+                constructor() {
+                    this.omegaNorm = 0.1;
+                    this.omegaChangeSpeed = 2.0;
+
+                    this.omega = new THREE.Vector3();
+                    this.omegaTarget = new THREE.Spherical();
+                    this.omegaCurrent = new THREE.Spherical(this.omegaNorm, 0.0, 0.0);
+
+                    this.colorFrameRotation = new THREE.Quaternion();
+                    this.dq = new THREE.Quaternion();
+
+                    this.hueRange = 20;
+                    this.hueRangeTarget = getNextHueRangeTarget();
+
+                    this.huePosition = sampleUniform(0.0, 360.0);
+                    this.hueRotation = 0;
+
+                    this.saturation = 60;
+                    this.saturationTarget = getNextSaturationTarget();
+
+                    this.light = 50;
+                    this.lightTarget = getNextLightTarget();
+
+                    this.hueRangeChangeFactor = 0.2;
+                    this.hueRangeChangeDefault = 10.0;
+                    this.huePositionChangeFactor = 0.05;
+                    this.hueRotationChangeFactor = 0.1;
+                    this.saturationChangeFactor = 0.5;
+                    this.lightChangeFactor = 0.1;
+
+                    this.speedScale = 0.2;
+
+                    this.particlePositions = new Float32Array(PARTICLES * 3);
+                    for (let i = 0; i < PARTICLES; i++) {
+                        const index = i * 3;
+                        this.particlePositions[index] = sampleUniform(-5.0, 5.0);
+                        this.particlePositions[index + 1] = sampleUniform(-5.0, 5.0);
+                        this.particlePositions[index + 2] = sampleUniform(60.0, 70.0);
+                    }
+
+                    this.particleVelocities = new Float32Array(PARTICLES * 3);
+
+                    this.integrateOutput = new THREE.Vector3();
+                }
+
+                updateColorFrameRotation(dt) {
+                    const errorPhi = shortestAngleDifference(this.omegaCurrent.phi, this.omegaTarget.phi);
+                    const errorTheta = shortestAngleDifference(this.omegaCurrent.theta, this.omegaTarget.theta);
+
+                    const errorNormSquared = errorPhi * errorPhi + errorTheta * errorTheta;
+
+                    if (errorNormSquared > 1e-3) {
+                        this.omegaCurrent.phi += errorPhi * this.omegaChangeSpeed * dt;
+                        this.omegaCurrent.theta += errorTheta * this.omegaChangeSpeed * dt;
+                    } else {
+                        getRandomTarget(this.omegaTarget);
+                    }
+
+                    this.omega.setFromSpherical(this.omegaCurrent);
+
+                    deltaQuaternion(this.omega, dt, this.dq);
+                    this.colorFrameRotation.multiply(this.dq);
+                    this.colorFrameRotation.normalize();
+                }
+
+                updateColorValues(dt) {
+                    if (this.hueRange < this.hueRangeTarget) {
+                        this.hueRange += ((this.hueRangeTarget - this.hueRange) * this.hueRangeChangeFactor + this.hueRangeChangeDefault) * dt;
+                        if (this.hueRange >= this.hueRangeTarget) {
+                            this.hueRangeTarget = getNextHueRangeTarget();
+                        }
+                    } else {
+                        this.hueRange += ((this.hueRangeTarget - this.hueRange) * this.hueRangeChangeFactor - this.hueRangeChangeDefault) * dt;
+                        if (this.hueRange <= this.hueRangeTarget) {
+                            this.hueRangeTarget = getNextHueRangeTarget();
+                        }
+                    }
+
+                    const huePositionChange = getHuePositionChange();
+                    this.huePosition += huePositionChange * this.huePositionChangeFactor * dt;
+                    if (this.huePosition >= 360.0) {
+                        this.huePosition = 0.0;
+                    }
+
+                    const hueRotationChange = getHueRotationChange();
+                    this.hueRotation += hueRotationChange * this.hueRotationChangeFactor * dt;
+                    if (this.hueRotation >= 360.0) {
+                        this.hueRotation = 0.0;
+                    }
+
+                    const saturationError = this.saturationTarget - this.saturation;
+                    if (Math.abs(saturationError) > 1e-1) {
+                        this.saturation += saturationError * this.saturationChangeFactor * dt;
+                    } else {
+                        this.saturationTarget = getNextSaturationTarget();
+                    }
+
+                    const lightError = this.lightTarget - this.light;
+                    if (Math.abs(lightError) > 1e-1) {
+                        this.light += lightError * this.lightChangeFactor * dt;
+                    } else {
+                        this.lightTarget = getNextLightTarget();
+                    }
+                }
+
+                updateParticles(dt) {
+                    for (let i = 0; i < PARTICLES; i++) {
+                        const particleIndex = i * 3;
+                        const x = this.particlePositions[particleIndex];
+                        const y = this.particlePositions[particleIndex + 1];
+                        const z = this.particlePositions[particleIndex + 2];
+
+                        lorenz(x, y, z, this.integrateOutput);
+                        const dx = this.integrateOutput.x;
+                        const dy = this.integrateOutput.y;
+                        const dz = this.integrateOutput.z;
+                        this.particleVelocities[particleIndex] = dx;
+                        this.particleVelocities[particleIndex + 1] = dy;
+                        this.particleVelocities[particleIndex + 2] = dz;
+
+                        const h = dt * this.speedScale;
+                        euler(x, y, z, dx, dy, dz, h, this.integrateOutput);
+                        this.particlePositions[particleIndex] = this.integrateOutput.x;
+                        this.particlePositions[particleIndex + 1] = this.integrateOutput.y;
+                        this.particlePositions[particleIndex + 2] = this.integrateOutput.z;
+                    }
+                }
+
+                update(dt) {
+                    this.updateColorFrameRotation(dt);
+                    this.updateColorValues(dt);
+                    this.updateParticles(dt);
+                }
+
+                copyTo(dst) {
+                    dst.omegaNorm = this.omegaNorm;
+                    dst.omegaChangeSpeed = this.omegaChangeSpeed;
+
+                    dst.omega.x = this.omega.x;
+                    dst.omega.y = this.omega.y;
+                    dst.omega.z = this.omega.z;
+
+                    dst.omegaTarget.radius = this.omegaTarget.radius;
+                    dst.omegaTarget.phi = this.omegaTarget.phi;
+                    dst.omegaTarget.theta = this.omegaTarget.theta;
+
+                    dst.omegaCurrent.radius = this.omegaCurrent.radius;
+                    dst.omegaCurrent.phi = this.omegaCurrent.phi;
+                    dst.omegaCurrent.theta = this.omegaCurrent.theta;
+
+                    dst.colorFrameRotation.w = this.colorFrameRotation.w;
+                    dst.colorFrameRotation.x = this.colorFrameRotation.x;
+                    dst.colorFrameRotation.y = this.colorFrameRotation.y;
+                    dst.colorFrameRotation.z = this.colorFrameRotation.z;
+
+                    dst.dq.w = this.dq.w;
+                    dst.dq.x = this.dq.x;
+                    dst.dq.y = this.dq.y;
+                    dst.dq.z = this.dq.z;
+
+                    dst.hueRange = this.hueRange;
+                    dst.hueRangeTarget = this.hueRangeTarget;
+                    dst.huePosition = this.huePosition;
+                    dst.hueRotation = this.hueRotation;
+
+                    dst.saturation = this.saturation;
+                    dst.saturationTarget = this.saturationTarget;
+
+                    dst.light = this.light;
+                    dst.lightTarget = this.lightTarget;
+
+                    dst.hueRangeChangeFactor = this.hueRangeChangeFactor;
+                    dst.hueRangeChangeDefault = this.hueRangeChangeDefault;
+                    dst.huePositionChangeFactor = this.huePositionChangeFactor;
+                    dst.hueRotationChangeFactor = this.hueRotationChangeFactor;
+                    dst.saturationChangeFactor = this.saturationChangeFactor;
+                    dst.lightChangeFactor = this.lightChangeFactor;
+
+                    dst.speedScale = this.speedScale;
+
+                    dst.particlePositions.set(this.particlePositions);
+                    dst.particleVelocities.set(this.particleVelocities);
+
+                    dst.integrateOutput.x = this.integrateOutput.x;
+                    dst.integrateOutput.y = this.integrateOutput.y;
+                    dst.integrateOutput.z = this.integrateOutput.z;
+                }
+            }
+
+            const simulationState = new SimulationState();
+            const simulationStatePrevious = new SimulationState();
+
+            initializeVertices(simulationState);
+
+            class Renderer {
+                constructor() {
+                    this.currentStartIndex = 0;
+
+                    this.colorHSL = new THREE.Color();
+                    this.colorRGB = new THREE.Vector3();
+
+                    this.velocityHueFactor = 0.0001;
+
+                    this.alphaRamp = new Float32Array(TRAIL);
+                    for (let j = 0; j < TRAIL; j++) {
+                        const alpha = j / (TRAIL - 1);
+                        this.alphaRamp[j] = Math.pow(alpha, 3.0);
+                    }
+
+                    this.qSlerped = new THREE.Quaternion();
+                }
+
+                updateVertices(simulationStateCurrent, simulationStatePrevious, interpolateAlpha) {
+                    // TODO
+                    // Now the vertices array work like this:
+                    // [p_1_1, p_1_2, p_1_3, ..., p_2_1, p_2_2. p_2_3, ..., p_n_1, p_n_2, ...]
+                    // Where p_particle_trail
+                    // I suspect that transposing the dimensions is going to be a lot more cache friendly
+                    // Meaning
+                    // [p_1_1, p_2_1, p_3_1, ..., p_1_2, p_2_2, p_3_2, ..., p_1_t, p_2_t, p_3_t]
+                    // Would also need to fix the indexes array
+
+                    // Can then do something like this:
+                    // positionAttribute.updateRange = {
+                    //     offset: startOffset,
+                    //     count: count
+                    // };
+                    // positionAttribute.needsUpdate = true;
+                    // Instead of sending the whole array every frame
+
+                    const particlePositionsCurrent = simulationStateCurrent.particlePositions;
+                    const particlePositionsPrevious = simulationStatePrevious.particlePositions;
+
+                    const particleVelocitiesCurrent = simulationStateCurrent.particleVelocities;
+                    const particleVelocitiesPrevious = simulationStatePrevious.particleVelocities;
+
+                    for (let i = 0; i < PARTICLES; i++) {
+                        const particleIndex = i * 3;
+
+                        const xCurrent = particlePositionsCurrent[particleIndex];
+                        const yCurrent = particlePositionsCurrent[particleIndex + 1];
+                        const zCurrent = particlePositionsCurrent[particleIndex + 2];
+
+                        const xPrevious = particlePositionsPrevious[particleIndex];
+                        const yPrevious = particlePositionsPrevious[particleIndex + 1];
+                        const zPrevious = particlePositionsPrevious[particleIndex + 2];
+
+                        const x = lerp(xPrevious, xCurrent, interpolateAlpha);
+                        const y = lerp(yPrevious, yCurrent, interpolateAlpha);
+                        const z = lerp(zPrevious, zCurrent, interpolateAlpha);
+
+                        const dxCurrent = particleVelocitiesCurrent[particleIndex];
+                        const dyCurrent = particleVelocitiesCurrent[particleIndex + 1];
+                        const dzCurrent = particleVelocitiesCurrent[particleIndex + 2];
+
+                        const dxPrevious = particleVelocitiesPrevious[particleIndex];
+                        const dyPrevious = particleVelocitiesPrevious[particleIndex + 1];
+                        const dzPrevious = particleVelocitiesPrevious[particleIndex + 2];
+
+                        const dx = lerp(dxPrevious, dxCurrent, interpolateAlpha);
+                        const dy = lerp(dyPrevious, dyCurrent, interpolateAlpha);
+                        const dz = lerp(dzPrevious, dzCurrent, interpolateAlpha);
+
+                        const nx = cameraDir.y * dz - cameraDir.z * dy;
+                        const ny = cameraDir.z * dx - cameraDir.x * dz;
+                        const nz = cameraDir.x * dy - cameraDir.y * dx;
+
+                        const normalLength = WIDTH / Math.max(Math.sqrt(nx * nx + ny * ny + nz * nz), 1e-6);
+                        const offsetX = nx * normalLength;
+                        const offsetY = ny * normalLength;
+                        const offsetZ = nz * normalLength;
+
+                        const vertexIndex = (i * TRAIL + this.currentStartIndex) * 6;
+
+                        vertices[vertexIndex] = x - offsetX;
+                        vertices[vertexIndex + 1] = y - offsetY;
+                        vertices[vertexIndex + 2] = z - offsetZ;
+
+                        vertices[vertexIndex + 3] = x + offsetX;
+                        vertices[vertexIndex + 4] = y + offsetY;
+                        vertices[vertexIndex + 5] = z + offsetZ;
+
+                        const vertexIndexNext = (i * TRAIL + ((this.currentStartIndex + 1) % TRAIL)) * 6;
+
+                        vertices[vertexIndexNext] = x;
+                        vertices[vertexIndexNext + 1] = y;
+                        vertices[vertexIndexNext + 2] = z;
+
+                        vertices[vertexIndexNext + 3] = x;
+                        vertices[vertexIndexNext + 4] = y;
+                        vertices[vertexIndexNext + 5] = z;
+
+                        const vertexIndexNextNext = (i * TRAIL + ((this.currentStartIndex + 2) % TRAIL)) * 6;
+
+                        const xLast = (vertices[vertexIndexNextNext] + vertices[vertexIndexNextNext + 3]) / 2.0;
+                        const yLast = (vertices[vertexIndexNextNext + 1] + vertices[vertexIndexNextNext + 4]) / 2.0;
+                        const zLast = (vertices[vertexIndexNextNext + 2] + vertices[vertexIndexNextNext + 5]) / 2.0;
+
+                        vertices[vertexIndexNextNext] = xLast;
+                        vertices[vertexIndexNextNext + 1] = yLast;
+                        vertices[vertexIndexNextNext + 2] = zLast;
+
+                        vertices[vertexIndexNextNext + 3] = xLast;
+                        vertices[vertexIndexNextNext + 4] = yLast;
+                        vertices[vertexIndexNextNext + 5] = zLast;
+                    }
+                }
+
+                updateColors(simulationStateCurrent, simulationStatePrevious, interpolateAlpha) {
+                    const particleVelocitiesCurrent = simulationStateCurrent.particleVelocities;
+                    const particleVelocitiesPrevious = simulationStatePrevious.particleVelocities;
+
+                    const hueRotationCurrent = simulationStateCurrent.hueRotation;
+                    const hueRotationPrevious = simulationStatePrevious.hueRotation;
+                    const hueRotation = lerp(hueRotationPrevious, hueRotationCurrent, interpolateAlpha);
+
+                    const hueRangeCurrent = simulationStateCurrent.hueRange;
+                    const hueRangePrevious = simulationStatePrevious.hueRange;
+                    const hueRange = lerp(hueRangePrevious, hueRangeCurrent, interpolateAlpha);
+
+                    const huePositionCurrent = simulationStateCurrent.huePosition;
+                    const huePositionPrevious = simulationStatePrevious.huePosition;
+                    const huePosition = lerp(huePositionPrevious, huePositionCurrent, interpolateAlpha);
+
+                    const saturationCurrent = simulationStateCurrent.saturation;
+                    const saturationPrevious = simulationStatePrevious.saturation;
+                    const saturation = lerp(saturationPrevious, saturationCurrent, interpolateAlpha);
+
+                    const lightCurrent = simulationStateCurrent.light;
+                    const lightPrevious = simulationStatePrevious.light;
+                    const light = lerp(lightPrevious, lightCurrent, interpolateAlpha);
+
+                    const colorFrameRotationCurrent = simulationStateCurrent.colorFrameRotation;
+                    const colorFrameRotationPrevious = simulationStatePrevious.colorFrameRotation;
+                    this.qSlerped.w = colorFrameRotationPrevious.w;
+                    this.qSlerped.x = colorFrameRotationPrevious.x;
+                    this.qSlerped.y = colorFrameRotationPrevious.y;
+                    this.qSlerped.z = colorFrameRotationPrevious.z;
+                    const colorFrameRotation = this.qSlerped.slerp(colorFrameRotationCurrent, interpolateAlpha);
+
+                    for (let i = 0; i < PARTICLES; i++) {
+                        const particleIndex = i * 3;
+
+                        const dxCurrent = particleVelocitiesCurrent[particleIndex];
+                        const dyCurrent = particleVelocitiesCurrent[particleIndex + 1];
+                        const dzCurrent = particleVelocitiesCurrent[particleIndex + 2];
+
+                        const dxPrevious = particleVelocitiesPrevious[particleIndex];
+                        const dyPrevious = particleVelocitiesPrevious[particleIndex + 1];
+                        const dzPrevious = particleVelocitiesPrevious[particleIndex + 2];
+
+                        const dx = lerp(dxPrevious, dxCurrent, interpolateAlpha);
+                        const dy = lerp(dyPrevious, dyCurrent, interpolateAlpha);
+                        const dz = lerp(dzPrevious, dzCurrent, interpolateAlpha);
+
+                        const velocityLengthSquared = dx * dx + dy * dy + dz * dz;
+
+                        const angle = Math.atan2(dy, dx) * RAD2DEG;
+                        const rotatedAngle = mod(angle + hueRotation + 180, 360);
+                        const halfAngle = 360 - 2 * Math.abs(rotatedAngle - 180);
+                        const hue = mod(halfAngle / 360 * hueRange + huePosition - hueRange / 2 + velocityLengthSquared * this.velocityHueFactor, 360);
+
+                        this.colorHSL.setHSL(hue / 360.0, saturation / 100.0, light / 100.0);
+
+                        this.colorRGB.x = this.colorHSL.r;
+                        this.colorRGB.y = this.colorHSL.g;
+                        this.colorRGB.z = this.colorHSL.b;
+
+                        this.colorRGB.applyQuaternion(colorFrameRotation);
+                        this.colorRGB.clampScalar(0.0, 1.0);
+
+                        const indexColor = (i * TRAIL + this.currentStartIndex) * 8;
+
+                        colors[indexColor] = this.colorRGB.x;
+                        colors[indexColor + 1] = this.colorRGB.y;
+                        colors[indexColor + 2] = this.colorRGB.z;
+
+                        colors[indexColor + 4] = this.colorRGB.x;
+                        colors[indexColor + 5] = this.colorRGB.y;
+                        colors[indexColor + 6] = this.colorRGB.z;
+
+                        for (let j = 0; j < TRAIL; j++) {
+                            const indexAlpha = (j - this.currentStartIndex + TRAIL) % TRAIL;
+                            const a = this.alphaRamp[indexAlpha];
+
+                            const indexColor = (i * TRAIL + j) * 8;
+                            colors[indexColor + 3] = a;
+                            colors[indexColor + 7] = a;
+                        }
+                    }
+                }
+
+                update(simulationStateCurrent, simulationStatePrevious, interpolateAlpha) {
+                    this.updateVertices(simulationStateCurrent, simulationStatePrevious, interpolateAlpha);
+                    this.updateColors(simulationStateCurrent, simulationStatePrevious, interpolateAlpha);
+
+                    this.currentStartIndex = (this.currentStartIndex + 1) % TRAIL;
+                }
+            }
+
+            const renderer = new Renderer();
 
             const MAX_DT = 0.05;
-
             let timestampPrevious = performance.now();
-
-            const omegaNorm = 0.1;
-            let omegaAz = 0.0;
-            let omegaEl = 0.0;
-            let omega = new Vector(0.0, 0.0, 0.0);
-
-            const omegaChangeSpeed = 2.0;
-            let omegaTargetAz = 0.0;
-            let omegaTargetEl = 0.0;
-            let omegaTarget = new Vector(0.0, 0.0, 0.0);
-
-            let colorFrameRotation = new Quaternion(1.0, 0.0, 0.0, 0.0);
-            let dq = new Quaternion(1.0, 0.0, 0.0, 0.0);
-            let normalizeCounter = 0;
-
-            let hueRange = 20;
-            let hueRangeTarget = getNextHueRangeTarget();
-
-            let huePosition = sampleUniform(0.0, 360.0);
-            let hueRotation = 0;
-
-            let saturation = 60;
-            let saturationTarget = getNextSaturationTarget();
-
-            let light = 50;
-            let lightTarget = getNextLightTarget();
-
-            const velocityHueFactor = 0.0001;
-
-            const integrateOutput = new Vector(0.0, 0.0, 0.0);
-            let rotateOutput = new Vector(0.0, 0.0, 0.0);
-            let rgbOut = new Vector(0.0, 0.0, 0.0);
-
-            const alphaRamp = new Float32Array(TRAIL);
-            for (let j = 0; j < TRAIL; j++) {
-                const alpha = j / (TRAIL - 1);
-                alphaRamp[j] = Math.pow(alpha, 3.0);
-            }
-
-            function updateColorFrameRotation(dt) {
-                let omegaErrorAz = omegaTargetAz - omegaAz;
-                while (omegaErrorAz > Math.PI) {
-                    omegaErrorAz -= 2.0 * Math.PI;
-                }
-                while (omegaErrorAz < -Math.PI) {
-                    omegaErrorAz += 2.0 * Math.PI;
-                }
-
-                const omegaErrorEl = omegaTargetEl - omegaEl;
-                const omegaErorNormSquared = omegaErrorAz * omegaErrorAz + omegaErrorEl * omegaErrorEl;
-                if (omegaErorNormSquared > 1e-3) {
-                    omegaAz += omegaErrorAz * omegaChangeSpeed * dt;
-                    omegaEl += omegaErrorEl * omegaChangeSpeed * dt;
-                } else {
-                    [omegaTargetAz, omegaTargetEl] = getRandomTarget();
-                    sphericalVector(omegaNorm, omegaTargetAz, omegaTargetEl, omegaTarget);
-                }
-
-                sphericalVector(omegaNorm, omegaAz, omegaEl, omega);
-
-                deltaQuaternion(omega, dt, dq);
-                colorFrameRotation.multiply(dq);
-                if (normalizeCounter % 100 == 0) {
-                    colorFrameRotation.normalize();
-                }
-                normalizeCounter++;
-            }
-
-            function updateColorValues(dt) {
-                const hueRangeChangeFactor = 0.2;
-                const hueRangeChangeDefault = 10.0;
-                if (hueRange < hueRangeTarget) {
-                    hueRange += ((hueRangeTarget - hueRange) * hueRangeChangeFactor + hueRangeChangeDefault) * dt;
-                    if (hueRange >= hueRangeTarget) {
-                        hueRangeTarget = getNextHueRangeTarget();
-                    }
-                } else {
-                    hueRange += ((hueRangeTarget - hueRange) * hueRangeChangeFactor - hueRangeChangeDefault) * dt;
-                    if (hueRange <= hueRangeTarget) {
-                        hueRangeTarget = getNextHueRangeTarget();
-                    }
-                }
-
-                const huePositionChangeFactor = 0.05;
-                const huePositionChange = getHuePositionChange();
-                huePosition += huePositionChange * huePositionChangeFactor * dt;
-                if (huePosition >= 360.0) {
-                    huePosition = 0.0;
-                }
-
-                const hueRotationChangeFactor = 0.1;
-                const hueRotationChange = getHueRotationChange();
-                hueRotation += hueRotationChange * hueRotationChangeFactor * dt;
-                if (hueRotation >= 360.0) {
-                    hueRotation = 0.0;
-                }
-
-                const saturationChangeFactor = 0.5;
-                const saturationError = saturationTarget - saturation;
-                if (Math.abs(saturationError) > 1e-1) {
-                    saturation += saturationError * saturationChangeFactor * dt;
-                } else {
-                    saturationTarget = getNextSaturationTarget();
-                }
-
-                const lightChangeFactor = 0.1;
-                const lightError = lightTarget - light;
-                if (Math.abs(lightError) > 1e-1) {
-                    light += lightError * lightChangeFactor * dt;
-                } else {
-                    lightTarget = getNextLightTarget();
-                }
-            }
-
-            function updateParticles(dt) {
-                for (let i = 0; i < PARTICLES; i++) {
-                    const particleIndex = i * 3;
-                    const x = particlePositions[particleIndex];
-                    const y = particlePositions[particleIndex + 1];
-                    const z = particlePositions[particleIndex + 2];
-
-                    lorenz(x, y, z, integrateOutput);
-                    const dx = integrateOutput.x;
-                    const dy = integrateOutput.y;
-                    const dz = integrateOutput.z;
-                    particleVelocities[particleIndex] = dx;
-                    particleVelocities[particleIndex + 1] = dy;
-                    particleVelocities[particleIndex + 2] = dz;
-
-                    const h = dt * speedScale;
-                    euler(x, y, z, dx, dy, dz, h, integrateOutput);
-                    particlePositions[particleIndex] = integrateOutput.x;
-                    particlePositions[particleIndex + 1] = integrateOutput.y;
-                    particlePositions[particleIndex + 2] = integrateOutput.z;
-                }
-            }
-
-            function updateVertices() {
-                for (let i = 0; i < PARTICLES; i++) {
-                    const particleIndex = i * 3;
-
-                    const x = particlePositions[particleIndex];
-                    const y = particlePositions[particleIndex + 1];
-                    const z = particlePositions[particleIndex + 2];
-
-                    const dx = particleVelocities[particleIndex];
-                    const dy = particleVelocities[particleIndex + 1];
-                    const dz = particleVelocities[particleIndex + 2];
-
-                    const nx = cameraDir.y * dz - cameraDir.z * dy;
-                    const ny = cameraDir.z * dx - cameraDir.x * dz;
-                    const nz = cameraDir.x * dy - cameraDir.y * dx;
-
-                    const normalLength = WIDTH / Math.max(Math.sqrt(nx * nx + ny * ny + nz * nz), 1e-6);
-                    const offsetX = nx * normalLength;
-                    const offsetY = ny * normalLength;
-                    const offsetZ = nz * normalLength;
-
-                    const vertexIndex = (i * TRAIL + currentStartIndex) * 6;
-
-                    vertices[vertexIndex] = x - offsetX;
-                    vertices[vertexIndex + 1] = y - offsetY;
-                    vertices[vertexIndex + 2] = z - offsetZ;
-
-                    vertices[vertexIndex + 3] = x + offsetX;
-                    vertices[vertexIndex + 4] = y + offsetY;
-                    vertices[vertexIndex + 5] = z + offsetZ;
-
-                    const vertexIndexNext = (i * TRAIL + (currentStartIndex + 1) % TRAIL) * 6;
-
-                    vertices[vertexIndexNext] = integrateOutput.x;
-                    vertices[vertexIndexNext + 1] = integrateOutput.y;
-                    vertices[vertexIndexNext + 2] = integrateOutput.z;
-
-                    vertices[vertexIndexNext + 3] = integrateOutput.x;
-                    vertices[vertexIndexNext + 4] = integrateOutput.y;
-                    vertices[vertexIndexNext + 5] = integrateOutput.z;
-
-                    const vertexIndexNextNext = (i * TRAIL + (currentStartIndex + 2) % TRAIL) * 6;
-
-                    const xLast = (vertices[vertexIndexNextNext] + vertices[vertexIndexNextNext + 3]) / 2.0;
-                    const yLast = (vertices[vertexIndexNextNext + 1] + vertices[vertexIndexNextNext + 4]) / 2.0;
-                    const zLast = (vertices[vertexIndexNextNext + 2] + vertices[vertexIndexNextNext + 5]) / 2.0;
-
-                    vertices[vertexIndexNextNext] = xLast;
-                    vertices[vertexIndexNextNext + 1] = yLast;
-                    vertices[vertexIndexNextNext + 2] = zLast;
-
-                    vertices[vertexIndexNextNext + 3] = xLast;
-                    vertices[vertexIndexNextNext + 4] = yLast;
-                    vertices[vertexIndexNextNext + 5] = zLast;
-                }
-            }
-
-            function updateColors() {
-                for (let i = 0; i < PARTICLES; i++) {
-                    const particleIndex = i * 3;
-                    const dx = particleVelocities[particleIndex];
-                    const dy = particleVelocities[particleIndex + 1];
-                    const dz = particleVelocities[particleIndex + 2];
-
-                    const velocityLengthSquared = dx * dx + dy * dy + dz * dz;
-
-                    const angle = Math.atan2(dy, dx) * RAD2DEG;
-                    const rotatedAngle = mod(angle + hueRotation + 180, 360);
-                    const halfAngle = 360 - 2 * Math.abs(rotatedAngle - 180);
-                    const hue = mod(halfAngle / 360 * hueRange + huePosition - hueRange / 2 + velocityLengthSquared * velocityHueFactor, 360);
-
-                    hslToRgb(hue / 360.0, saturation / 100.0, light / 100.0, rgbOut);
-
-                    const indexColor = (i * TRAIL + currentStartIndex) * 8;
-
-                    rotateVector(colorFrameRotation, rgbOut, rotateOutput);
-                    rgbOut.x = Math.min(Math.max(rotateOutput.x, 0.0), 1.0);
-                    rgbOut.y = Math.min(Math.max(rotateOutput.y, 0.0), 1.0);
-                    rgbOut.z = Math.min(Math.max(rotateOutput.z, 0.0), 1.0);
-
-                    colors[indexColor] = rgbOut.x;
-                    colors[indexColor + 1] = rgbOut.y;
-                    colors[indexColor + 2] = rgbOut.z;
-
-                    colors[indexColor + 4] = rgbOut.x;
-                    colors[indexColor + 5] = rgbOut.y;
-                    colors[indexColor + 6] = rgbOut.z;
-
-                    for (let j = 0; j < TRAIL; j++) {
-                        const indexAlpha = (j - currentStartIndex + TRAIL) % TRAIL;
-                        const a = alphaRamp[indexAlpha];
-
-                        const indexColor = (i * TRAIL + j) * 8;
-                        colors[indexColor + 3] = a;
-                        colors[indexColor + 7] = a;
-                    }
-                }
-            }
+            let timestepAccumulator = 0.0;
+            const fixedPhysicsTimestep = 1e-2;
 
             function animate(timestamp) {
                 const animateStart = performance.now();
@@ -600,7 +685,14 @@
                 const dt = Math.min((timestamp - timestampPrevious) / 1000.0, MAX_DT);
                 timestampPrevious = timestamp;
 
-                if (resize(renderer)) {
+                timestepAccumulator += dt;
+                while (timestepAccumulator > fixedPhysicsTimestep) {
+                    simulationState.copyTo(simulationStatePrevious);
+                    simulationState.update(fixedPhysicsTimestep);
+                    timestepAccumulator -= fixedPhysicsTimestep;
+                }
+
+                if (resize(threeRenderer)) {
                     camera.aspect = canvas.clientWidth / canvas.clientHeight;
                     camera.updateProjectionMatrix();
                 }
@@ -608,19 +700,14 @@
                 camera.getWorldDirection(cameraDir);
                 cameraDir.applyMatrix3(meshNormalMatrixTransposed);
 
-                updateColorFrameRotation(dt);
-                updateColorValues(dt);
-                updateParticles(dt);
-
-                updateVertices();
-                updateColors();
-                currentStartIndex = (currentStartIndex + 1) % TRAIL;
+                const interpolateAlpha = timestepAccumulator / fixedPhysicsTimestep;
+                renderer.update(simulationState, simulationStatePrevious, interpolateAlpha);
 
                 positionAttribute.needsUpdate = true;
                 colorAttribute.needsUpdate = true;
 
                 controls.update();
-                renderer.render(scene, camera);
+                threeRenderer.render(scene, camera);
 
 
 
@@ -638,7 +725,7 @@
                     perfFrames = 0;
                 }
             }
-            renderer.setAnimationLoop(animate);
+            threeRenderer.setAnimationLoop(animate);
         }
         start();
     </script>
