@@ -420,6 +420,8 @@
         positionAttribute: THREE.BufferAttribute;
         colorAttribute: THREE.BufferAttribute;
 
+        aspectRatio: number;
+
         cameraDir: THREE.Vector3;
         meshNormalMatrix: THREE.Matrix3;
         meshNormalMatrixTransposed: THREE.Matrix3;
@@ -500,6 +502,8 @@
 
             this.threeRenderer.render(this.scene, this.camera);
 
+            this.aspectRatio = 1.0;
+
             this.cameraDir = new THREE.Vector3();
             this.meshNormalMatrix = new THREE.Matrix3();
             this.meshNormalMatrixTransposed = new THREE.Matrix3();
@@ -548,7 +552,9 @@
             this.threeRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
             this.threeRenderer.setSize(width, height, false);
 
-            this.camera.aspect = width / height;
+            this.aspectRatio = width / height;
+
+            this.camera.aspect = this.aspectRatio;
             this.camera.updateProjectionMatrix();
         }
 
@@ -755,15 +761,7 @@
         ) {
             this.scene.background = this.backgroundColor.setStyle(backgroundColor);
 
-            // 1.76
-            // const scale = 2.0;
-            // this.mesh.scale.set(scale, scale, scale);
-            // this.mesh.position.set(0.0, -25.0 * scale, 0.0);
-            // this.mesh.rotation.x = -Math.PI / 2.0;
-            // this.mesh.rotation.z = -Math.PI / 4.0;
-
-            // 0.7
-            const scale = 1.4;
+            const scale = this.aspectRatio + 0.4;
             this.mesh.scale.set(scale, scale, scale);
             this.mesh.position.set(0.0, -25.0 * scale, 0.0);
             this.mesh.rotation.x = -Math.PI / 2.0;
@@ -810,7 +808,7 @@
         // let perfFrames = 0;
 
         const PARTICLES = 100;
-        const TRAIL = 400;
+        const TRAIL = 300;
         const WIDTH = 0.1;
 
         const simulationState = new SimulationState(PARTICLES);

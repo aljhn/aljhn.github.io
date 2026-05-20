@@ -106,9 +106,9 @@
                             aria-hidden="true"
                         >
                             {#if darkModeState}
-                                <Moon width="32" height="32" />
-                            {:else}
                                 <Sun width="32" height="32" />
+                            {:else}
+                                <Moon width="32" height="32" />
                             {/if}
                         </div>
 
@@ -144,9 +144,9 @@
             aria-label="Dark mode toggle"
         >
             {#if darkModeState}
-                <Moon width="32" height="32" />
-            {:else}
                 <Sun width="32" height="32" />
+            {:else}
+                <Moon width="32" height="32" />
             {/if}
         </button>
 
