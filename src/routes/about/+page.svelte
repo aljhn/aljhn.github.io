@@ -14,15 +14,15 @@
             title: "Interests",
             paragraphs: [
                 "I am particularly interested in the combination of deep learning and dynamical systems. This includes methods like Neural Ordinary Differential Equations, Physics Informed Neural Networks and Neural Operators.",
-                "I also have a more general interest in deep learning, including computer vision and LLMs.",
-                "And I like math, especially subjects like: dynamical systems theory, partial differential equations and functional analysis."
+                "I also have a more general interest in deep learning, including applied areas like computer vision and LLMs.",
+                "And I like math, especially subjects like: dynamical systems theory, functional analysis and optimization."
             ]
         },
         {
-            title: "Miscellaneous",
+            title: "Misc",
             paragraphs: [
                 "I'm a fitness nerd that is currently doing a lot of powerlifting.",
-                "Also a big fan of scuba diving and freediving."
+                "Also a fan of scuba diving, swimming and boxing."
             ]
         }
     ];

@@ -19,7 +19,7 @@
             title: "Work in progress",
             authors: "",
             conference: "",
-            year: 2025,
+            year: 2026,
             link: ""
         },
         {

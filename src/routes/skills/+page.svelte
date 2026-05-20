@@ -1,7 +1,4 @@
 <script lang="ts">
-    import { onMount, onDestroy } from "svelte";
-    import { browser } from "$app/environment";
-
     import Meta from "$lib/Meta.svelte";
 
     const beginner: string = "Beginner";
@@ -22,6 +19,18 @@
             ]
         },
         {
+            category: "Web",
+            items: [
+                { name: "HTML", level: intermediate, icon: "/icons/html5.svg" },
+                { name: "CSS", level: intermediate, icon: "/icons/css3.svg" },
+                { name: "JavaScript", level: intermediate, icon: "/icons/javascript.svg" },
+                { name: "TypeScript", level: beginner, icon: "/icons/typescript.svg" },
+                { name: "Svelte (Kit)", level: beginner, icon: "/icons/svelte.svg" },
+                //{ name: "Tailwind CSS", level: beginner, icon: "/icons/tailwindcss.svg" },
+                { name: "Flask", level: beginner, icon: "/icons/flask.svg" }
+            ]
+        },
+        {
             category: "Machine Learning and Scientific Computing",
             items: [
                 { name: "NumPy", level: advanced, icon: "/icons/numpy.svg" },
@@ -34,18 +43,6 @@
                 { name: "Transformers", level: beginner, icon: "/icons/huggingface.svg" },
                 { name: "OpenCV", level: beginner, icon: "/icons/opencv.svg" },
                 { name: "ROS", level: beginner, icon: "/icons/ros.svg" }
-            ]
-        },
-        {
-            category: "Web",
-            items: [
-                { name: "HTML", level: intermediate, icon: "/icons/html5.svg" },
-                { name: "CSS", level: intermediate, icon: "/icons/css3.svg" },
-                { name: "JavaScript", level: intermediate, icon: "/icons/javascript.svg" },
-                { name: "TypeScript", level: beginner, icon: "/icons/typescript.svg" },
-                { name: "Svelte (Kit)", level: beginner, icon: "/icons/svelte.svg" },
-                //{ name: "Tailwind CSS", level: beginner, icon: "/icons/tailwindcss.svg" },
-                { name: "Flask", level: beginner, icon: "/icons/flask.svg" }
             ]
         },
         {
@@ -72,85 +69,32 @@
             ]
         }*/
     ];
-
-    onMount(() => {
-        const divPadding: number = 16;
-
-        const skillsGridRoot: HTMLElement = document.getElementById("skillsGridRoot")!;
-        const skillDivs: HTMLCollection = skillsGridRoot.children;
-
-        function addPadding() {
-            let columns: number = 1;
-            if (window.matchMedia("(min-width: 1024px)").matches) {
-                columns = 2;
-            }
-
-            for (let i = 0; i < skillDivs.length; i++) {
-                (skillDivs[i] as HTMLElement).style.transform = `translateY(0px)`;
-            }
-
-            for (let i = columns; i < skillDivs.length; i++) {
-                const currentDiv: HTMLElement = skillDivs[i] as HTMLElement;
-                const aboveDiv: HTMLElement = skillDivs[i - columns] as HTMLElement;
-
-                const offset: number =
-                    currentDiv.getBoundingClientRect().top - aboveDiv.getBoundingClientRect().bottom - divPadding;
-
-                if (offset < 0) {
-                    currentDiv.style.transform = `translateY(${Math.abs(offset)}px)`;
-                } else {
-                    currentDiv.style.transform = `translateY(-${Math.abs(offset)}px)`;
-                }
-            }
-
-            const mainHeight: number =
-                window.pageYOffset +
-                skillDivs[skillDivs.length - 1].getBoundingClientRect().bottom -
-                document.getElementsByTagName("header")[0].getBoundingClientRect().height +
-                divPadding;
-
-            skillsGridRoot.style.height = "100%";
-            document.getElementsByTagName("main")[0].style.height = mainHeight.toString() + "px";
-        }
-
-        const resizeObserver: ResizeObserver = new ResizeObserver((entries) => {
-            addPadding();
-        });
-        resizeObserver.observe(document.documentElement);
-    });
-
-    onDestroy(() => {
-        if (browser) {
-            document.getElementsByTagName("main")[0].style.height = "100%";
-        }
-    });
 </script>
 
 <Meta name="Skills" />
 
-<div class="mt-5 grid grid-cols-1 pt-5 lg:grid-cols-2" id="skillsGridRoot">
+<div class="mt-5 columns-1 gap-8 pt-5 lg:columns-2">
     {#each skills as skill}
-        <div class="h-min px-10">
-            <section class="bg-bglight-2 dark:bg-bgdark-2 rounded-xl {skill.category !== '' ? 'p-3' : ''} shadow-xl">
-                {#if skill.category !== ""}
+        {#if skill.category !== ""}
+            <div class="mb-8 break-inside-avoid px-4 lg:px-10">
+                <section class="bg-bglight-2 dark:bg-bgdark-2 rounded-xl p-3 shadow-xl">
                     <h2
                         class="text-textlight-1 dark:text-textdark-1 mb-4 border-b-2 border-current pb-2 font-mono text-2xl font-semibold"
                     >
                         {skill.category}
                     </h2>
-                    <ul class="space-y-0">
+                    <ul class="space-y-2">
                         {#each skill.items as item}
                             <li class="flex items-center justify-between">
-                                <span class="flex space-x-1">
-                                    <img src={item.icon} class="size-7 pr-1" alt="Skill icon" />
+                                <span class="flex items-center space-x-2">
+                                    <img src={item.icon} class="size-7 object-contain" alt="{item.name} icon" />
                                     <p class="font-mono text-lg">{item.name}</p>
                                 </span>
-                                <!--<p class="text-sm italic">{item.level}</p>-->
                             </li>
                         {/each}
                     </ul>
-                {/if}
-            </section>
-        </div>
+                </section>
+            </div>
+        {/if}
     {/each}
 </div>

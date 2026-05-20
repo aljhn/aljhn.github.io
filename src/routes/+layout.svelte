@@ -5,11 +5,11 @@
     let { children } = $props();
 </script>
 
-<div class="grid min-h-screen max-w-screen grid-rows-[auto_1fr] font-sans">
+<div class="flex min-h-screen flex-col font-sans">
     <Header />
 
-    <div class="bg-bglight-1 dark:bg-bgdark-1 text-gray-600 dark:text-gray-300" id="mainRoot">
-        <main class="container mx-auto h-full pb-10">
+    <div class="bg-bglight-1 dark:bg-bgdark-1 flex flex-1 flex-col text-gray-600 dark:text-gray-300" id="mainRoot">
+        <main class="mx-auto flex w-full flex-1 flex-col px-0 pb-10 lg:px-20">
             {@render children()}
         </main>
     </div>

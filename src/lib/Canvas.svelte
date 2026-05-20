@@ -1,44 +1,62 @@
 <script lang="ts">
+    import { onMount } from "svelte";
     import * as THREE from "three";
     import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 
-    class Lorenz {
-        constructor() {
-            this.sigma = 10.0;
-            this.rho = 28.0;
-            this.beta = 8.0 / 3.0;
+    interface ODE {
+        f: (x: number, y: number, z: number, out: THREE.Vector3) => void;
+    }
+
+    class Lorenz implements ODE {
+        rho: number;
+        sigma: number;
+        beta: number;
+
+        constructor(rho: number = 28.0, sigma: number = 10.0, beta: number = 8.0 / 3.0) {
+            this.rho = rho;
+            this.sigma = sigma;
+            this.beta = beta;
         }
 
-        f(x, y, z, out) {
+        f(x: number, y: number, z: number, out: THREE.Vector3): void {
             out.x = this.sigma * (y - x);
             out.y = x * (this.rho - z) - y;
             out.z = x * y - this.beta * z;
         }
     }
 
-    class Euler {
+    interface Integrator {
+        step: (x: number, y: number, z: number, ode: ODE, h: number, out: THREE.Vector3) => void;
+    }
+
+    class Euler implements Integrator {
+        k: THREE.Vector3;
+
         constructor() {
-            this.d = new THREE.Vector3();
+            this.k = new THREE.Vector3();
         }
 
-        iterate(x, y, z, system, h, out) {
-            system.f(x, y, z, this.d);
-            out.x = x + this.d.x * h;
-            out.y = y + this.d.y * h;
-            out.z = z + this.d.z * h;
+        step(x: number, y: number, z: number, ode: ODE, h: number, out: THREE.Vector3): void {
+            ode.f(x, y, z, this.k);
+            out.x = x + this.k.x * h;
+            out.y = y + this.k.y * h;
+            out.z = z + this.k.z * h;
         }
     }
 
-    class RK2 {
+    class RK2 implements Integrator {
+        k1: THREE.Vector3;
+        k2: THREE.Vector3;
+
         constructor() {
             this.k1 = new THREE.Vector3();
             this.k2 = new THREE.Vector3();
         }
 
-        iterate(x, y, z, system, h, out) {
-            system.f(x, y, z, this.k1);
+        step(x: number, y: number, z: number, ode: ODE, h: number, out: THREE.Vector3): void {
+            ode.f(x, y, z, this.k1);
 
-            system.f(x + this.k1.x * h, y + this.k1.y * h, z + this.k1.z * h, this.k2);
+            ode.f(x + this.k1.x * h, y + this.k1.y * h, z + this.k1.z * h, this.k2);
 
             out.x = x + 0.5 * (this.k1.x + this.k2.x) * h;
             out.y = y + 0.5 * (this.k1.y + this.k2.y) * h;
@@ -46,37 +64,11 @@
         }
     }
 
-    class RK4 {
-        constructor() {
-            this.k1 = new THREE.Vector3();
-            this.k2 = new THREE.Vector3();
-            this.k3 = new THREE.Vector3();
-            this.k4 = new THREE.Vector3();
-        }
-
-        iterate(x, y, z, system, h, out) {
-            const h2 = h * 0.5;
-
-            system.f(x, y, z, this.k1);
-
-            system.f(x + this.k1.x * h2, y + this.k1.y * h2, z + this.k1.z * h2, this.k2);
-
-            system.f(x + this.k2.x * h2, y + this.k2.y * h2, z + this.k2.z * h2, this.k3);
-
-            system.f(x + this.k3.x * h, y + this.k3.y * h, z + this.k3.z * h, this.k4);
-
-            const h6 = h / 6;
-            out.x = x + h6 * (this.k1.x + 2 * this.k2.x + 2 * this.k3.x + this.k4.x);
-            out.y = y + h6 * (this.k1.y + 2 * this.k2.y + 2 * this.k3.y + this.k4.y);
-            out.z = z + h6 * (this.k1.z + 2 * this.k2.z + 2 * this.k3.z + this.k4.z);
-        }
-    }
-
-    function sampleUniform(low, high) {
+    function sampleUniform(low: number, high: number): number {
         return Math.random() * (high - low) + low;
     }
 
-    function sampleStandardNormal() {
+    function sampleStandardNormal(): number {
         const u1 = sampleUniform(1e-6, 1);
         const u2 = sampleUniform(0, 1);
 
@@ -88,50 +80,58 @@
         return z0;
     }
 
-    function sampleNormal(mean, std) {
+    function sampleNormal(mean: number, std: number): number {
         const z = sampleStandardNormal();
         return mean + std * z;
     }
 
-    function sampleLogNormal(mean, std) {
+    function sampleLogNormal(mean: number, std: number): number {
         return Math.exp(sampleNormal(mean, std));
     }
 
-    function getNextHueRangeTarget() {
-        return Math.exp(sampleNormal(4, 0.5));
+    function getNextHueRangeTarget(): number {
+        return sampleLogNormal(4, 0.5);
     }
 
-    function getNextSaturationTarget() {
-        return sampleUniform(40.0, 90.0);
+    function getNextSaturationTarget(): number {
+        return sampleUniform(40.0, 60.0);
     }
 
-    function getNextLightTarget() {
-        return sampleUniform(30.0, 70.0);
+    function getNextLightTarget(): number {
+        return sampleUniform(40.0, 60.0);
     }
 
-    function getHuePositionChange() {
+    function getHuePositionChange(): number {
         return sampleNormal(50.0, 15.0);
     }
 
-    function getHueRotationChange() {
+    function getHueRotationChange(): number {
         return sampleNormal(30.0, 10.0);
     }
 
     const RAD2DEG = 180.0 / Math.PI;
 
-    function mod(n, d) {
+    function mod(n: number, d: number): number {
         return ((n % d) + d) % d;
     }
 
-    function shortestAngleDifference(a, b) {
-        return Math.atan2(Math.sin(b - a), Math.cos(b - a));
+    function shortestAngleDifference(a: number, b: number): number {
+        // return Math.atan2(Math.sin(b - a), Math.cos(b - a));
+        let difference = b - a;
+        while (difference < -Math.PI) {
+            difference += Math.PI * 2;
+        }
+        while (difference > Math.PI) {
+            difference -= Math.PI * 2;
+        }
+        return difference;
     }
 
-    function lerp(a, b, t) {
+    function lerp(a: number, b: number, t: number): number {
         return a + (b - a) * t;
     }
 
-    function getRandomTarget(out) {
+    function getRandomTarget(out: THREE.Spherical): void {
         const az = Math.random() * 2.0 * Math.PI;
         const z = Math.random() * 2.0 - 1.0;
         const el = Math.asin(z);
@@ -139,7 +139,7 @@
         out.theta = el;
     }
 
-    function deltaQuaternion(omega, dt, dq) {
+    function deltaQuaternion(omega: THREE.Vector3, dt: number, dq: THREE.Quaternion): void {
         const omegaLength = omega.length();
         const angle = omegaLength * dt;
 
@@ -162,570 +162,680 @@
         dq.z = nz * s;
     }
 
-    function start() {
-        const canvas = document.getElementById("canvas");
+    class SimulationState {
+        omegaNorm: number;
+        omegaChangeSpeed: number;
 
-        function resize(threeRenderer) {
-            const canvas = threeRenderer.domElement;
-            const width = canvas.clientWidth;
-            const height = canvas.clientHeight;
-            const devicePixelRatio = window.devicePixelRatio;
-            const needResize = canvas.width !== width || canvas.height !== height;
-            if (needResize) {
-                threeRenderer.setSize(width, height, false);
-                threeRenderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+        omega: THREE.Vector3;
+        omegaTarget: THREE.Spherical;
+        omegaCurrent: THREE.Spherical;
+
+        colorFrameRotation: THREE.Quaternion;
+        dq: THREE.Quaternion;
+
+        hueRange: number;
+        hueRangeTarget: number;
+
+        huePosition: number;
+        hueRotation: number;
+
+        saturation: number;
+        saturationTarget: number;
+
+        light: number;
+        lightTarget: number;
+
+        hueRangeChangeFactor: number;
+        hueRangeChangeDefault: number;
+        huePositionChangeFactor: number;
+        hueRotationChangeFactor: number;
+        saturationChangeFactor: number;
+        lightChangeFactor: number;
+
+        speedScale: number;
+
+        particleAmount: number;
+
+        particlePositions: Float32Array;
+        particleVelocities: Float32Array;
+
+        integrateOutput: THREE.Vector3;
+
+        ode: ODE;
+        integrator: Integrator;
+
+        constructor(particleAmount: number) {
+            this.omegaNorm = 0.1;
+            this.omegaChangeSpeed = 2.0;
+
+            this.omega = new THREE.Vector3();
+            this.omegaTarget = new THREE.Spherical();
+            this.omegaCurrent = new THREE.Spherical(this.omegaNorm, 0.0, 0.0);
+
+            this.colorFrameRotation = new THREE.Quaternion();
+            this.dq = new THREE.Quaternion();
+
+            this.hueRange = 20;
+            this.hueRangeTarget = getNextHueRangeTarget();
+
+            this.huePosition = sampleUniform(0.0, 360.0);
+            this.hueRotation = 0;
+
+            this.saturation = 60;
+            this.saturationTarget = getNextSaturationTarget();
+
+            this.light = 50;
+            this.lightTarget = getNextLightTarget();
+
+            this.hueRangeChangeFactor = 0.2;
+            this.hueRangeChangeDefault = 10.0;
+            this.huePositionChangeFactor = 0.05;
+            this.hueRotationChangeFactor = 0.1;
+            this.saturationChangeFactor = 0.5;
+            this.lightChangeFactor = 0.1;
+
+            this.speedScale = 0.2;
+
+            this.particleAmount = particleAmount;
+
+            this.particlePositions = new Float32Array(this.particleAmount * 3);
+            for (let i = 0; i < this.particleAmount; i++) {
+                const index = i * 3;
+                this.particlePositions[index] = sampleUniform(-5.0, 5.0);
+                this.particlePositions[index + 1] = sampleUniform(-5.0, 5.0);
+                this.particlePositions[index + 2] = sampleUniform(80.0, 100.0);
             }
-            return needResize;
+
+            this.particleVelocities = new Float32Array(this.particleAmount * 3);
+
+            this.integrateOutput = new THREE.Vector3();
+
+            this.ode = new Lorenz();
+            this.integrator = new RK2();
         }
 
-        const FOV = 60;
-        const camera = new THREE.PerspectiveCamera(FOV, canvas.clientWidth / canvas.clientHeight, 0.1, 1000.0);
-        camera.position.set(0, 0, 100);
-        camera.lookAt(0, 0, 0);
+        updateColorFrameRotation(dt: number): void {
+            const errorPhi = shortestAngleDifference(this.omegaCurrent.phi, this.omegaTarget.phi);
+            const errorTheta = shortestAngleDifference(this.omegaCurrent.theta, this.omegaTarget.theta);
 
-        const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x444444);
+            const errorNormSquared = errorPhi * errorPhi + errorTheta * errorTheta;
 
-        const threeRenderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+            if (errorNormSquared > 1e-3) {
+                this.omegaCurrent.phi += errorPhi * this.omegaChangeSpeed * dt;
+                this.omegaCurrent.theta += errorTheta * this.omegaChangeSpeed * dt;
+            } else {
+                getRandomTarget(this.omegaTarget);
+            }
 
-        const perfDiv = document.createElement("div");
-        perfDiv.style.position = "absolute";
-        perfDiv.style.top = "10px";
-        perfDiv.style.left = "10px";
-        perfDiv.style.color = "white";
-        perfDiv.style.fontFamily = "monospace";
-        perfDiv.style.fontSize = "14px";
-        perfDiv.style.background = "rgba(0,0,0,0.5)";
-        perfDiv.style.padding = "6px 10px";
-        perfDiv.style.borderRadius = "4px";
-        perfDiv.style.pointerEvents = "none";
-        document.body.appendChild(perfDiv);
+            this.omega.setFromSpherical(this.omegaCurrent);
 
-        let perfAccum = 0.0;
-        let perfFrames = 0;
+            deltaQuaternion(this.omega, dt, this.dq);
+            this.colorFrameRotation.multiply(this.dq);
+            this.colorFrameRotation.normalize();
+        }
 
-        const controls = new OrbitControls(camera, canvas);
-        controls.enableDamping = true;
-        controls.dampingFactor = 0.1;
+        updateColorValues(dt: number): void {
+            if (this.hueRange < this.hueRangeTarget) {
+                this.hueRange +=
+                    ((this.hueRangeTarget - this.hueRange) * this.hueRangeChangeFactor + this.hueRangeChangeDefault) *
+                    dt;
+                if (this.hueRange >= this.hueRangeTarget) {
+                    this.hueRangeTarget = getNextHueRangeTarget();
+                }
+            } else {
+                this.hueRange +=
+                    ((this.hueRangeTarget - this.hueRange) * this.hueRangeChangeFactor - this.hueRangeChangeDefault) *
+                    dt;
+                if (this.hueRange <= this.hueRangeTarget) {
+                    this.hueRangeTarget = getNextHueRangeTarget();
+                }
+            }
+
+            const huePositionChange = getHuePositionChange();
+            this.huePosition += huePositionChange * this.huePositionChangeFactor * dt;
+            if (this.huePosition >= 360.0) {
+                this.huePosition = 0.0;
+            }
+
+            const hueRotationChange = getHueRotationChange();
+            this.hueRotation += hueRotationChange * this.hueRotationChangeFactor * dt;
+            if (this.hueRotation >= 360.0) {
+                this.hueRotation = 0.0;
+            }
+
+            const saturationError = this.saturationTarget - this.saturation;
+            if (Math.abs(saturationError) > 1e-1) {
+                this.saturation += saturationError * this.saturationChangeFactor * dt;
+            } else {
+                this.saturationTarget = getNextSaturationTarget();
+            }
+
+            const lightError = this.lightTarget - this.light;
+            if (Math.abs(lightError) > 1e-1) {
+                this.light += lightError * this.lightChangeFactor * dt;
+            } else {
+                this.lightTarget = getNextLightTarget();
+            }
+        }
+
+        updateParticles(dt: number): void {
+            for (let i = 0; i < this.particleAmount; i++) {
+                const particleIndex = i * 3;
+                const x = this.particlePositions[particleIndex];
+                const y = this.particlePositions[particleIndex + 1];
+                const z = this.particlePositions[particleIndex + 2];
+
+                this.ode.f(x, y, z, this.integrateOutput);
+                this.particleVelocities[particleIndex] = this.integrateOutput.x;
+                this.particleVelocities[particleIndex + 1] = this.integrateOutput.y;
+                this.particleVelocities[particleIndex + 2] = this.integrateOutput.z;
+
+                const h = dt * this.speedScale;
+                this.integrator.step(x, y, z, this.ode, h, this.integrateOutput);
+                this.particlePositions[particleIndex] = this.integrateOutput.x;
+                this.particlePositions[particleIndex + 1] = this.integrateOutput.y;
+                this.particlePositions[particleIndex + 2] = this.integrateOutput.z;
+            }
+        }
+
+        update(dt: number): void {
+            this.updateColorFrameRotation(dt);
+            this.updateColorValues(dt);
+            this.updateParticles(dt);
+        }
+
+        copyTo(dst: SimulationState): void {
+            dst.omegaNorm = this.omegaNorm;
+            dst.omegaChangeSpeed = this.omegaChangeSpeed;
+
+            dst.omega.x = this.omega.x;
+            dst.omega.y = this.omega.y;
+            dst.omega.z = this.omega.z;
+
+            dst.omegaTarget.radius = this.omegaTarget.radius;
+            dst.omegaTarget.phi = this.omegaTarget.phi;
+            dst.omegaTarget.theta = this.omegaTarget.theta;
+
+            dst.omegaCurrent.radius = this.omegaCurrent.radius;
+            dst.omegaCurrent.phi = this.omegaCurrent.phi;
+            dst.omegaCurrent.theta = this.omegaCurrent.theta;
+
+            dst.colorFrameRotation.w = this.colorFrameRotation.w;
+            dst.colorFrameRotation.x = this.colorFrameRotation.x;
+            dst.colorFrameRotation.y = this.colorFrameRotation.y;
+            dst.colorFrameRotation.z = this.colorFrameRotation.z;
+
+            dst.dq.w = this.dq.w;
+            dst.dq.x = this.dq.x;
+            dst.dq.y = this.dq.y;
+            dst.dq.z = this.dq.z;
+
+            dst.hueRange = this.hueRange;
+            dst.hueRangeTarget = this.hueRangeTarget;
+            dst.huePosition = this.huePosition;
+            dst.hueRotation = this.hueRotation;
+
+            dst.saturation = this.saturation;
+            dst.saturationTarget = this.saturationTarget;
+
+            dst.light = this.light;
+            dst.lightTarget = this.lightTarget;
+
+            dst.hueRangeChangeFactor = this.hueRangeChangeFactor;
+            dst.hueRangeChangeDefault = this.hueRangeChangeDefault;
+            dst.huePositionChangeFactor = this.huePositionChangeFactor;
+            dst.hueRotationChangeFactor = this.hueRotationChangeFactor;
+            dst.saturationChangeFactor = this.saturationChangeFactor;
+            dst.lightChangeFactor = this.lightChangeFactor;
+
+            dst.speedScale = this.speedScale;
+
+            dst.particlePositions.set(this.particlePositions);
+            dst.particleVelocities.set(this.particleVelocities);
+
+            dst.integrateOutput.x = this.integrateOutput.x;
+            dst.integrateOutput.y = this.integrateOutput.y;
+            dst.integrateOutput.z = this.integrateOutput.z;
+        }
+    }
+
+    class Renderer {
+        particleAmount: number;
+        trailAmount: number;
+        ribbonWidth: number;
+
+        camera: THREE.PerspectiveCamera;
+        scene: THREE.Scene;
+        threeRenderer: THREE.WebGLRenderer;
+        controls: OrbitControls;
+
+        vertices: Float32Array;
+        indexes: Uint32Array;
+        colors: Float32Array;
+
+        geometry: THREE.BufferGeometry;
+        material: THREE.MeshBasicMaterial;
+        mesh: THREE.Mesh;
+
+        positionAttribute: THREE.BufferAttribute;
+        colorAttribute: THREE.BufferAttribute;
+
+        cameraDir: THREE.Vector3;
+        meshNormalMatrix: THREE.Matrix3;
+        meshNormalMatrixTransposed: THREE.Matrix3;
+
+        backgroundColor: THREE.Color;
+
+        currentStartIndex: number;
+
+        colorHSL: THREE.Color;
+        colorRGB: THREE.Vector3;
+
+        velocityHueFactor: number;
+
+        alphaRamp: Float32Array;
+
+        qSlerped: THREE.Quaternion;
+
+        constructor(particleAmount: number, trailAmount: number, ribbonWidth: number) {
+            this.particleAmount = particleAmount;
+            this.trailAmount = trailAmount;
+            this.ribbonWidth = ribbonWidth;
+
+            const FOV = 60;
+            this.camera = new THREE.PerspectiveCamera(FOV, canvas.clientWidth / canvas.clientHeight, 0.1, 1000.0);
+            this.camera.position.set(0, 0, 100);
+            this.camera.lookAt(0, 0, 0);
+
+            this.scene = new THREE.Scene();
+
+            this.threeRenderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+
+            this.controls = new OrbitControls(this.camera, canvas);
+            this.controls.enableDamping = true;
+            this.controls.dampingFactor = 0.1;
+
+            this.vertices = new Float32Array(2 * this.particleAmount * this.trailAmount * 3);
+            this.indexes = new Uint32Array(2 * this.particleAmount * this.trailAmount * 3);
+            const maxIndex = this.trailAmount * 2;
+            for (let i = 0; i < this.particleAmount; i++) {
+                for (let j = 0; j < this.trailAmount; j++) {
+                    const insertIndex = (i * this.trailAmount + j) * 6;
+                    const index = j * 2;
+                    const indexOffset = i * maxIndex;
+
+                    this.indexes[insertIndex] = (index % maxIndex) + indexOffset;
+                    this.indexes[insertIndex + 1] = ((index + 1) % maxIndex) + indexOffset;
+                    this.indexes[insertIndex + 2] = ((index + 2) % maxIndex) + indexOffset;
+
+                    this.indexes[insertIndex + 3] = ((index + 1) % maxIndex) + indexOffset;
+                    this.indexes[insertIndex + 4] = ((index + 3) % maxIndex) + indexOffset;
+                    this.indexes[insertIndex + 5] = ((index + 2) % maxIndex) + indexOffset;
+                }
+            }
+
+            this.colors = new Float32Array(2 * this.particleAmount * this.trailAmount * 4);
+
+            this.geometry = new THREE.BufferGeometry();
+            this.geometry.setAttribute("position", new THREE.BufferAttribute(this.vertices, 3));
+            this.geometry.setAttribute("color", new THREE.BufferAttribute(this.colors, 4));
+            this.geometry.setIndex(new THREE.BufferAttribute(this.indexes, 1));
+
+            this.material = new THREE.MeshBasicMaterial({
+                vertexColors: true,
+                transparent: true,
+                side: THREE.DoubleSide,
+                depthWrite: false
+            });
+
+            this.mesh = new THREE.Mesh(this.geometry, this.material);
+            this.mesh.frustumCulled = false;
+            this.scene.add(this.mesh);
+
+            this.positionAttribute = this.mesh.geometry.getAttribute("position");
+            this.positionAttribute.setUsage(THREE.DynamicDrawUsage);
+
+            this.colorAttribute = this.mesh.geometry.getAttribute("color");
+            this.colorAttribute.setUsage(THREE.DynamicDrawUsage);
+
+            this.threeRenderer.render(this.scene, this.camera);
+
+            this.cameraDir = new THREE.Vector3();
+            this.meshNormalMatrix = new THREE.Matrix3();
+            this.meshNormalMatrixTransposed = this.meshNormalMatrix.transpose();
+
+            this.backgroundColor = new THREE.Color();
+
+            this.currentStartIndex = 0;
+
+            this.colorHSL = new THREE.Color();
+            this.colorRGB = new THREE.Vector3();
+
+            this.velocityHueFactor = 0.0001;
+
+            this.alphaRamp = new Float32Array(this.trailAmount);
+            for (let j = 0; j < this.trailAmount; j++) {
+                const alpha = j / (this.trailAmount - 1);
+                this.alphaRamp[j] = Math.pow(alpha, 3.0);
+            }
+
+            this.qSlerped = new THREE.Quaternion();
+        }
+
+        initializeVertices(simulationState: SimulationState): void {
+            const particlePositions = simulationState.particlePositions;
+
+            for (let i = 0; i < this.particleAmount; i++) {
+                for (let j = 0; j < this.trailAmount; j++) {
+                    let vertexIndex = (i * this.trailAmount + j) * 6;
+                    let positionIndex = i * 3;
+
+                    this.vertices[vertexIndex] = particlePositions[positionIndex];
+                    this.vertices[vertexIndex + 1] = particlePositions[positionIndex + 1];
+                    this.vertices[vertexIndex + 2] = particlePositions[positionIndex + 2];
+
+                    this.vertices[vertexIndex + 3] = particlePositions[positionIndex];
+                    this.vertices[vertexIndex + 4] = particlePositions[positionIndex + 1];
+                    this.vertices[vertexIndex + 5] = particlePositions[positionIndex + 2];
+                }
+            }
+
+            this.geometry.computeBoundingBox();
+            this.geometry.computeBoundingSphere();
+        }
+
+        resize(width: number, height: number): void {
+            this.threeRenderer.setSize(width, height, false);
+            this.threeRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+            this.camera.aspect = width / height;
+            this.camera.updateProjectionMatrix();
+        }
+
+        updateVertices(
+            simulationStateCurrent: SimulationState,
+            simulationStatePrevious: SimulationState,
+            interpolateAlpha: number
+        ) {
+            // TODO
+            // Now the vertices array work like this:
+            // [p_1_1, p_1_2, p_1_3, ..., p_2_1, p_2_2. p_2_3, ..., p_n_1, p_n_2, ...]
+            // Where p_particle_trail
+            // I suspect that transposing the dimensions is going to be a lot more cache friendly
+            // Meaning
+            // [p_1_1, p_2_1, p_3_1, ..., p_1_2, p_2_2, p_3_2, ..., p_1_t, p_2_t, p_3_t]
+            // Would also need to fix the indexes array
+
+            // Can then do something like this:
+            // positionAttribute.updateRange = {
+            //     offset: startOffset,
+            //     count: count
+            // };
+            // positionAttribute.needsUpdate = true;
+            // Instead of sending the whole array every frame
+
+            const particlePositionsCurrent = simulationStateCurrent.particlePositions;
+            const particlePositionsPrevious = simulationStatePrevious.particlePositions;
+
+            const particleVelocitiesCurrent = simulationStateCurrent.particleVelocities;
+            const particleVelocitiesPrevious = simulationStatePrevious.particleVelocities;
+
+            for (let i = 0; i < this.particleAmount; i++) {
+                const particleIndex = i * 3;
+
+                const xCurrent = particlePositionsCurrent[particleIndex];
+                const yCurrent = particlePositionsCurrent[particleIndex + 1];
+                const zCurrent = particlePositionsCurrent[particleIndex + 2];
+
+                const xPrevious = particlePositionsPrevious[particleIndex];
+                const yPrevious = particlePositionsPrevious[particleIndex + 1];
+                const zPrevious = particlePositionsPrevious[particleIndex + 2];
+
+                const x = lerp(xPrevious, xCurrent, interpolateAlpha);
+                const y = lerp(yPrevious, yCurrent, interpolateAlpha);
+                const z = lerp(zPrevious, zCurrent, interpolateAlpha);
+
+                const dxCurrent = particleVelocitiesCurrent[particleIndex];
+                const dyCurrent = particleVelocitiesCurrent[particleIndex + 1];
+                const dzCurrent = particleVelocitiesCurrent[particleIndex + 2];
+
+                const dxPrevious = particleVelocitiesPrevious[particleIndex];
+                const dyPrevious = particleVelocitiesPrevious[particleIndex + 1];
+                const dzPrevious = particleVelocitiesPrevious[particleIndex + 2];
+
+                const dx = lerp(dxPrevious, dxCurrent, interpolateAlpha);
+                const dy = lerp(dyPrevious, dyCurrent, interpolateAlpha);
+                const dz = lerp(dzPrevious, dzCurrent, interpolateAlpha);
+
+                const nx = this.cameraDir.y * dz - this.cameraDir.z * dy;
+                const ny = this.cameraDir.z * dx - this.cameraDir.x * dz;
+                const nz = this.cameraDir.x * dy - this.cameraDir.y * dx;
+
+                const normalLength = this.ribbonWidth / Math.max(Math.sqrt(nx * nx + ny * ny + nz * nz), 1e-6);
+                const offsetX = nx * normalLength;
+                const offsetY = ny * normalLength;
+                const offsetZ = nz * normalLength;
+
+                const vertexIndex = (i * this.trailAmount + this.currentStartIndex) * 6;
+
+                this.vertices[vertexIndex] = x - offsetX;
+                this.vertices[vertexIndex + 1] = y - offsetY;
+                this.vertices[vertexIndex + 2] = z - offsetZ;
+
+                this.vertices[vertexIndex + 3] = x + offsetX;
+                this.vertices[vertexIndex + 4] = y + offsetY;
+                this.vertices[vertexIndex + 5] = z + offsetZ;
+
+                const vertexIndexNext = (i * this.trailAmount + ((this.currentStartIndex + 1) % this.trailAmount)) * 6;
+
+                this.vertices[vertexIndexNext] = x;
+                this.vertices[vertexIndexNext + 1] = y;
+                this.vertices[vertexIndexNext + 2] = z;
+
+                this.vertices[vertexIndexNext + 3] = x;
+                this.vertices[vertexIndexNext + 4] = y;
+                this.vertices[vertexIndexNext + 5] = z;
+
+                const vertexIndexNextNext =
+                    (i * this.trailAmount + ((this.currentStartIndex + 2) % this.trailAmount)) * 6;
+
+                const xLast = (this.vertices[vertexIndexNextNext] + this.vertices[vertexIndexNextNext + 3]) / 2.0;
+                const yLast = (this.vertices[vertexIndexNextNext + 1] + this.vertices[vertexIndexNextNext + 4]) / 2.0;
+                const zLast = (this.vertices[vertexIndexNextNext + 2] + this.vertices[vertexIndexNextNext + 5]) / 2.0;
+
+                this.vertices[vertexIndexNextNext] = xLast;
+                this.vertices[vertexIndexNextNext + 1] = yLast;
+                this.vertices[vertexIndexNextNext + 2] = zLast;
+
+                this.vertices[vertexIndexNextNext + 3] = xLast;
+                this.vertices[vertexIndexNextNext + 4] = yLast;
+                this.vertices[vertexIndexNextNext + 5] = zLast;
+            }
+        }
+
+        updateColors(
+            simulationStateCurrent: SimulationState,
+            simulationStatePrevious: SimulationState,
+            interpolateAlpha: number
+        ) {
+            const particleVelocitiesCurrent = simulationStateCurrent.particleVelocities;
+            const particleVelocitiesPrevious = simulationStatePrevious.particleVelocities;
+
+            const hueRotationCurrent = simulationStateCurrent.hueRotation;
+            const hueRotationPrevious = simulationStatePrevious.hueRotation;
+            const hueRotation = lerp(hueRotationPrevious, hueRotationCurrent, interpolateAlpha);
+
+            const hueRangeCurrent = simulationStateCurrent.hueRange;
+            const hueRangePrevious = simulationStatePrevious.hueRange;
+            const hueRange = lerp(hueRangePrevious, hueRangeCurrent, interpolateAlpha);
+
+            const huePositionCurrent = simulationStateCurrent.huePosition;
+            const huePositionPrevious = simulationStatePrevious.huePosition;
+            const huePosition = lerp(huePositionPrevious, huePositionCurrent, interpolateAlpha);
+
+            const saturationCurrent = simulationStateCurrent.saturation;
+            const saturationPrevious = simulationStatePrevious.saturation;
+            const saturation = lerp(saturationPrevious, saturationCurrent, interpolateAlpha);
+
+            const lightCurrent = simulationStateCurrent.light;
+            const lightPrevious = simulationStatePrevious.light;
+            const light = lerp(lightPrevious, lightCurrent, interpolateAlpha);
+
+            const colorFrameRotationCurrent = simulationStateCurrent.colorFrameRotation;
+            const colorFrameRotationPrevious = simulationStatePrevious.colorFrameRotation;
+            this.qSlerped.w = colorFrameRotationPrevious.w;
+            this.qSlerped.x = colorFrameRotationPrevious.x;
+            this.qSlerped.y = colorFrameRotationPrevious.y;
+            this.qSlerped.z = colorFrameRotationPrevious.z;
+            const colorFrameRotation = this.qSlerped.slerp(colorFrameRotationCurrent, interpolateAlpha);
+
+            for (let i = 0; i < this.particleAmount; i++) {
+                const particleIndex = i * 3;
+
+                const dxCurrent = particleVelocitiesCurrent[particleIndex];
+                const dyCurrent = particleVelocitiesCurrent[particleIndex + 1];
+                const dzCurrent = particleVelocitiesCurrent[particleIndex + 2];
+
+                const dxPrevious = particleVelocitiesPrevious[particleIndex];
+                const dyPrevious = particleVelocitiesPrevious[particleIndex + 1];
+                const dzPrevious = particleVelocitiesPrevious[particleIndex + 2];
+
+                const dx = lerp(dxPrevious, dxCurrent, interpolateAlpha);
+                const dy = lerp(dyPrevious, dyCurrent, interpolateAlpha);
+                const dz = lerp(dzPrevious, dzCurrent, interpolateAlpha);
+
+                const velocityLengthSquared = dx * dx + dy * dy + dz * dz;
+
+                const angle = Math.atan2(dy, dx) * RAD2DEG;
+                const rotatedAngle = mod(angle + hueRotation + 180, 360);
+                const halfAngle = 360 - 2 * Math.abs(rotatedAngle - 180);
+                const hue = mod(
+                    (halfAngle / 360) * hueRange +
+                        huePosition -
+                        hueRange / 2 +
+                        velocityLengthSquared * this.velocityHueFactor,
+                    360
+                );
+
+                this.colorHSL.setHSL(hue / 360.0, saturation / 100.0, light / 100.0);
+
+                this.colorRGB.x = this.colorHSL.r;
+                this.colorRGB.y = this.colorHSL.g;
+                this.colorRGB.z = this.colorHSL.b;
+
+                this.colorRGB.applyQuaternion(colorFrameRotation);
+                this.colorRGB.clampScalar(0.0, 1.0);
+
+                const indexColor = (i * this.trailAmount + this.currentStartIndex) * 8;
+
+                this.colors[indexColor] = this.colorRGB.x;
+                this.colors[indexColor + 1] = this.colorRGB.y;
+                this.colors[indexColor + 2] = this.colorRGB.z;
+
+                this.colors[indexColor + 4] = this.colorRGB.x;
+                this.colors[indexColor + 5] = this.colorRGB.y;
+                this.colors[indexColor + 6] = this.colorRGB.z;
+
+                for (let j = 0; j < this.trailAmount; j++) {
+                    const indexAlpha = (j - this.currentStartIndex + this.trailAmount) % this.trailAmount;
+                    const a = this.alphaRamp[indexAlpha];
+
+                    const indexColor = (i * this.trailAmount + j) * 8;
+                    this.colors[indexColor + 3] = a;
+                    this.colors[indexColor + 7] = a;
+                }
+            }
+        }
+
+        update(
+            simulationStateCurrent: SimulationState,
+            simulationStatePrevious: SimulationState,
+            interpolateAlpha: number,
+            backgroundColor: string
+        ) {
+            this.scene.background = this.backgroundColor.setStyle(backgroundColor);
+
+            // 1.76
+            // const scale = 2.0;
+            // this.mesh.scale.set(scale, scale, scale);
+            // this.mesh.position.set(0.0, -25.0 * scale, 0.0);
+            // this.mesh.rotation.x = -Math.PI / 2.0;
+            // this.mesh.rotation.z = -Math.PI / 4.0;
+
+            // 0.7
+            const scale = 1.4;
+            this.mesh.scale.set(scale, scale, scale);
+            this.mesh.position.set(0.0, -25.0 * scale, 0.0);
+            this.mesh.rotation.x = -Math.PI / 2.0;
+            this.mesh.rotation.z = -Math.PI / 4.0;
+
+            this.mesh.updateMatrixWorld(true);
+            this.meshNormalMatrix.getNormalMatrix(this.mesh.matrixWorld);
+            this.meshNormalMatrixTransposed.copy(this.meshNormalMatrix).transpose();
+            this.camera.getWorldDirection(this.cameraDir);
+            this.cameraDir.applyMatrix3(this.meshNormalMatrixTransposed);
+
+            this.updateVertices(simulationStateCurrent, simulationStatePrevious, interpolateAlpha);
+            this.updateColors(simulationStateCurrent, simulationStatePrevious, interpolateAlpha);
+
+            this.currentStartIndex = (this.currentStartIndex + 1) % this.trailAmount;
+
+            this.positionAttribute.needsUpdate = true;
+            this.colorAttribute.needsUpdate = true;
+
+            this.controls.update();
+            this.threeRenderer.render(this.scene, this.camera);
+        }
+    }
+
+    let canvas: HTMLCanvasElement;
+
+    onMount(() => {
+        const canvasDiv: HTMLElement = document.getElementById("canvasDiv")!;
+        const mainRoot: HTMLElement = document.getElementById("mainRoot")!;
+
+        // const perfDiv = document.createElement("div");
+        // perfDiv.style.position = "absolute";
+        // perfDiv.style.top = "10px";
+        // perfDiv.style.left = "10px";
+        // perfDiv.style.color = "white";
+        // perfDiv.style.fontFamily = "monospace";
+        // perfDiv.style.fontSize = "14px";
+        // perfDiv.style.background = "rgba(0,0,0,0.5)";
+        // perfDiv.style.padding = "6px 10px";
+        // perfDiv.style.borderRadius = "4px";
+        // perfDiv.style.pointerEvents = "none";
+        // document.body.appendChild(perfDiv);
+        //
+        // let perfAccum = 0.0;
+        // let perfFrames = 0;
 
         const PARTICLES = 100;
         const TRAIL = 400;
         const WIDTH = 0.1;
 
-        const vertices = new Float32Array(2 * PARTICLES * TRAIL * 3);
-        const indexes = new Uint32Array(2 * PARTICLES * TRAIL * 3);
-        const maxIndex = TRAIL * 2;
-        for (let i = 0; i < PARTICLES; i++) {
-            for (let j = 0; j < TRAIL; j++) {
-                const insertIndex = (i * TRAIL + j) * 6;
-                const index = j * 2;
-                const indexOffset = i * maxIndex;
+        const simulationState = new SimulationState(PARTICLES);
+        const simulationStatePrevious = new SimulationState(PARTICLES);
 
-                indexes[insertIndex] = (index % maxIndex) + indexOffset;
-                indexes[insertIndex + 1] = ((index + 1) % maxIndex) + indexOffset;
-                indexes[insertIndex + 2] = ((index + 2) % maxIndex) + indexOffset;
+        const renderer = new Renderer(PARTICLES, TRAIL, WIDTH);
+        renderer.initializeVertices(simulationState);
+        renderer.resize(canvasDiv.clientWidth, canvasDiv.clientHeight);
 
-                indexes[insertIndex + 3] = ((index + 1) % maxIndex) + indexOffset;
-                indexes[insertIndex + 4] = ((index + 3) % maxIndex) + indexOffset;
-                indexes[insertIndex + 5] = ((index + 2) % maxIndex) + indexOffset;
-            }
-        }
-
-        const colors = new Float32Array(2 * PARTICLES * TRAIL * 4);
-
-        const geometry = new THREE.BufferGeometry();
-        geometry.setAttribute("position", new THREE.BufferAttribute(vertices, 3));
-        geometry.setAttribute("color", new THREE.BufferAttribute(colors, 4));
-        geometry.setIndex(new THREE.BufferAttribute(indexes, 1));
-
-        const material = new THREE.MeshBasicMaterial({
-            vertexColors: true,
-            transparent: true,
-            side: THREE.DoubleSide,
-            depthWrite: false
+        let resizeNow = false;
+        const resizeObserver: ResizeObserver = new ResizeObserver((entries) => {
+            resizeNow = true;
         });
-
-        const mesh = new THREE.Mesh(geometry, material);
-        mesh.position.set(0.0, -50.0, 0.0);
-        mesh.rotation.x = -Math.PI / 2.0;
-        mesh.rotation.z = -Math.PI / 4.0;
-        mesh.scale.set(2.0, 2.0, 2.0);
-        mesh.frustumCulled = false;
-        scene.add(mesh);
-
-        const positionAttribute = mesh.geometry.getAttribute("position");
-        positionAttribute.setUsage(THREE.DynamicDrawUsage);
-
-        const colorAttribute = mesh.geometry.getAttribute("color");
-        colorAttribute.setUsage(THREE.DynamicDrawUsage);
-
-        if (resize(threeRenderer)) {
-            camera.aspect = canvas.clientWidth / canvas.clientHeight;
-            camera.updateProjectionMatrix();
-        }
-
-        threeRenderer.render(scene, camera);
-
-        const cameraDir = new THREE.Vector3();
-        const meshNormalMatrix = new THREE.Matrix3();
-        meshNormalMatrix.getNormalMatrix(mesh.matrixWorld);
-        const meshNormalMatrixTransposed = meshNormalMatrix.transpose();
-
-        function initializeVertices(simulationState) {
-            const particlePositions = simulationState.particlePositions;
-
-            for (let i = 0; i < PARTICLES; i++) {
-                for (let j = 0; j < TRAIL; j++) {
-                    let vertexIndex = (i * TRAIL + j) * 6;
-                    let positionIndex = i * 3;
-
-                    vertices[vertexIndex] = particlePositions[positionIndex];
-                    vertices[vertexIndex + 1] = particlePositions[positionIndex + 1];
-                    vertices[vertexIndex + 2] = particlePositions[positionIndex + 2];
-
-                    vertices[vertexIndex + 3] = particlePositions[positionIndex];
-                    vertices[vertexIndex + 4] = particlePositions[positionIndex + 1];
-                    vertices[vertexIndex + 5] = particlePositions[positionIndex + 2];
-                }
-            }
-        }
-
-        class SimulationState {
-            constructor() {
-                this.omegaNorm = 0.1;
-                this.omegaChangeSpeed = 2.0;
-
-                this.omega = new THREE.Vector3();
-                this.omegaTarget = new THREE.Spherical();
-                this.omegaCurrent = new THREE.Spherical(this.omegaNorm, 0.0, 0.0);
-
-                this.colorFrameRotation = new THREE.Quaternion();
-                this.dq = new THREE.Quaternion();
-
-                this.hueRange = 20;
-                this.hueRangeTarget = getNextHueRangeTarget();
-
-                this.huePosition = sampleUniform(0.0, 360.0);
-                this.hueRotation = 0;
-
-                this.saturation = 60;
-                this.saturationTarget = getNextSaturationTarget();
-
-                this.light = 50;
-                this.lightTarget = getNextLightTarget();
-
-                this.hueRangeChangeFactor = 0.2;
-                this.hueRangeChangeDefault = 10.0;
-                this.huePositionChangeFactor = 0.05;
-                this.hueRotationChangeFactor = 0.1;
-                this.saturationChangeFactor = 0.5;
-                this.lightChangeFactor = 0.1;
-
-                this.speedScale = 0.2;
-
-                this.particlePositions = new Float32Array(PARTICLES * 3);
-                for (let i = 0; i < PARTICLES; i++) {
-                    const index = i * 3;
-                    this.particlePositions[index] = sampleUniform(-5.0, 5.0);
-                    this.particlePositions[index + 1] = sampleUniform(-5.0, 5.0);
-                    this.particlePositions[index + 2] = sampleUniform(60.0, 70.0);
-                }
-
-                this.particleVelocities = new Float32Array(PARTICLES * 3);
-
-                this.integrateOutput = new THREE.Vector3();
-
-                this.dynamicalSystem = new Lorenz();
-                this.integrator = new RK2();
-            }
-
-            updateColorFrameRotation(dt) {
-                const errorPhi = shortestAngleDifference(this.omegaCurrent.phi, this.omegaTarget.phi);
-                const errorTheta = shortestAngleDifference(this.omegaCurrent.theta, this.omegaTarget.theta);
-
-                const errorNormSquared = errorPhi * errorPhi + errorTheta * errorTheta;
-
-                if (errorNormSquared > 1e-3) {
-                    this.omegaCurrent.phi += errorPhi * this.omegaChangeSpeed * dt;
-                    this.omegaCurrent.theta += errorTheta * this.omegaChangeSpeed * dt;
-                } else {
-                    getRandomTarget(this.omegaTarget);
-                }
-
-                this.omega.setFromSpherical(this.omegaCurrent);
-
-                deltaQuaternion(this.omega, dt, this.dq);
-                this.colorFrameRotation.multiply(this.dq);
-                this.colorFrameRotation.normalize();
-            }
-
-            updateColorValues(dt) {
-                if (this.hueRange < this.hueRangeTarget) {
-                    this.hueRange +=
-                        ((this.hueRangeTarget - this.hueRange) * this.hueRangeChangeFactor +
-                            this.hueRangeChangeDefault) *
-                        dt;
-                    if (this.hueRange >= this.hueRangeTarget) {
-                        this.hueRangeTarget = getNextHueRangeTarget();
-                    }
-                } else {
-                    this.hueRange +=
-                        ((this.hueRangeTarget - this.hueRange) * this.hueRangeChangeFactor -
-                            this.hueRangeChangeDefault) *
-                        dt;
-                    if (this.hueRange <= this.hueRangeTarget) {
-                        this.hueRangeTarget = getNextHueRangeTarget();
-                    }
-                }
-
-                const huePositionChange = getHuePositionChange();
-                this.huePosition += huePositionChange * this.huePositionChangeFactor * dt;
-                if (this.huePosition >= 360.0) {
-                    this.huePosition = 0.0;
-                }
-
-                const hueRotationChange = getHueRotationChange();
-                this.hueRotation += hueRotationChange * this.hueRotationChangeFactor * dt;
-                if (this.hueRotation >= 360.0) {
-                    this.hueRotation = 0.0;
-                }
-
-                const saturationError = this.saturationTarget - this.saturation;
-                if (Math.abs(saturationError) > 1e-1) {
-                    this.saturation += saturationError * this.saturationChangeFactor * dt;
-                } else {
-                    this.saturationTarget = getNextSaturationTarget();
-                }
-
-                const lightError = this.lightTarget - this.light;
-                if (Math.abs(lightError) > 1e-1) {
-                    this.light += lightError * this.lightChangeFactor * dt;
-                } else {
-                    this.lightTarget = getNextLightTarget();
-                }
-            }
-
-            updateParticles(dt) {
-                for (let i = 0; i < PARTICLES; i++) {
-                    const particleIndex = i * 3;
-                    const x = this.particlePositions[particleIndex];
-                    const y = this.particlePositions[particleIndex + 1];
-                    const z = this.particlePositions[particleIndex + 2];
-
-                    this.dynamicalSystem.f(x, y, z, this.integrateOutput);
-                    this.particleVelocities[particleIndex] = this.integrateOutput.x;
-                    this.particleVelocities[particleIndex + 1] = this.integrateOutput.y;
-                    this.particleVelocities[particleIndex + 2] = this.integrateOutput.z;
-
-                    const h = dt * this.speedScale;
-                    this.integrator.iterate(x, y, z, this.dynamicalSystem, h, this.integrateOutput);
-                    this.particlePositions[particleIndex] = this.integrateOutput.x;
-                    this.particlePositions[particleIndex + 1] = this.integrateOutput.y;
-                    this.particlePositions[particleIndex + 2] = this.integrateOutput.z;
-                }
-            }
-
-            update(dt) {
-                this.updateColorFrameRotation(dt);
-                this.updateColorValues(dt);
-                this.updateParticles(dt);
-            }
-
-            copyTo(dst) {
-                dst.omegaNorm = this.omegaNorm;
-                dst.omegaChangeSpeed = this.omegaChangeSpeed;
-
-                dst.omega.x = this.omega.x;
-                dst.omega.y = this.omega.y;
-                dst.omega.z = this.omega.z;
-
-                dst.omegaTarget.radius = this.omegaTarget.radius;
-                dst.omegaTarget.phi = this.omegaTarget.phi;
-                dst.omegaTarget.theta = this.omegaTarget.theta;
-
-                dst.omegaCurrent.radius = this.omegaCurrent.radius;
-                dst.omegaCurrent.phi = this.omegaCurrent.phi;
-                dst.omegaCurrent.theta = this.omegaCurrent.theta;
-
-                dst.colorFrameRotation.w = this.colorFrameRotation.w;
-                dst.colorFrameRotation.x = this.colorFrameRotation.x;
-                dst.colorFrameRotation.y = this.colorFrameRotation.y;
-                dst.colorFrameRotation.z = this.colorFrameRotation.z;
-
-                dst.dq.w = this.dq.w;
-                dst.dq.x = this.dq.x;
-                dst.dq.y = this.dq.y;
-                dst.dq.z = this.dq.z;
-
-                dst.hueRange = this.hueRange;
-                dst.hueRangeTarget = this.hueRangeTarget;
-                dst.huePosition = this.huePosition;
-                dst.hueRotation = this.hueRotation;
-
-                dst.saturation = this.saturation;
-                dst.saturationTarget = this.saturationTarget;
-
-                dst.light = this.light;
-                dst.lightTarget = this.lightTarget;
-
-                dst.hueRangeChangeFactor = this.hueRangeChangeFactor;
-                dst.hueRangeChangeDefault = this.hueRangeChangeDefault;
-                dst.huePositionChangeFactor = this.huePositionChangeFactor;
-                dst.hueRotationChangeFactor = this.hueRotationChangeFactor;
-                dst.saturationChangeFactor = this.saturationChangeFactor;
-                dst.lightChangeFactor = this.lightChangeFactor;
-
-                dst.speedScale = this.speedScale;
-
-                dst.particlePositions.set(this.particlePositions);
-                dst.particleVelocities.set(this.particleVelocities);
-
-                dst.integrateOutput.x = this.integrateOutput.x;
-                dst.integrateOutput.y = this.integrateOutput.y;
-                dst.integrateOutput.z = this.integrateOutput.z;
-            }
-        }
-
-        class Renderer {
-            constructor() {
-                this.currentStartIndex = 0;
-
-                this.colorHSL = new THREE.Color();
-                this.colorRGB = new THREE.Vector3();
-
-                this.velocityHueFactor = 0.0001;
-
-                this.alphaRamp = new Float32Array(TRAIL);
-                for (let j = 0; j < TRAIL; j++) {
-                    const alpha = j / (TRAIL - 1);
-                    this.alphaRamp[j] = Math.pow(alpha, 3.0);
-                }
-
-                this.qSlerped = new THREE.Quaternion();
-            }
-
-            updateVertices(simulationStateCurrent, simulationStatePrevious, interpolateAlpha) {
-                // TODO
-                // Now the vertices array work like this:
-                // [p_1_1, p_1_2, p_1_3, ..., p_2_1, p_2_2. p_2_3, ..., p_n_1, p_n_2, ...]
-                // Where p_particle_trail
-                // I suspect that transposing the dimensions is going to be a lot more cache friendly
-                // Meaning
-                // [p_1_1, p_2_1, p_3_1, ..., p_1_2, p_2_2, p_3_2, ..., p_1_t, p_2_t, p_3_t]
-                // Would also need to fix the indexes array
-
-                // Can then do something like this:
-                // positionAttribute.updateRange = {
-                //     offset: startOffset,
-                //     count: count
-                // };
-                // positionAttribute.needsUpdate = true;
-                // Instead of sending the whole array every frame
-
-                const particlePositionsCurrent = simulationStateCurrent.particlePositions;
-                const particlePositionsPrevious = simulationStatePrevious.particlePositions;
-
-                const particleVelocitiesCurrent = simulationStateCurrent.particleVelocities;
-                const particleVelocitiesPrevious = simulationStatePrevious.particleVelocities;
-
-                for (let i = 0; i < PARTICLES; i++) {
-                    const particleIndex = i * 3;
-
-                    const xCurrent = particlePositionsCurrent[particleIndex];
-                    const yCurrent = particlePositionsCurrent[particleIndex + 1];
-                    const zCurrent = particlePositionsCurrent[particleIndex + 2];
-
-                    const xPrevious = particlePositionsPrevious[particleIndex];
-                    const yPrevious = particlePositionsPrevious[particleIndex + 1];
-                    const zPrevious = particlePositionsPrevious[particleIndex + 2];
-
-                    const x = lerp(xPrevious, xCurrent, interpolateAlpha);
-                    const y = lerp(yPrevious, yCurrent, interpolateAlpha);
-                    const z = lerp(zPrevious, zCurrent, interpolateAlpha);
-
-                    const dxCurrent = particleVelocitiesCurrent[particleIndex];
-                    const dyCurrent = particleVelocitiesCurrent[particleIndex + 1];
-                    const dzCurrent = particleVelocitiesCurrent[particleIndex + 2];
-
-                    const dxPrevious = particleVelocitiesPrevious[particleIndex];
-                    const dyPrevious = particleVelocitiesPrevious[particleIndex + 1];
-                    const dzPrevious = particleVelocitiesPrevious[particleIndex + 2];
-
-                    const dx = lerp(dxPrevious, dxCurrent, interpolateAlpha);
-                    const dy = lerp(dyPrevious, dyCurrent, interpolateAlpha);
-                    const dz = lerp(dzPrevious, dzCurrent, interpolateAlpha);
-
-                    const nx = cameraDir.y * dz - cameraDir.z * dy;
-                    const ny = cameraDir.z * dx - cameraDir.x * dz;
-                    const nz = cameraDir.x * dy - cameraDir.y * dx;
-
-                    const normalLength = WIDTH / Math.max(Math.sqrt(nx * nx + ny * ny + nz * nz), 1e-6);
-                    const offsetX = nx * normalLength;
-                    const offsetY = ny * normalLength;
-                    const offsetZ = nz * normalLength;
-
-                    const vertexIndex = (i * TRAIL + this.currentStartIndex) * 6;
-
-                    vertices[vertexIndex] = x - offsetX;
-                    vertices[vertexIndex + 1] = y - offsetY;
-                    vertices[vertexIndex + 2] = z - offsetZ;
-
-                    vertices[vertexIndex + 3] = x + offsetX;
-                    vertices[vertexIndex + 4] = y + offsetY;
-                    vertices[vertexIndex + 5] = z + offsetZ;
-
-                    const vertexIndexNext = (i * TRAIL + ((this.currentStartIndex + 1) % TRAIL)) * 6;
-
-                    vertices[vertexIndexNext] = x;
-                    vertices[vertexIndexNext + 1] = y;
-                    vertices[vertexIndexNext + 2] = z;
-
-                    vertices[vertexIndexNext + 3] = x;
-                    vertices[vertexIndexNext + 4] = y;
-                    vertices[vertexIndexNext + 5] = z;
-
-                    const vertexIndexNextNext = (i * TRAIL + ((this.currentStartIndex + 2) % TRAIL)) * 6;
-
-                    const xLast = (vertices[vertexIndexNextNext] + vertices[vertexIndexNextNext + 3]) / 2.0;
-                    const yLast = (vertices[vertexIndexNextNext + 1] + vertices[vertexIndexNextNext + 4]) / 2.0;
-                    const zLast = (vertices[vertexIndexNextNext + 2] + vertices[vertexIndexNextNext + 5]) / 2.0;
-
-                    vertices[vertexIndexNextNext] = xLast;
-                    vertices[vertexIndexNextNext + 1] = yLast;
-                    vertices[vertexIndexNextNext + 2] = zLast;
-
-                    vertices[vertexIndexNextNext + 3] = xLast;
-                    vertices[vertexIndexNextNext + 4] = yLast;
-                    vertices[vertexIndexNextNext + 5] = zLast;
-                }
-            }
-
-            updateColors(simulationStateCurrent, simulationStatePrevious, interpolateAlpha) {
-                const particleVelocitiesCurrent = simulationStateCurrent.particleVelocities;
-                const particleVelocitiesPrevious = simulationStatePrevious.particleVelocities;
-
-                const hueRotationCurrent = simulationStateCurrent.hueRotation;
-                const hueRotationPrevious = simulationStatePrevious.hueRotation;
-                const hueRotation = lerp(hueRotationPrevious, hueRotationCurrent, interpolateAlpha);
-
-                const hueRangeCurrent = simulationStateCurrent.hueRange;
-                const hueRangePrevious = simulationStatePrevious.hueRange;
-                const hueRange = lerp(hueRangePrevious, hueRangeCurrent, interpolateAlpha);
-
-                const huePositionCurrent = simulationStateCurrent.huePosition;
-                const huePositionPrevious = simulationStatePrevious.huePosition;
-                const huePosition = lerp(huePositionPrevious, huePositionCurrent, interpolateAlpha);
-
-                const saturationCurrent = simulationStateCurrent.saturation;
-                const saturationPrevious = simulationStatePrevious.saturation;
-                const saturation = lerp(saturationPrevious, saturationCurrent, interpolateAlpha);
-
-                const lightCurrent = simulationStateCurrent.light;
-                const lightPrevious = simulationStatePrevious.light;
-                const light = lerp(lightPrevious, lightCurrent, interpolateAlpha);
-
-                const colorFrameRotationCurrent = simulationStateCurrent.colorFrameRotation;
-                const colorFrameRotationPrevious = simulationStatePrevious.colorFrameRotation;
-                this.qSlerped.w = colorFrameRotationPrevious.w;
-                this.qSlerped.x = colorFrameRotationPrevious.x;
-                this.qSlerped.y = colorFrameRotationPrevious.y;
-                this.qSlerped.z = colorFrameRotationPrevious.z;
-                const colorFrameRotation = this.qSlerped.slerp(colorFrameRotationCurrent, interpolateAlpha);
-
-                for (let i = 0; i < PARTICLES; i++) {
-                    const particleIndex = i * 3;
-
-                    const dxCurrent = particleVelocitiesCurrent[particleIndex];
-                    const dyCurrent = particleVelocitiesCurrent[particleIndex + 1];
-                    const dzCurrent = particleVelocitiesCurrent[particleIndex + 2];
-
-                    const dxPrevious = particleVelocitiesPrevious[particleIndex];
-                    const dyPrevious = particleVelocitiesPrevious[particleIndex + 1];
-                    const dzPrevious = particleVelocitiesPrevious[particleIndex + 2];
-
-                    const dx = lerp(dxPrevious, dxCurrent, interpolateAlpha);
-                    const dy = lerp(dyPrevious, dyCurrent, interpolateAlpha);
-                    const dz = lerp(dzPrevious, dzCurrent, interpolateAlpha);
-
-                    const velocityLengthSquared = dx * dx + dy * dy + dz * dz;
-
-                    const angle = Math.atan2(dy, dx) * RAD2DEG;
-                    const rotatedAngle = mod(angle + hueRotation + 180, 360);
-                    const halfAngle = 360 - 2 * Math.abs(rotatedAngle - 180);
-                    const hue = mod(
-                        (halfAngle / 360) * hueRange +
-                            huePosition -
-                            hueRange / 2 +
-                            velocityLengthSquared * this.velocityHueFactor,
-                        360
-                    );
-
-                    this.colorHSL.setHSL(hue / 360.0, saturation / 100.0, light / 100.0);
-
-                    this.colorRGB.x = this.colorHSL.r;
-                    this.colorRGB.y = this.colorHSL.g;
-                    this.colorRGB.z = this.colorHSL.b;
-
-                    this.colorRGB.applyQuaternion(colorFrameRotation);
-                    this.colorRGB.clampScalar(0.0, 1.0);
-
-                    const indexColor = (i * TRAIL + this.currentStartIndex) * 8;
-
-                    colors[indexColor] = this.colorRGB.x;
-                    colors[indexColor + 1] = this.colorRGB.y;
-                    colors[indexColor + 2] = this.colorRGB.z;
-
-                    colors[indexColor + 4] = this.colorRGB.x;
-                    colors[indexColor + 5] = this.colorRGB.y;
-                    colors[indexColor + 6] = this.colorRGB.z;
-
-                    for (let j = 0; j < TRAIL; j++) {
-                        const indexAlpha = (j - this.currentStartIndex + TRAIL) % TRAIL;
-                        const a = this.alphaRamp[indexAlpha];
-
-                        const indexColor = (i * TRAIL + j) * 8;
-                        colors[indexColor + 3] = a;
-                        colors[indexColor + 7] = a;
-                    }
-                }
-            }
-
-            update(simulationStateCurrent, simulationStatePrevious, interpolateAlpha) {
-                if (resize(threeRenderer)) {
-                    camera.aspect = canvas.clientWidth / canvas.clientHeight;
-                    camera.updateProjectionMatrix();
-                }
-
-                camera.getWorldDirection(cameraDir);
-                cameraDir.applyMatrix3(meshNormalMatrixTransposed);
-
-                this.updateVertices(simulationStateCurrent, simulationStatePrevious, interpolateAlpha);
-                this.updateColors(simulationStateCurrent, simulationStatePrevious, interpolateAlpha);
-
-                this.currentStartIndex = (this.currentStartIndex + 1) % TRAIL;
-
-                positionAttribute.needsUpdate = true;
-                colorAttribute.needsUpdate = true;
-
-                controls.update();
-                threeRenderer.render(scene, camera);
-            }
-        }
-
-        const simulationState = new SimulationState();
-        const simulationStatePrevious = new SimulationState();
-
-        initializeVertices(simulationState);
-
-        const renderer = new Renderer();
+        resizeObserver.observe(canvasDiv);
 
         const MAX_DT = 0.05;
         let timestampPrevious = performance.now();
         let timestepAccumulator = 0.0;
         const fixedPhysicsTimestep = 1e-2;
 
-        function animate(timestamp) {
-            const animateStart = performance.now();
+        let animationFrameId: number;
+
+        function animate(timestamp: DOMHighResTimeStamp): void {
+            // const animateStart: DOMHighResTimeStamp = performance.now();
 
             const dt = Math.min((timestamp - timestampPrevious) / 1000.0, MAX_DT);
             timestampPrevious = timestamp;
@@ -737,24 +847,45 @@
                 timestepAccumulator -= fixedPhysicsTimestep;
             }
 
-            const interpolateAlpha = timestepAccumulator / fixedPhysicsTimestep;
-            renderer.update(simulationState, simulationStatePrevious, interpolateAlpha);
-
-            const animateEnd = performance.now();
-            perfAccum += animateEnd - animateStart;
-            perfFrames++;
-
-            if (perfFrames >= 20) {
-                const avg = perfAccum / perfFrames;
-                const fps = 1000.0 / avg;
-
-                perfDiv.textContent = `${avg.toFixed(2)} ms | ${fps.toFixed(1)} FPS`;
-
-                perfAccum = 0.0;
-                perfFrames = 0;
+            if (resizeNow) {
+                renderer.resize(canvasDiv.clientWidth, canvasDiv.clientHeight);
+                resizeNow = false;
             }
+
+            const backgroundColor: string = window.getComputedStyle(mainRoot).backgroundColor;
+
+            const interpolateAlpha = timestepAccumulator / fixedPhysicsTimestep;
+            renderer.update(simulationState, simulationStatePrevious, interpolateAlpha, backgroundColor);
+
+            // const animateEnd = performance.now();
+            // perfAccum += animateEnd - animateStart;
+            // perfFrames++;
+            //
+            // if (perfFrames >= 20) {
+            //     const avg = perfAccum / perfFrames;
+            //     const fps = 1000.0 / avg;
+            //
+            //     perfDiv.textContent = `${avg.toFixed(2)} ms | ${fps.toFixed(1)} FPS`;
+            //
+            //     perfAccum = 0.0;
+            //     perfFrames = 0;
+            // }
+
+            animationFrameId = requestAnimationFrame(animate);
         }
-        threeRenderer.setAnimationLoop(animate);
-    }
-    start();
+
+        animationFrameId = requestAnimationFrame(animate);
+
+        return () => {
+            cancelAnimationFrame(animationFrameId);
+            resizeObserver.disconnect();
+            renderer.threeRenderer.dispose();
+            renderer.geometry.dispose();
+            renderer.material.dispose();
+        };
+    });
 </script>
+
+<div class="w-full flex-1 flex-col" id="canvasDiv">
+    <canvas bind:this={canvas}>Dynamical system simulator</canvas>
+</div>
