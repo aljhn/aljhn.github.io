@@ -29,6 +29,8 @@ jobs:
                   cache: pnpm
 
             - name: Install dependencies
+              env:
+                  PNPM_CONFIG_ONLY_BUILT_DEPENDENCIES: esbuild,sharp
               run: pnpm install
 
             - name: build
