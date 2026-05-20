@@ -39,5 +39,11 @@
     },
     "dependencies": {
         "three": "^0.184.0"
+    },
+    "pnpm": {
+        "allowedBuilds": [
+            "esbuild",
+            "sharp"
+        ]
     }
 }
