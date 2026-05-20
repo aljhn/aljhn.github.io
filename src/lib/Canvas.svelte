@@ -44,7 +44,7 @@
         }
     }
 
-    class RK2 implements Integrator {
+    class Heun implements Integrator {
         k1: THREE.Vector3;
         k2: THREE.Vector3;
 
@@ -251,7 +251,7 @@
             this.integrateOutput = new THREE.Vector3();
 
             this.ode = new Lorenz();
-            this.integrator = new RK2();
+            this.integrator = new Heun();
         }
 
         updateColorFrameRotation(dt: number): void {
@@ -563,23 +563,6 @@
             simulationStatePrevious: SimulationState,
             interpolateAlpha: number
         ) {
-            // TODO
-            // Now the vertices array work like this:
-            // [p_1_1, p_1_2, p_1_3, ..., p_2_1, p_2_2. p_2_3, ..., p_n_1, p_n_2, ...]
-            // Where p_particle_trail
-            // I suspect that transposing the dimensions is going to be a lot more cache friendly
-            // Meaning
-            // [p_1_1, p_2_1, p_3_1, ..., p_1_2, p_2_2, p_3_2, ..., p_1_t, p_2_t, p_3_t]
-            // Would also need to fix the indexes array
-
-            // Can then do something like this:
-            // positionAttribute.updateRange = {
-            //     offset: startOffset,
-            //     count: count
-            // };
-            // positionAttribute.needsUpdate = true;
-            // Instead of sending the whole array every frame
-
             const particlePositionsCurrent = simulationStateCurrent.particlePositions;
             const particlePositionsPrevious = simulationStatePrevious.particlePositions;
 
@@ -789,23 +772,24 @@
     let canvas: HTMLCanvasElement;
 
     onMount(() => {
+        let resizeNow = true;
+        const resizeObserver = new ResizeObserver(() => {
+            resizeNow = true;
+        });
+
+        resizeObserver.observe(canvas);
         const mainRoot: HTMLElement = document.getElementById("mainRoot")!;
 
-        // const perfDiv = document.createElement("div");
-        // perfDiv.style.position = "absolute";
-        // perfDiv.style.top = "10px";
-        // perfDiv.style.left = "10px";
-        // perfDiv.style.color = "white";
-        // perfDiv.style.fontFamily = "monospace";
-        // perfDiv.style.fontSize = "14px";
-        // perfDiv.style.background = "rgba(0,0,0,0.5)";
-        // perfDiv.style.padding = "6px 10px";
-        // perfDiv.style.borderRadius = "4px";
-        // perfDiv.style.pointerEvents = "none";
-        // document.body.appendChild(perfDiv);
-        //
-        // let perfAccum = 0.0;
-        // let perfFrames = 0;
+        let backgroundColor = window.getComputedStyle(mainRoot).backgroundColor;
+        let backgroundColorChanged = true;
+
+        const backgroundColorObserver = new MutationObserver(() => {
+            backgroundColorChanged = true;
+        });
+        backgroundColorObserver.observe(document.documentElement, {
+            attributes: true,
+            attributeFilter: ["class", "data-theme"]
+        });
 
         const PARTICLES = 100;
         const TRAIL = 300;
@@ -817,13 +801,6 @@
         const renderer = new Renderer(PARTICLES, TRAIL, WIDTH);
         renderer.initializeVertices(simulationState);
 
-        let resizeNow = false;
-        const resizeObserver = new ResizeObserver(() => {
-            resizeNow = true;
-        });
-
-        resizeObserver.observe(canvas);
-
         const MAX_DT = 0.05;
         let timestampPrevious = performance.now();
         let timestepAccumulator = 0.0;
@@ -832,8 +809,6 @@
         let animationFrameId: number;
 
         function animate(timestamp: DOMHighResTimeStamp): void {
-            // const animateStart: DOMHighResTimeStamp = performance.now();
-
             const dt = Math.min((timestamp - timestampPrevious) / 1000.0, MAX_DT);
             timestampPrevious = timestamp;
 
@@ -849,24 +824,12 @@
                 resizeNow = false;
             }
 
-            const backgroundColor: string = window.getComputedStyle(mainRoot).backgroundColor;
+            if (backgroundColorChanged) {
+                backgroundColor = window.getComputedStyle(mainRoot).backgroundColor;
+            }
 
             const interpolateAlpha = timestepAccumulator / fixedPhysicsTimestep;
             renderer.update(simulationState, simulationStatePrevious, interpolateAlpha, backgroundColor);
-
-            // const animateEnd = performance.now();
-            // perfAccum += animateEnd - animateStart;
-            // perfFrames++;
-            //
-            // if (perfFrames >= 20) {
-            //     const avg = perfAccum / perfFrames;
-            //     const fps = 1000.0 / avg;
-            //
-            //     perfDiv.textContent = `${avg.toFixed(2)} ms | ${fps.toFixed(1)} FPS`;
-            //
-            //     perfAccum = 0.0;
-            //     perfFrames = 0;
-            // }
 
             animationFrameId = requestAnimationFrame(animate);
         }
@@ -876,6 +839,7 @@
         return () => {
             cancelAnimationFrame(animationFrameId);
             resizeObserver.disconnect();
+            backgroundColorObserver.disconnect();
             renderer.threeRenderer.dispose();
             renderer.geometry.dispose();
             renderer.material.dispose();
