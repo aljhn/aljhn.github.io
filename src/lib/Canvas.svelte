@@ -502,7 +502,7 @@
 
             this.cameraDir = new THREE.Vector3();
             this.meshNormalMatrix = new THREE.Matrix3();
-            this.meshNormalMatrixTransposed = this.meshNormalMatrix.transpose();
+            this.meshNormalMatrixTransposed = new THREE.Matrix3();
 
             this.backgroundColor = new THREE.Color();
 
@@ -545,8 +545,8 @@
         }
 
         resize(width: number, height: number): void {
-            this.threeRenderer.setSize(width, height, false);
             this.threeRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            this.threeRenderer.setSize(width, height, false);
 
             this.camera.aspect = width / height;
             this.camera.updateProjectionMatrix();
@@ -791,7 +791,6 @@
     let canvas: HTMLCanvasElement;
 
     onMount(() => {
-        const canvasDiv: HTMLElement = document.getElementById("canvasDiv")!;
         const mainRoot: HTMLElement = document.getElementById("mainRoot")!;
 
         // const perfDiv = document.createElement("div");
@@ -819,13 +818,13 @@
 
         const renderer = new Renderer(PARTICLES, TRAIL, WIDTH);
         renderer.initializeVertices(simulationState);
-        renderer.resize(canvasDiv.clientWidth, canvasDiv.clientHeight);
 
         let resizeNow = false;
-        const resizeObserver: ResizeObserver = new ResizeObserver((entries) => {
+        const resizeObserver = new ResizeObserver(() => {
             resizeNow = true;
         });
-        resizeObserver.observe(canvasDiv);
+
+        resizeObserver.observe(canvas);
 
         const MAX_DT = 0.05;
         let timestampPrevious = performance.now();
@@ -848,7 +847,7 @@
             }
 
             if (resizeNow) {
-                renderer.resize(canvasDiv.clientWidth, canvasDiv.clientHeight);
+                renderer.resize(canvas.clientWidth, canvas.clientHeight);
                 resizeNow = false;
             }
 
@@ -886,6 +885,6 @@
     });
 </script>
 
-<div class="w-full flex-1 flex-col" id="canvasDiv">
-    <canvas bind:this={canvas}>Dynamical system simulator</canvas>
+<div class="relative flex-1">
+    <canvas bind:this={canvas} class="absolute h-full w-full"> Dynamical system simulator </canvas>
 </div>
