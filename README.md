@@ -13,6 +13,7 @@
 - unplugin-icons + Iconify + Lucide
 - Prettier + ESLint
 - GitHub Pages + GitHub Actions
+- Three.js
 
 ---
 
