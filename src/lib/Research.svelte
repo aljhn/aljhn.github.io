@@ -16,7 +16,7 @@
     const { papers, title }: Papers = $props();
 </script>
 
-<div class="px-5 lg:px-10 pt-10">
+<div class="px-5 pt-10 lg:px-10">
     <h2 class="text-textlight-1 dark:text-textdark-1 my-2 border-b-2 border-current font-mono text-2xl font-semibold">
         {title}
     </h2>
@@ -26,10 +26,10 @@
                 <h3 class="text-textlight-1 dark:text-textdark-1 text-xl font-semibold">{paper.title}</h3>
                 <div class="flex">
                     {#if paper.pdf != ""}
-                        <a class="text-lg mr-3 hover:underline" href="{paper.pdf}">[PDF]</a>
+                        <a class="mr-3 text-lg hover:underline" href={paper.pdf}>[PDF]</a>
                     {/if}
                     {#if paper.link != ""}
-                        <a class="text-lg hover:underline" href="{paper.link}">[Link]</a>
+                        <a class="text-lg hover:underline" href={paper.link}>[Link]</a>
                     {/if}
                     <p class="text-md grow text-right">{paper.year}</p>
                 </div>
