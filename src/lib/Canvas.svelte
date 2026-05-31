@@ -94,11 +94,15 @@
     }
 
     function getNextSaturationTarget(): number {
-        return sampleUniform(40.0, 60.0);
+        return sampleUniform(60.0, 80.0);
     }
 
-    function getNextLightTarget(): number {
-        return sampleUniform(40.0, 60.0);
+    function getNextLightTarget(darkMode: boolean): number {
+        if (darkMode) {
+            return sampleUniform(60.0, 80.0);
+        } else {
+            return sampleUniform(20.0, 40.0);
+        }
     }
 
     function getHuePositionChange(): number {
@@ -225,7 +229,7 @@
             this.saturationTarget = getNextSaturationTarget();
 
             this.light = 50;
-            this.lightTarget = getNextLightTarget();
+            this.lightTarget = 50;
 
             this.hueRangeChangeFactor = 0.2;
             this.hueRangeChangeDefault = 10.0;
@@ -274,7 +278,7 @@
             this.colorFrameRotation.normalize();
         }
 
-        updateColorValues(dt: number): void {
+        updateColorValues(dt: number, darkMode: boolean): void {
             if (this.hueRange < this.hueRangeTarget) {
                 this.hueRange +=
                     ((this.hueRangeTarget - this.hueRange) * this.hueRangeChangeFactor + this.hueRangeChangeDefault) *
@@ -314,7 +318,7 @@
             if (Math.abs(lightError) > 1e-1) {
                 this.light += lightError * this.lightChangeFactor * dt;
             } else {
-                this.lightTarget = getNextLightTarget();
+                this.lightTarget = getNextLightTarget(darkMode);
             }
         }
 
@@ -338,9 +342,9 @@
             }
         }
 
-        update(dt: number): void {
+        update(dt: number, darkMode: boolean): void {
             this.updateColorFrameRotation(dt);
-            this.updateColorValues(dt);
+            this.updateColorValues(dt, darkMode);
             this.updateParticles(dt);
         }
 
@@ -780,16 +784,20 @@
         resizeObserver.observe(canvas);
         const mainRoot: HTMLElement = document.getElementById("mainRoot")!;
 
-        let backgroundColor = window.getComputedStyle(mainRoot).backgroundColor;
-        let backgroundColorChanged = true;
+        let backgroundColor: string;
+        let darkMode: boolean;
 
-        const backgroundColorObserver = new MutationObserver(() => {
-            backgroundColorChanged = true;
-        });
-        backgroundColorObserver.observe(document.documentElement, {
-            attributes: true,
-            attributeFilter: ["class", "data-theme"]
-        });
+        function updateBackground() {
+            backgroundColor = window.getComputedStyle(mainRoot).backgroundColor;
+
+            const [r, g, b] = backgroundColor.substring(4, backgroundColor.length - 1).split(", ");
+            const gray = parseInt(r, 10) * 0.3 + parseInt(b, 10) * 0.6 + parseInt(g, 10) * 0.1;
+            if (gray < 128) {
+                darkMode = true;
+            } else {
+                darkMode = false;
+            }
+        }
 
         const PARTICLES = 100;
         const TRAIL = 300;
@@ -802,30 +810,28 @@
         renderer.initializeVertices(simulationState);
 
         const MAX_DT = 0.05;
-        let timestampPrevious = performance.now();
-        let timestepAccumulator = 0.0;
+        let timestampPrevious: DOMHighResTimeStamp = performance.now();
+        let timestepAccumulator: number = 0.0;
         const fixedPhysicsTimestep = 1e-2;
 
         let animationFrameId: number;
 
         function animate(timestamp: DOMHighResTimeStamp): void {
+            updateBackground();
+
             const dt = Math.min((timestamp - timestampPrevious) / 1000.0, MAX_DT);
             timestampPrevious = timestamp;
 
             timestepAccumulator += dt;
             while (timestepAccumulator > fixedPhysicsTimestep) {
                 simulationState.copyTo(simulationStatePrevious);
-                simulationState.update(fixedPhysicsTimestep);
+                simulationState.update(fixedPhysicsTimestep, darkMode);
                 timestepAccumulator -= fixedPhysicsTimestep;
             }
 
             if (resizeNow) {
                 renderer.resize(canvas.clientWidth, canvas.clientHeight);
                 resizeNow = false;
-            }
-
-            if (backgroundColorChanged) {
-                backgroundColor = window.getComputedStyle(mainRoot).backgroundColor;
             }
 
             const interpolateAlpha = timestepAccumulator / fixedPhysicsTimestep;
@@ -839,7 +845,6 @@
         return () => {
             cancelAnimationFrame(animationFrameId);
             resizeObserver.disconnect();
-            backgroundColorObserver.disconnect();
             renderer.threeRenderer.dispose();
             renderer.geometry.dispose();
             renderer.material.dispose();
