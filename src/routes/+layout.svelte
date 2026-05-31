@@ -9,7 +9,7 @@
     <Header />
 
     <div class="bg-bglight-1 dark:bg-bgdark-1 flex flex-1 flex-col text-gray-600 dark:text-gray-300" id="mainRoot">
-        <main class="flex flex-1 flex-col px-0 pb-10 lg:px-20">
+        <main class="flex flex-1 flex-col px-0 lg:px-20">
             {@render children()}
         </main>
     </div>

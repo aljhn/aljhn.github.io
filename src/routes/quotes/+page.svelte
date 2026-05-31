@@ -30,7 +30,7 @@
 
 <Meta name="Quotes" />
 
-<div class="grid auto-rows-min gap-5 p-10">
+<div class="mx-auto grid auto-rows-min gap-5 px-5 pt-10 pb-20 lg:max-w-10/12 lg:px-0">
     <h2 class="text-textlight-1 dark:text-textdark-1 font-mono text-2xl font-semibold">Selected Quotes</h2>
     <p class="text-textlight-2 dark:text-textdark-2">
         Interesting quotes sampled from various places on the internet. Order randomized.

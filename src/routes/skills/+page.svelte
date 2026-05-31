@@ -13,7 +13,7 @@
                 { name: "C++", level: advanced, icon: "/icons/cplusplus.svg" },
                 { name: "C", level: intermediate, icon: "/icons/c.svg" },
                 //{ name: "CUDA", level: beginner, icon: "/icons/nvidia.svg" },
-                { name: "Java", level: intermediate, icon: "/icons/java.svg" },
+                // { name: "Java", level: intermediate, icon: "/icons/java.svg" },
                 { name: "MATLAB", level: intermediate, icon: "/icons/matlab.svg" },
                 { name: "Haskell", level: beginner, icon: "/icons/haskell.svg" }
             ]
@@ -73,10 +73,10 @@
 
 <Meta name="Skills" />
 
-<div class="mt-5 columns-1 gap-8 pt-5 lg:columns-2">
+<div class="mx-auto columns-1 gap-8 px-5 pt-10 pb-20 lg:columns-2 lg:px-0 lg:max-w-10/12">
     {#each skills as skill}
         {#if skill.category !== ""}
-            <div class="mb-8 break-inside-avoid px-4 lg:px-10">
+            <div class="mb-8 break-inside-avoid px-0 lg:px-10">
                 <section class="bg-bglight-2 dark:bg-bgdark-2 rounded-xl p-3 shadow-xl">
                     <h2
                         class="text-textlight-1 dark:text-textdark-1 mb-4 border-b-2 border-current pb-2 font-mono text-2xl font-semibold"

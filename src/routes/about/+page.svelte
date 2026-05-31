@@ -30,4 +30,6 @@
 
 <Meta name="About" />
 
-<Sections {sections} />
+<div class="mx-auto pt-10 pb-20 lg:max-w-10/12">
+    <Sections {sections} />
+</div>

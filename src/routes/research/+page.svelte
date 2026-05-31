@@ -20,14 +20,16 @@
             authors: "",
             conference: "",
             year: 2026,
-            link: ""
+            link: "",
+            pdf: ""
         },
         {
             title: "Learning Ordinary Differential Equations with the Line Integral Loss Function",
             authors: "Albert Johannessen",
             conference: "NeurIPS 2022 Workshop - The Symbiosis of Deep Learning and Differential Equations II",
             year: 2022,
-            link: "https://openreview.net/forum?id=6EvTvGpiXe0"
+            link: "https://openreview.net/forum?id=6EvTvGpiXe0",
+            pdf: "papers/LineIntegralLoss.pdf"
         }
     ];
 
@@ -35,23 +37,25 @@
         {
             title: "Modeling Dynamical Systems with Physics Informed Neural Networks with Applications to PDE-Constrained Optimal Control Problems",
             authors: "Albert Johannessen",
-            conference: "NTNU Open",
+            conference: "Norwegian Research Information Repository",
             year: 2024,
-            link: "https://ntnuopen.ntnu.no/ntnu-xmlui/handle/11250/3130805"
+            link: "https://nva.sikt.no/registration/0198ec6407ac-73371548-6668-4c6c-bfc1-1b8452106fa6",
+            pdf: "papers/MasterThesis2.pdf"
         },
         {
             title: "Motion Classification with Neural Ordinary Differential Equations",
             authors: "Albert Johannessen",
-            conference: "NTNU Open",
+            conference: "Norwegian Research Information Repository",
             year: 2022,
-            link: "https://ntnuopen.ntnu.no/ntnu-xmlui/handle/11250/3024692"
+            link: "https://nva.sikt.no/registration/0198eaba1be8-c870f8f5-94b4-4643-a358-6c7904de4be6",
+            pdf: "papers/MasterThesis.pdf"
         }
     ];
 </script>
 
 <Meta name="Research" />
 
-<div class="grid lg:grid-cols-2">
+<div class="mx-auto grid pt-10 pb-20 lg:grid-cols-2 lg:max-w-10/12">
     <div>
         <Sections {sections} />
 
@@ -59,7 +63,7 @@
         <Research papers={masterTheses} title="Master Theses" />
     </div>
 
-    <div class="grid auto-rows-min gap-y-10 pt-10">
+    <div class="grid auto-rows-min gap-y-10 pt-10 lg:pt-0">
         <div class="flex justify-center">
             <enhanced:img
                 src="/static/images/MassSpringDamper.jpg?w=600;300"
