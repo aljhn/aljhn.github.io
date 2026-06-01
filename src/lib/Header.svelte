@@ -70,7 +70,7 @@
     };
 </script>
 
-<header class="bg-bglight-2 text-textlight-1 dark:bg-bgdark-2 dark:text-textdark-1 theme-transition font-mono">
+<header class="bg-bglight-2 text-textlight-1 dark:bg-bgdark-2 dark:text-textdark-1 font-mono darkModeFade">
     <div class="container mx-auto flex flex-col items-center py-2 lg:flex-row lg:justify-between">
         <div class="flex grow items-center">
             <a href="/"><img src="images/Logo.svg" alt="Logo" width="75" height="75" /></a>
@@ -78,7 +78,7 @@
 
             <button
                 bind:this={dropdownMenuButton}
-                class="{isDropdownOpen ? 'bg-bglight-3 dark:bg-bgdark-3 shadow-lg' : ''} inline p-1 lg:hidden"
+                class="{isDropdownOpen ? 'bg-bglight-3 dark:bg-bgdark-3 shadow-lg' : ''} inline p-1 lg:hidden darkModeFade"
                 onclick={handleDropdownClick}
                 onfocusout={handleDropdownFocusLoss}
                 aria-label="Navigation menu"
@@ -86,7 +86,7 @@
                 <Menu width="32" height="32" />
                 <div
                     bind:this={dropdownMenuDiv}
-                    class="bg-bglight-3 dark:bg-bgdark-3 absolute left-0 z-10 shadow-lg"
+                    class="bg-bglight-3 dark:bg-bgdark-3 absolute left-0 z-10 shadow-lg darkModeFade"
                     style:visibility={isDropdownOpen ? "visible" : "collapse"}
                 >
                     <div class="flex flex-col items-center space-y-1 p-2">
@@ -101,7 +101,7 @@
 
                         <div
                             onclick={handleDarkModeToggleMenu}
-                            class="hover:bg-bglight-1 hover:dark:bg-bgdark-1 flex rounded-2xl p-1"
+                            class="hover:bg-bglight-1 hover:dark:bg-bgdark-1 flex rounded-2xl p-1 darkModeFade"
                             aria-hidden="true"
                         >
                             {#if darkModeState}
@@ -139,7 +139,7 @@
 
         <button
             onclick={handleDarkModeToggle}
-            class="hover:bg-bglight-1 hover:dark:bg-bgdark-1 hidden rounded-2xl p-1 lg:flex"
+            class="hover:bg-bglight-1 hover:dark:bg-bgdark-1 hidden rounded-2xl p-1 lg:flex darkModeFade"
             aria-label="Dark mode toggle"
         >
             {#if darkModeState}

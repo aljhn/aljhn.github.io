@@ -31,8 +31,8 @@
 <Meta name="Quotes" />
 
 <div class="mx-auto grid auto-rows-min gap-5 px-5 pt-10 pb-20 lg:max-w-10/12 lg:px-0">
-    <h2 class="text-textlight-1 dark:text-textdark-1 font-mono text-2xl font-semibold">Selected Quotes</h2>
-    <p class="text-textlight-2 dark:text-textdark-2">
+    <h2 class="text-textlight-1 dark:text-textdark-1 font-mono text-2xl font-semibold darkModeFade">Selected Quotes</h2>
+    <p class="text-textlight-2 dark:text-textdark-2 darkModeFade">
         Interesting quotes sampled from various places on the internet. Order randomized.
     </p>
 
@@ -40,7 +40,7 @@
         {#each quotes as quote}
             <li class="p-1">
                 <blockquote
-                    class="blockquote bg-bglight-2 dark:bg-bgdark-2 text-textlight-1 dark:text-textdark-1 rounded-md px-3 py-3 text-lg shadow-lg"
+                    class="blockquote bg-bglight-2 dark:bg-bgdark-2 text-textlight-1 dark:text-textdark-1 rounded-md px-3 py-3 text-lg shadow-lg darkModeFade"
                 >
                     {quote}
                 </blockquote>
