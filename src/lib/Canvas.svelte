@@ -773,7 +773,9 @@
         }
     }
 
-    let canvas: HTMLCanvasElement;
+    let webglSupported = $state(true);
+
+    let canvas: HTMLCanvasElement = $state()!;
 
     onMount(() => {
         let resizeNow = true;
@@ -789,24 +791,25 @@
 
         function updateBackground() {
             backgroundColor = window.getComputedStyle(mainRoot).backgroundColor;
-
-            const [r, g, b] = backgroundColor.substring(4, backgroundColor.length - 1).split(", ");
-            const gray = parseInt(r, 10) * 0.3 + parseInt(b, 10) * 0.6 + parseInt(g, 10) * 0.1;
-            if (gray < 128) {
-                darkMode = true;
-            } else {
-                darkMode = false;
-            }
+            darkMode = document.documentElement.classList.contains("dark");
         }
 
         const PARTICLES = 100;
         const TRAIL = 300;
         const WIDTH = 0.1;
 
+        let renderer: Renderer;
+
+        try {
+            renderer = new Renderer(PARTICLES, TRAIL, WIDTH);
+        } catch {
+            webglSupported = false;
+            return;
+        }
+
         const simulationState = new SimulationState(PARTICLES);
         const simulationStatePrevious = new SimulationState(PARTICLES);
 
-        const renderer = new Renderer(PARTICLES, TRAIL, WIDTH);
         renderer.initializeVertices(simulationState);
 
         const MAX_DT = 0.05;
@@ -845,13 +848,19 @@
         return () => {
             cancelAnimationFrame(animationFrameId);
             resizeObserver.disconnect();
-            renderer.threeRenderer.dispose();
+            renderer.controls.dispose();
+            renderer.scene.remove(renderer.mesh);
             renderer.geometry.dispose();
             renderer.material.dispose();
+            renderer.threeRenderer.dispose();
         };
     });
 </script>
 
-<div class="relative flex-1">
-    <canvas bind:this={canvas} class="absolute h-full w-full"> Dynamical system simulator </canvas>
-</div>
+{#if webglSupported}
+    <div class="relative flex-1">
+        <canvas bind:this={canvas} class="absolute h-full w-full"> Dynamical system simulator </canvas>
+    </div>
+{:else}
+    <div class="flex flex-1 items-center justify-center text-lg">WebGL is not supported in your browser.</div>
+{/if}

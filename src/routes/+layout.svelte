@@ -8,7 +8,10 @@
 <div class="flex min-h-screen flex-col font-sans">
     <Header />
 
-    <div class="bg-bglight-1 dark:bg-bgdark-1 flex flex-1 flex-col text-gray-600 dark:text-gray-300" id="mainRoot">
+    <div
+        class="bg-bglight-1 dark:bg-bgdark-1 theme-transition flex flex-1 flex-col text-gray-600 dark:text-gray-300"
+        id="mainRoot"
+    >
         <main class="flex flex-1 flex-col px-0 lg:px-20">
             {@render children()}
         </main>
