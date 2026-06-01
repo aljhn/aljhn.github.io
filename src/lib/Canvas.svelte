@@ -859,7 +859,7 @@
 
 {#if webglSupported}
     <div class="relative flex-1">
-        <canvas bind:this={canvas} class="absolute h-full w-full"> Dynamical system simulator </canvas>
+        <canvas bind:this={canvas} class="absolute h-full w-full">Dynamical system simulator</canvas>
     </div>
 {:else}
     <div class="flex flex-1 items-center justify-center text-lg">WebGL is not supported in your browser.</div>

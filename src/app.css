@@ -2,11 +2,11 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
-@utility theme-transition {
+@utility darkModeFade {
     transition:
-        color 300ms,
-        background-color 300ms,
-        border-color 300ms;
+        color 200ms,
+        background-color 200ms,
+        border-color 200ms;
 }
 
 @theme {
