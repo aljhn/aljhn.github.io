@@ -77,9 +77,9 @@
     {#each skills as skill}
         {#if skill.category !== ""}
             <div class="mb-8 break-inside-avoid px-0 lg:px-10">
-                <section class="bg-bglight-2 dark:bg-bgdark-2 rounded-xl p-3 shadow-xl darkModeFade">
+                <section class="bg-bglight-2 dark:bg-bgdark-2 darkModeFade rounded-xl p-3 shadow-xl">
                     <h2
-                        class="text-textlight-1 dark:text-textdark-1 mb-4 border-b-2 border-current pb-2 font-mono text-2xl font-semibold darkModeFade"
+                        class="text-textlight-1 dark:text-textdark-1 darkModeFade mb-4 border-b-2 border-current pb-2 font-mono text-2xl font-semibold"
                     >
                         {skill.category}
                     </h2>
