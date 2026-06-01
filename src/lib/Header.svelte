@@ -66,12 +66,11 @@
     const handleDropdownFocusLoss = (event: FocusEvent) => {
         if (!event.relatedTarget || !(event.target as HTMLElement).contains(event.relatedTarget as HTMLElement)) {
             isDropdownOpen = false;
-            console.log(true);
         }
     };
 </script>
 
-<header class="bg-bglight-2 text-textlight-1 dark:bg-bgdark-2 dark:text-textdark-1 font-mono">
+<header class="bg-bglight-2 text-textlight-1 dark:bg-bgdark-2 dark:text-textdark-1 theme-transition font-mono">
     <div class="container mx-auto flex flex-col items-center py-2 lg:flex-row lg:justify-between">
         <div class="flex grow items-center">
             <a href="/"><img src="images/Logo.svg" alt="Logo" width="75" height="75" /></a>
