@@ -14,7 +14,7 @@
                 "Personal Website, Resume, Portfolio, Projects, Publications, Interests, Computer Science, Programming, Artificial Intelligence, AI, Machine Learning, Deep Learning, Math, Dynamical Systems, Control Theory",
             url: "https://aljhn.github.io",
             pageUrl: "https://aljhn.github.io" + page.url.pathname,
-            image: "https://aljhn.github.io/images/Hex.png"
+            image: "https://aljhn.github.io/images/Logo.png"
         };
     });
 </script>
