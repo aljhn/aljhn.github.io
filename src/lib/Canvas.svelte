@@ -243,13 +243,6 @@
             this.particleAmount = particleAmount;
 
             this.particlePositions = new Float32Array(this.particleAmount * 3);
-            for (let i = 0; i < this.particleAmount; i++) {
-                const index = i * 3;
-                this.particlePositions[index] = sampleUniform(-5.0, 5.0);
-                this.particlePositions[index + 1] = sampleUniform(-5.0, 5.0);
-                this.particlePositions[index + 2] = sampleUniform(80.0, 100.0);
-            }
-
             this.particleVelocities = new Float32Array(this.particleAmount * 3);
 
             this.integrateOutput = new THREE.Vector3();
@@ -809,6 +802,17 @@
 
         const simulationState = new SimulationState(PARTICLES);
         const simulationStatePrevious = new SimulationState(PARTICLES);
+
+        for (let i = 0; i < PARTICLES; i++) {
+            const index = i * 3;
+            simulationState.particlePositions[index] = sampleUniform(-5.0, 5.0);
+            simulationState.particlePositions[index + 1] = sampleUniform(-5.0, 5.0);
+            simulationState.particlePositions[index + 2] = sampleUniform(80.0, 100.0);
+
+            simulationStatePrevious.particlePositions[index] = simulationState.particlePositions[index];
+            simulationStatePrevious.particlePositions[index + 1] = simulationState.particlePositions[index + 1];
+            simulationStatePrevious.particlePositions[index + 2] = simulationState.particlePositions[index + 2];
+        }
 
         renderer.initializeVertices(simulationState);
 
