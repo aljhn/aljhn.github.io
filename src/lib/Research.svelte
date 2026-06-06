@@ -23,7 +23,7 @@
         {title}
     </h2>
     <ul class="space-y-4">
-        {#each papers as paper}
+        {#each papers as paper (paper.title)}
             <li
                 class="bg-bglight-2 dark:bg-bgdark-2 text-textlight-2 dark:text-textdark-2 darkModeFade rounded-xl p-3 shadow-xl"
             >

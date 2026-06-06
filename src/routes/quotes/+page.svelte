@@ -37,7 +37,7 @@
     </p>
 
     <ul class="items-left mt-5 flex flex-col space-y-4 border-t-2 border-current pt-5">
-        {#each quotes as quote}
+        {#each quotes as quote, i (i)}
             <li class="p-1">
                 <blockquote
                     class="blockquote bg-bglight-2 dark:bg-bgdark-2 text-textlight-1 dark:text-textdark-1 darkModeFade rounded-md px-3 py-3 text-lg shadow-lg"
