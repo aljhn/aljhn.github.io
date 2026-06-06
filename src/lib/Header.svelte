@@ -73,8 +73,8 @@
 <header class="bg-bglight-2 text-textlight-1 dark:bg-bgdark-2 dark:text-textdark-1 darkModeFade font-mono">
     <div class="container mx-auto flex flex-col items-center py-2 lg:flex-row lg:justify-between">
         <div class="flex grow items-center">
-            <a href="/"><img src="images/Logo.svg" alt="Logo" width="75" height="75" /></a>
-            <a href="/"><h1 class="px-2 text-2xl font-bold lg:text-3xl">Albert Johannessen</h1></a>
+            <a href={resolve("/")}><img src="images/Logo.svg" alt="Logo" width="75" height="75" /></a>
+            <a href={resolve("/")}><h1 class="px-2 text-2xl font-bold lg:text-3xl">Albert Johannessen</h1></a>
 
             <button
                 bind:this={dropdownMenuButton}
@@ -92,7 +92,7 @@
                     style:visibility={isDropdownOpen ? "visible" : "collapse"}
                 >
                     <div class="flex flex-col items-center space-y-1 p-2">
-                        {#each links as link}
+                        {#each links as link (link.url)}
                             <a
                                 href={link.url}
                                 class="{page.url.pathname === link.url
@@ -129,7 +129,7 @@
         </div>
 
         <nav class="hidden lg:flex lg:pr-3">
-            {#each links as link}
+            {#each links as link (link.url)}
                 <a
                     href={link.url}
                     class="p-1 text-lg {page.url.pathname === link.url

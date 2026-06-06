@@ -74,7 +74,7 @@
 <Meta name="Skills" />
 
 <div class="mx-auto columns-1 gap-8 px-5 pt-10 pb-20 lg:max-w-10/12 lg:columns-2 lg:px-0">
-    {#each skills as skill}
+    {#each skills as skill (skill.category)}
         {#if skill.category !== ""}
             <div class="mb-8 break-inside-avoid px-0 lg:px-10">
                 <section class="bg-bglight-2 dark:bg-bgdark-2 darkModeFade rounded-xl p-3 shadow-xl">
@@ -84,7 +84,7 @@
                         {skill.category}
                     </h2>
                     <ul class="space-y-2">
-                        {#each skill.items as item}
+                        {#each skill.items as item (item.name)}
                             <li class="flex items-center justify-between">
                                 <span class="flex items-center space-x-2">
                                     <img src={item.icon} class="size-7 object-contain" alt="{item.name} icon" />

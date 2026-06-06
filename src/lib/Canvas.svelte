@@ -29,21 +29,6 @@
         step: (x: number, y: number, z: number, ode: ODE, h: number, out: THREE.Vector3) => void;
     }
 
-    class Euler implements Integrator {
-        k: THREE.Vector3;
-
-        constructor() {
-            this.k = new THREE.Vector3();
-        }
-
-        step(x: number, y: number, z: number, ode: ODE, h: number, out: THREE.Vector3): void {
-            ode.f(x, y, z, this.k);
-            out.x = x + this.k.x * h;
-            out.y = y + this.k.y * h;
-            out.z = z + this.k.z * h;
-        }
-    }
-
     class Heun implements Integrator {
         k1: THREE.Vector3;
         k2: THREE.Vector3;
@@ -491,10 +476,10 @@
             this.mesh.frustumCulled = false;
             this.scene.add(this.mesh);
 
-            this.positionAttribute = this.mesh.geometry.getAttribute("position");
+            this.positionAttribute = this.mesh.geometry.getAttribute("position") as THREE.BufferAttribute;
             this.positionAttribute.setUsage(THREE.DynamicDrawUsage);
 
-            this.colorAttribute = this.mesh.geometry.getAttribute("color");
+            this.colorAttribute = this.mesh.geometry.getAttribute("color") as THREE.BufferAttribute;
             this.colorAttribute.setUsage(THREE.DynamicDrawUsage);
 
             this.threeRenderer.render(this.scene, this.camera);
