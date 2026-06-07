@@ -27,7 +27,7 @@
             <li
                 class="bg-bglight-2 dark:bg-bgdark-2 text-textlight-2 dark:text-textdark-2 darkModeFade rounded-xl p-3 shadow-xl"
             >
-                <h3 class="text-textlight-1 dark:text-textdark-1 font-semibol darkModeFade text-xl">{paper.title}</h3>
+                <h3 class="text-textlight-1 dark:text-textdark-1 font-semibold darkModeFade text-xl">{paper.title}</h3>
                 <div class="flex">
                     {#if paper.pdf != ""}
                         <a class="mr-3 text-lg hover:underline" href={paper.pdf}>[PDF]</a>
