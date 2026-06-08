@@ -97,6 +97,13 @@ export class SimulationState {
 
         this.ode = new Lorenz();
         this.integrator = new Heun();
+
+        for (let i = 0; i < this.particleAmount; i++) {
+            const index = i * 3;
+            this.particlePositions[index] = sampleUniform(-5.0, 5.0);
+            this.particlePositions[index + 1] = sampleUniform(-5.0, 5.0);
+            this.particlePositions[index + 2] = sampleUniform(80.0, 100.0);
+        }
     }
 
     updateColorFrameRotation(dt: number): void {

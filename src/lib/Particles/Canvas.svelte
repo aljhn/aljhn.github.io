@@ -1,100 +1,132 @@
 <script lang="ts">
     import { onMount } from "svelte";
-    import { Renderer } from "./renderer";
-    import { SimulationState } from "./simulation";
-    import { sampleUniform } from "./utils";
+    import type { Renderer } from "./renderer";
 
     let webglSupported = $state(true);
 
     let canvas: HTMLCanvasElement = $state()!;
 
     onMount(() => {
-        let resizeNow = true;
-        const resizeObserver = new ResizeObserver(() => {
-            resizeNow = true;
-        });
+        let cancelled = false;
+        let cleanup: (() => void) | undefined;
 
-        resizeObserver.observe(canvas);
-        const mainRoot: HTMLElement = document.getElementById("mainRoot")!;
+        Promise.all([import("./renderer"), import("./simulation")])
+            .then(([{ Renderer }, { SimulationState }]) => {
+                if (cancelled) {
+                    return;
+                }
+                if (canvas == null) {
+                    webglSupported = false;
+                    return;
+                }
 
-        let backgroundColor: string;
-        let darkMode: boolean;
+                let resizeNow = true;
+                const resizeObserver = new ResizeObserver(() => {
+                    resizeNow = true;
+                });
 
-        function updateBackground() {
-            backgroundColor = window.getComputedStyle(mainRoot).backgroundColor;
-            darkMode = document.documentElement.classList.contains("dark");
-        }
+                resizeObserver.observe(canvas);
+                const mainRoot: HTMLElement = document.getElementById("mainRoot")!;
 
-        const PARTICLES = 100;
-        const TRAIL = 300;
-        const WIDTH = 0.1;
+                let backgroundColor: string;
+                let darkMode: boolean;
 
-        let renderer: Renderer;
+                function updateBackground() {
+                    backgroundColor = window.getComputedStyle(mainRoot).backgroundColor;
+                    darkMode = document.documentElement.classList.contains("dark");
+                }
 
-        try {
-            renderer = new Renderer(canvas, PARTICLES, TRAIL, WIDTH);
-        } catch {
-            webglSupported = false;
-            return;
-        }
+                const PARTICLES = 100;
+                const TRAIL = 300;
+                const WIDTH = 0.1;
 
-        const simulationState = new SimulationState(PARTICLES);
-        const simulationStatePrevious = new SimulationState(PARTICLES);
+                let renderer: Renderer;
 
-        for (let i = 0; i < PARTICLES; i++) {
-            const index = i * 3;
-            simulationState.particlePositions[index] = sampleUniform(-5.0, 5.0);
-            simulationState.particlePositions[index + 1] = sampleUniform(-5.0, 5.0);
-            simulationState.particlePositions[index + 2] = sampleUniform(80.0, 100.0);
+                try {
+                    renderer = new Renderer(canvas, PARTICLES, TRAIL, WIDTH);
+                } catch {
+                    webglSupported = false;
+                    return;
+                }
 
-            simulationStatePrevious.particlePositions[index] = simulationState.particlePositions[index];
-            simulationStatePrevious.particlePositions[index + 1] = simulationState.particlePositions[index + 1];
-            simulationStatePrevious.particlePositions[index + 2] = simulationState.particlePositions[index + 2];
-        }
-
-        renderer.initializeVertices(simulationState);
-
-        const MAX_DT = 0.05;
-        let timestampPrevious: DOMHighResTimeStamp = performance.now();
-        let timestepAccumulator: number = 0.0;
-        const fixedPhysicsTimestep = 1e-2;
-
-        let animationFrameId: number;
-
-        function animate(timestamp: DOMHighResTimeStamp): void {
-            updateBackground();
-
-            const dt = Math.min((timestamp - timestampPrevious) / 1000.0, MAX_DT);
-            timestampPrevious = timestamp;
-
-            timestepAccumulator += dt;
-            while (timestepAccumulator > fixedPhysicsTimestep) {
+                const simulationState = new SimulationState(PARTICLES);
+                const simulationStatePrevious = new SimulationState(PARTICLES);
                 simulationState.copyTo(simulationStatePrevious);
-                simulationState.update(fixedPhysicsTimestep, darkMode);
-                timestepAccumulator -= fixedPhysicsTimestep;
-            }
 
-            if (resizeNow) {
-                renderer.resize(canvas.clientWidth, canvas.clientHeight);
-                resizeNow = false;
-            }
+                renderer.initializeVertices(simulationState);
 
-            const interpolateAlpha = timestepAccumulator / fixedPhysicsTimestep;
-            renderer.update(simulationState, simulationStatePrevious, interpolateAlpha, backgroundColor);
+                const MAX_DT = 0.05;
+                let timestampPrevious: DOMHighResTimeStamp = performance.now();
+                let timestepAccumulator: number = 0.0;
+                const fixedPhysicsTimestep = 1e-2;
 
-            animationFrameId = requestAnimationFrame(animate);
-        }
+                let animationFrameId: number;
+                let isAnimating = true;
 
-        animationFrameId = requestAnimationFrame(animate);
+                function animate(timestamp: DOMHighResTimeStamp): void {
+                    updateBackground();
+
+                    const dt = Math.min((timestamp - timestampPrevious) / 1000.0, MAX_DT);
+                    timestampPrevious = timestamp;
+
+                    timestepAccumulator += dt;
+                    while (timestepAccumulator > fixedPhysicsTimestep) {
+                        simulationState.copyTo(simulationStatePrevious);
+                        simulationState.update(fixedPhysicsTimestep, darkMode);
+                        timestepAccumulator -= fixedPhysicsTimestep;
+                    }
+
+                    if (resizeNow) {
+                        renderer.resize(canvas.clientWidth, canvas.clientHeight);
+                        resizeNow = false;
+                    }
+
+                    const interpolateAlpha = timestepAccumulator / fixedPhysicsTimestep;
+                    renderer.update(simulationState, simulationStatePrevious, interpolateAlpha, backgroundColor);
+
+                    animationFrameId = requestAnimationFrame(animate);
+                }
+
+                function handleVisibilityChange() {
+                    if (document.hidden) {
+                        if (isAnimating) {
+                            cancelAnimationFrame(animationFrameId);
+                            isAnimating = false;
+                        }
+                    } else {
+                        if (!isAnimating) {
+                            timestampPrevious = performance.now();
+                            animationFrameId = requestAnimationFrame(animate);
+                            isAnimating = true;
+                        }
+                    }
+                }
+
+                document.addEventListener("visibilitychange", handleVisibilityChange);
+
+                animationFrameId = requestAnimationFrame(animate);
+
+                cleanup = () => {
+                    cancelAnimationFrame(animationFrameId);
+                    document.removeEventListener("visibilitychange", handleVisibilityChange);
+                    resizeObserver.disconnect();
+                    renderer.controls.dispose();
+                    renderer.scene.remove(renderer.mesh);
+                    renderer.geometry.dispose();
+                    renderer.material.dispose();
+                    renderer.threeRenderer.dispose();
+                };
+            })
+            .catch(() => {
+                if (cancelled) {
+                    return;
+                }
+                webglSupported = false;
+            });
 
         return () => {
-            cancelAnimationFrame(animationFrameId);
-            resizeObserver.disconnect();
-            renderer.controls.dispose();
-            renderer.scene.remove(renderer.mesh);
-            renderer.geometry.dispose();
-            renderer.material.dispose();
-            renderer.threeRenderer.dispose();
+            cancelled = true;
+            cleanup?.();
         };
     });
 </script>
