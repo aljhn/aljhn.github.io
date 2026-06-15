@@ -10,17 +10,19 @@
 }
 
 @theme {
-    --color-bgdark-1: hsl(200, 30%, 5%);
-    --color-bgdark-2: hsl(200, 30%, 10%);
-    --color-bgdark-3: hsl(200, 30%, 15%);
+    --color-bgdark-1: hsl(170, 30%, 5%);
+    --color-bgdark-2: hsl(170, 30%, 10%);
+    --color-bgdark-3: hsl(170, 30%, 15%);
 
-    --color-textdark-1: hsl(200, 10%, 90%);
-    --color-textdark-2: hsl(200, 10%, 80%);
+    --color-textdark-1: hsl(40, 10%, 90%);
+    --color-textdark-2: hsl(40, 10%, 80%);
+    --color-linkdark: hsl(220, 50%, 60%);
 
-    --color-bglight-1: hsl(200, 30%, 95%);
-    --color-bglight-2: hsl(200, 30%, 90%);
-    --color-bglight-3: hsl(200, 30%, 85%);
+    --color-bglight-1: hsl(170, 30%, 95%);
+    --color-bglight-2: hsl(170, 30%, 90%);
+    --color-bglight-3: hsl(170, 30%, 85%);
 
-    --color-textlight-1: hsl(200, 10%, 10%);
-    --color-textlight-2: hsl(200, 10%, 20%);
+    --color-textlight-1: hsl(40, 10%, 10%);
+    --color-textlight-2: hsl(40, 10%, 20%);
+    --color-linklight: hsl(220, 50%, 40%);
 }

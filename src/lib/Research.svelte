@@ -30,10 +30,10 @@
                 <h3 class="text-textlight-1 dark:text-textdark-1 darkModeFade text-xl font-semibold">{paper.title}</h3>
                 <div class="flex">
                     {#if paper.pdf != ""}
-                        <a class="mr-3 text-lg hover:underline" href={paper.pdf}>[PDF]</a>
+                        <a class="mr-3 text-lg hover:underline text-linklight dark:text-linkdark" href={paper.pdf}>[PDF]</a>
                     {/if}
                     {#if paper.link != ""}
-                        <a class="text-lg hover:underline" href={paper.link}>[Link]</a>
+                        <a class="text-lg hover:underline text-linklight dark:text-linkdark" href={paper.link}>[Link]</a>
                     {/if}
                     <p class="text-md grow text-right">{paper.year}</p>
                 </div>
