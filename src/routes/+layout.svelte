@@ -1,5 +1,7 @@
 <script lang="ts">
     import "../app.css";
+    // import "katex/dist/katex.min.css";
+
     import Header from "$lib/Header.svelte";
 
     let { children } = $props();
