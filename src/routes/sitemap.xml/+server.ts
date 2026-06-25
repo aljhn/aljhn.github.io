@@ -2,7 +2,7 @@ import type { RequestHandler } from "./$types";
 
 const site = "https://aljhn.github.io";
 const date = new Date().toISOString().split("T")[0];
-const pages = ["", "about", "quotes", "skills", "research"];
+const pages = ["", "about", "quotes", "skills", "research", "writing"];
 
 export const prerender = true;
 
