@@ -5,7 +5,7 @@
   let metadata = $derived(data.metadata);
 </script>
 
-<article>
+<article class="prose dark:prose-invert">
   <h1>{metadata?.title}</h1>
 
   <Post />
