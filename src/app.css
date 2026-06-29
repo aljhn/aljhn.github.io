@@ -3,7 +3,7 @@
 @import "katex/dist/katex.min.css";
 
 .prose .katex {
-  font-size: 1.1em;
+    font-size: 1.1em;
 }
 
 @custom-variant dark (&:where(.dark, .dark *));
