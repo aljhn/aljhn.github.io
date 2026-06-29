@@ -1,0 +1,46 @@
+---
+title: 3D Spline Intersections
+date: 2026-06-25
+---
+
+Inline: $a+b$
+
+$$a=b+c$$
+
+Text afterwards.
+
+$$
+\hat{f}(\omega) = \int_{-\infty}^{\infty} f(t) e^{-j \omega t} dt
+$$
+
+
+a lot of text 
+a lot of text 
+a lot of text 
+a lot of text 
+a lot of text 
+a lot of text 
+a lot of text 
+a lot of text 
+a lot of text 
+a lot of text 
+a lot of text 
+a lot of text 
+a lot of text 
+a lot of text 
+a lot of text 
+a lot of text 
+a lot of text 
+a lot of text 
+a lot of text 
+a lot of text 
+a lot of text 
+a lot of text 
+a lot of text 
+a lot of text 
+a lot of text 
+a lot of text 
+a lot of text 
+a lot of text 
+a lot of text 
+a lot of text 
