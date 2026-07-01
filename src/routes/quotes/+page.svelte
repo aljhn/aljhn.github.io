@@ -27,7 +27,7 @@
     shuffleArray(quotes);
 </script>
 
-<Meta name="Quotes" />
+<Meta title="Quotes" />
 
 <div class="mx-auto grid auto-rows-min gap-5 px-5 pt-10 pb-20 lg:max-w-10/12 lg:px-0">
     <h2 class="text-textlight-1 dark:text-textdark-1 darkModeFade font-mono text-2xl font-semibold">Selected Quotes</h2>

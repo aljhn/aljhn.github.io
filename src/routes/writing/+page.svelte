@@ -4,7 +4,7 @@
     let { data } = $props();
 </script>
 
-<Meta name="Writing" />
+<Meta title="Writing" />
 
 <div class="mx-auto px-5 pt-20 pb-20">
     <ul class="items-left space-y-4">

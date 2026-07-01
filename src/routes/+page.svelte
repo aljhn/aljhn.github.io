@@ -3,6 +3,6 @@
     import ParticleCanvas from "$lib/particles/Canvas.svelte";
 </script>
 
-<Meta name="Home" />
+<Meta title="Home" />
 
 <ParticleCanvas />

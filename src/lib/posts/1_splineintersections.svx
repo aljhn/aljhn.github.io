@@ -1,5 +1,6 @@
 ---
 title: 3D Spline Intersections
+description: How to algorithmically check for collisions of 3D trajectories
 date: 2026-06-25
 ---
 

@@ -53,7 +53,7 @@
     ];
 </script>
 
-<Meta name="Research" />
+<Meta title="Research" />
 
 <div class="mx-auto grid pt-10 pb-20 lg:max-w-10/12 lg:grid-cols-2">
     <div>

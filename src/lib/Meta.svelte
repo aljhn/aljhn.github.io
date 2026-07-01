@@ -1,7 +1,17 @@
 <script lang="ts">
     import { page } from "$app/state";
 
-    let { name } = $props();
+    let {
+        title,
+        description,
+        date,
+        type = "website"
+    }: {
+        title: string;
+        description?: string;
+        date?: string;
+        type?: string;
+    } = $props();
 
     const data = {
         name: "Albert Johannessen",
@@ -11,12 +21,12 @@
     };
 
     const meta = $derived.by(() => {
-        const pageTitle = name === "Home" ? "" : " - " + (name.charAt(0).toUpperCase() + name.slice(1));
+        const pageTitle = title === "Home" ? "" : " - " + (title.charAt(0).toUpperCase() + title.slice(1));
 
         return {
             author: data.name,
             title: data.name + pageTitle,
-            description: data.desc + pageTitle,
+            description: description ?? data.desc + pageTitle,
             url: data.url,
             pageUrl: data.url + page.url.pathname,
             image: data.image
@@ -38,6 +48,23 @@
         }
         return items;
     });
+
+    const articleSchema = $derived(
+        type === "article"
+            ? [
+                  {
+                      "@type": "Article",
+                      headline: meta.title,
+                      author: { "@type": "Person", name: data.name },
+                      datePublished: date ?? new Date().toISOString().split("T")[0],
+                      image: meta.image,
+                      url: meta.pageUrl,
+                      description: meta.description,
+                      publisher: { "@type": "Person", name: data.name }
+                  }
+              ]
+            : []
+    );
 
     const jsonld = $derived({
         "@context": "https://schema.org",
@@ -64,7 +91,8 @@
             {
                 "@type": "BreadcrumbList",
                 itemListElement: breadcrumbs
-            }
+            },
+            ...articleSchema
         ]
     });
 
@@ -82,7 +110,7 @@
 
     <meta property="og:site_name" content={data.url} />
     <meta property="og:title" content={meta.title} />
-    <meta property="og:type" content="website" />
+    <meta property="og:type" content={type} />
     <meta property="og:url" content={meta.pageUrl} />
     <meta property="og:image" content={meta.image} />
     <meta property="og:description" content={meta.description} />
@@ -93,6 +121,11 @@
     <meta name="twitter:description" content={meta.description} />
     <meta name="twitter:image" content={meta.image} />
     <meta name="twitter:url" content={meta.pageUrl} />
+
+    {#if type === "article" && date !== undefined}
+        <meta property="article:published_time" content={date} />
+        <meta property="article:author" content={data.name} />
+    {/if}
 
     {@html `<script type="application/ld+json">${jsonldString}</script>`}
 </svelte:head>

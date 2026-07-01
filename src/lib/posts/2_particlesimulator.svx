@@ -1,5 +1,6 @@
 ---
 title: Chaotic Systems and Particle Simulators
+description: Why chaotic systems are interesting to visualize, and efficiently rendering particle trails with Three.js
 date: 2026-06-25
 ---
 
