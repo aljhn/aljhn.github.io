@@ -90,6 +90,7 @@
                 <div
                     bind:this={dropdownMenuDiv}
                     class="bg-bglight-3 dark:bg-bgdark-3 darkModeFade absolute left-0 z-10 shadow-lg"
+                    inert={!isDropdownOpen}
                     style:visibility={isDropdownOpen ? "visible" : "collapse"}
                 >
                     <div class="flex flex-col items-center space-y-1 p-2">
@@ -98,14 +99,19 @@
                                 href={link.url}
                                 class="{page.url.pathname === link.url
                                     ? 'font-extrabold'
-                                    : 'font-medium'} hover:underline">{link.label}</a
+                                    : 'font-medium'} hover:underline"
+                                aria-current={page.url.pathname === link.url ? 'page' : undefined}
+                            >{link.label}</a
                             >
                         {/each}
 
                         <div
                             onclick={handleDarkModeToggleMenu}
-                            class="hover:bg-bglight-1 hover:dark:bg-bgdark-1 darkModeFade flex rounded-2xl p-1"
-                            aria-hidden="true"
+                            onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleDarkModeToggleMenu(); } }}
+                            class="hover:bg-bglight-2 hover:dark:bg-bgdark-2 darkModeFade flex rounded-2xl p-1"
+                            role="button"
+                            tabindex="0"
+                            aria-label="Dark mode toggle"
                         >
                             {#if darkModeState}
                                 <Sun width="32" height="32" />
@@ -129,20 +135,22 @@
             </button>
         </div>
 
-        <nav class="hidden lg:flex lg:pr-3">
+        <nav class="hidden lg:flex lg:pr-3" aria-label="Main navigation">
             {#each links as link (link.url)}
                 <a
                     href={link.url}
                     class="p-1 text-lg {page.url.pathname === link.url
                         ? 'font-extrabold'
-                        : 'font-medium'} hover:underline">{link.label}</a
+                        : 'font-medium'} hover:underline"
+                    aria-current={page.url.pathname === link.url ? 'page' : undefined}
+                >{link.label}</a
                 >
             {/each}
         </nav>
 
         <button
             onclick={handleDarkModeToggle}
-            class="hover:bg-bglight-1 hover:dark:bg-bgdark-1 darkModeFade hidden rounded-2xl p-1 lg:flex"
+            class="hover:bg-bglight-2 hover:dark:bg-bgdark-2 darkModeFade hidden rounded-2xl p-1 lg:flex"
             aria-label="Dark mode toggle"
         >
             {#if darkModeState}
