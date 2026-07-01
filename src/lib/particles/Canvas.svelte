@@ -2,11 +2,17 @@
     import { onMount } from "svelte";
     import type { Renderer } from "./renderer";
 
+    let reducedMotion = $state(false);
     let webglSupported = $state(true);
 
     let canvas: HTMLCanvasElement = $state()!;
 
     onMount(() => {
+        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+            reducedMotion = true;
+            return;
+        }
+
         let cancelled = false;
         let cleanup: (() => void) | undefined;
 
@@ -131,7 +137,9 @@
     });
 </script>
 
-{#if webglSupported}
+{#if reducedMotion}
+    <div class="flex-1"></div>
+{:else if webglSupported}
     <div class="relative flex-1">
         <canvas bind:this={canvas} class="absolute h-full w-full" aria-hidden="true">Dynamical system simulator</canvas>
     </div>
