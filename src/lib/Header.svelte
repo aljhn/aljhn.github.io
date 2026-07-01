@@ -100,14 +100,18 @@
                                 class="{page.url.pathname === link.url
                                     ? 'font-extrabold'
                                     : 'font-medium'} hover:underline"
-                                aria-current={page.url.pathname === link.url ? 'page' : undefined}
-                            >{link.label}</a
+                                aria-current={page.url.pathname === link.url ? "page" : undefined}>{link.label}</a
                             >
                         {/each}
 
                         <div
                             onclick={handleDarkModeToggleMenu}
-                            onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleDarkModeToggleMenu(); } }}
+                            onkeydown={(e) => {
+                                if (e.key === "Enter" || e.key === " ") {
+                                    e.preventDefault();
+                                    handleDarkModeToggleMenu();
+                                }
+                            }}
                             class="hover:bg-bglight-2 hover:dark:bg-bgdark-2 darkModeFade flex rounded-2xl p-1"
                             role="button"
                             tabindex="0"
@@ -142,15 +146,14 @@
                     class="p-1 text-lg {page.url.pathname === link.url
                         ? 'font-extrabold'
                         : 'font-medium'} hover:underline"
-                    aria-current={page.url.pathname === link.url ? 'page' : undefined}
-                >{link.label}</a
+                    aria-current={page.url.pathname === link.url ? "page" : undefined}>{link.label}</a
                 >
             {/each}
         </nav>
 
         <button
             onclick={handleDarkModeToggle}
-            class="hover:bg-bglight-2 hover:dark:bg-bgdark-2 darkModeFade hidden rounded-2xl p-1 lg:flex"
+            class="hover:bg-bglight-1 hover:dark:bg-bgdark-1 darkModeFade hidden rounded-2xl p-1 lg:flex"
             aria-label="Dark mode toggle"
         >
             {#if darkModeState}
