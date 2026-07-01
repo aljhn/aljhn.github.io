@@ -1,6 +1,5 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
-@import "katex/dist/katex.min.css";
 
 .prose .katex {
     font-size: 1.1em;
