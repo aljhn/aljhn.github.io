@@ -16,10 +16,9 @@
     ];
 
     function shuffleArray<T>(array: T[]): void {
-        const n: number = array.length;
-        for (let i: number = 0; i < n; i++) {
-            const j: number = Math.floor(Math.random() * n);
-            const temp: T = array[i];
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            const temp = array[i];
             array[i] = array[j];
             array[j] = temp;
         }
