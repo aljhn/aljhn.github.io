@@ -9,9 +9,9 @@
 
 @utility darkModeFade {
     transition:
-        color 200ms,
-        background-color 200ms,
-        border-color 200ms;
+        color 300ms,
+        background-color 300ms,
+        border-color 300ms;
 }
 
 @theme {
@@ -30,4 +30,27 @@
     --color-textlight-1: hsl(40, 10%, 10%);
     --color-textlight-2: hsl(40, 10%, 20%);
     --color-linklight: hsl(220, 50%, 40%);
+}
+
+@view-transition {
+    navigation: auto;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    ::view-transition-old(root) {
+        animation: none;
+    }
+
+    ::view-transition-new(root) {
+        animation: 150ms ease-out both fade-in;
+    }
+}
+
+@keyframes fade-in {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
 }

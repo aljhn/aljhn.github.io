@@ -1,8 +1,18 @@
 <script lang="ts">
     import "../app.css";
     import Header from "$lib/Header.svelte";
+    import { onNavigate } from "$app/navigation";
 
     let { children } = $props();
+
+    onNavigate(() => {
+        if (!document.startViewTransition) {
+            return;
+        }
+        return new Promise((resolve) => {
+            document.startViewTransition(() => resolve());
+        });
+    });
 </script>
 
 <div class="flex min-h-screen flex-col font-sans">

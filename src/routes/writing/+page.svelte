@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
     import Meta from "$lib/Meta.svelte";
 
     let { data } = $props();
@@ -6,14 +6,20 @@
 
 <Meta title="Writing" />
 
-<div class="mx-auto px-5 pt-20 pb-20">
-    <ul class="items-left space-y-4">
-        {#each data.posts as post}
-            <li class="p-1">
-                <a href={`/writing/${post.slug}`} class="font-bold hover:underline">
+<div class="mx-auto px-5 pt-10 pb-20 lg:max-w-10/12">
+    <div class="grid auto-rows-min gap-6">
+        {#each data.posts as post (post.slug)}
+            <a
+                href={`/writing/${post.slug}`}
+                class="bg-bglight-2 dark:bg-bgdark-2 darkModeFade block rounded-xl p-6 shadow-xl"
+            >
+                <h2 class="text-textlight-1 dark:text-textdark-1 darkModeFade text-xl font-semibold">
                     {post.metadata?.title ?? post.slug}
-                </a>
-            </li>
+                </h2>
+                {#if post.metadata?.description}
+                    <p class="text-textlight-2 dark:text-textdark-2 darkModeFade pt-1">{post.metadata.description}</p>
+                {/if}
+            </a>
         {/each}
-    </ul>
+    </div>
 </div>
