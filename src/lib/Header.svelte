@@ -16,7 +16,7 @@
         { url: resolve("/about"), label: "About" },
         { url: resolve("/quotes"), label: "Quotes" },
         { url: resolve("/skills"), label: "Skills" },
-        { url: resolve("/research"), label: "Research" },
+        { url: resolve("/research"), label: "Research" }
         // { url: resolve("/writing"), label: "Writing" }
     ];
 
