@@ -42,7 +42,7 @@
     }
 
     ::view-transition-new(root) {
-        animation: 150ms ease-out both fade-in;
+        animation: 100ms ease-out both fade-in;
     }
 }
 
