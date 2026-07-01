@@ -16,7 +16,7 @@
     const { papers, title }: Papers = $props();
 </script>
 
-<div class="px-5 pt-10 lg:px-10">
+<div class="pt-10">
     <h2
         class="text-textlight-1 dark:text-textdark-1 darkModeFade my-2 border-b-2 border-current font-mono text-2xl font-semibold"
     >

@@ -9,7 +9,7 @@
 
 <Meta {title} {description} {date} type="article" />
 
-<div class="mx-auto max-w-3xl px-5 pt-5 pb-20">
+<div class="mx-auto w-full max-w-3xl px-5 pt-5 pb-20">
     <a
         href="/writing"
         class="text-linklight dark:text-linkdark inline-flex items-center gap-1 text-lg font-semibold hover:underline"

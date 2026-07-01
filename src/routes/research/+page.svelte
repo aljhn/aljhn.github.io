@@ -55,7 +55,7 @@
 
 <Meta title="Research" />
 
-<div class="mx-auto grid pt-10 pb-20 lg:max-w-10/12 lg:grid-cols-2">
+<div class="mx-auto w-full max-w-5xl grid gap-8 px-5 pt-10 pb-20 lg:grid-cols-2">
     <div>
         <Sections {sections} />
 

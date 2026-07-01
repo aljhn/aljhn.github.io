@@ -6,7 +6,7 @@
 
 <Meta title="Writing" />
 
-<div class="mx-auto px-5 pt-10 pb-20 lg:max-w-10/12">
+<div class="mx-auto w-full max-w-5xl px-5 pt-10 pb-20">
     <div class="grid auto-rows-min gap-6">
         {#each data.posts as post (post.slug)}
             <a

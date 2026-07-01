@@ -30,6 +30,6 @@
 
 <Meta title="About" />
 
-<div class="mx-auto pt-10 pb-20 lg:max-w-10/12">
+<div class="mx-auto w-full max-w-5xl px-5 pt-10 pb-20">
     <Sections {sections} />
 </div>

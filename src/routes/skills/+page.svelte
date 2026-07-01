@@ -73,10 +73,10 @@
 
 <Meta title="Skills" />
 
-<div class="mx-auto columns-1 gap-8 px-5 pt-10 pb-20 lg:max-w-10/12 lg:columns-2 lg:px-0">
+<div class="mx-auto w-full max-w-5xl columns-1 gap-8 px-5 pt-10 pb-20 lg:columns-2">
     {#each skills as skill (skill.category)}
         {#if skill.category !== ""}
-            <div class="mb-8 break-inside-avoid px-0 lg:px-10">
+            <div class="mb-8 break-inside-avoid">
                 <section class="bg-bglight-2 dark:bg-bgdark-2 darkModeFade rounded-xl p-3 shadow-xl">
                     <h2
                         class="text-textlight-1 dark:text-textdark-1 darkModeFade mb-4 border-b-2 border-current pb-2 font-mono text-2xl font-semibold"
