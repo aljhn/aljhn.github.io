@@ -8,7 +8,7 @@
 
 <div class="mx-auto w-full max-w-5xl px-5 pt-10 pb-20">
     <div class="grid auto-rows-min gap-6">
-        {#each data.posts as post (post.slug)}
+        {#each data.posts as post (post.id)}
             <a
                 href={`/writing/${post.slug}`}
                 class="bg-bglight-2 dark:bg-bgdark-2 darkModeFade block rounded-xl p-6 shadow-xl"
