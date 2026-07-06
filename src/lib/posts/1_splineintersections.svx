@@ -1,47 +1,160 @@
 ---
-title: 3D Spline Intersections
-description: How to algorithmically check for collisions of 3D trajectories
-date: 2026-06-25
+title: 3D Trajectory Intersections at Irregularly Sampled Timepoints
+description: How to algorithmically check for collisions of 3D trajectories with cubic spline interpolations and non-convex optimization.
+date: 2026-07-06
 ---
 
-Inline: $a+b$
+### Motivation
 
-$$a=b+c$$
+Imagine a rigid body moving in 3D space, subject to forces. Then imagine integrating this system with an ODE solver and getting the output states as a list of timepoints, positions and velocities. Optionally also orientations and angular velocities, but let's ignore those for now.
 
-Text afterwards.
+Adaptive ODE solvers are relatively normal, which could result in states at irregularly sampled timepoints. This means the deltatime between timepoints isn't constant, which is again often problematic when doing signal processing or other forms of data analysis, typically being solved with various interpolation schemes.
+
+Let's say we now have two rigid bodies, and we want to check if they collide when simulating the systems. Let's also assume that we are interested in checking if the two objects are going to collide at some future timepoint, and then finding the time of collision. One option is to have a low enough step size, and just check every iteration, as game engines often do. Here is an alternative approach relying on spline interpolations for irregularly sampled timepoints.
+
+### Splines
+
+Given a set of $n$ states:
 
 $$
-\hat{f}(\omega) = \int_{-\infty}^{\infty} f(t) e^{-j \omega t} dt
+\begin{align*}
+& (t_0, p_0, v_0) \\
+& (t_1, p_1, v_1) \\
+& \dots \\
+& (t_{n - 1}, p_{n - 1}, v_{n - 1})
+\end{align*}
 $$
 
+assumed to be 1-dimensional as of right now. Find a function $f$ that perfectly hits each of these states:
 
-a lot of text 
-a lot of text 
-a lot of text 
-a lot of text 
-a lot of text 
-a lot of text 
-a lot of text 
-a lot of text 
-a lot of text 
-a lot of text 
-a lot of text 
-a lot of text 
-a lot of text 
-a lot of text 
-a lot of text 
-a lot of text 
-a lot of text 
-a lot of text 
-a lot of text 
-a lot of text 
-a lot of text 
-a lot of text 
-a lot of text 
-a lot of text 
-a lot of text 
-a lot of text 
-a lot of text 
-a lot of text 
-a lot of text 
-a lot of text 
+$$
+\begin{align*}
+f(t_i) &= p_i \\
+f'(t_i) &= v_i
+\end{align*}
+$$
+
+for $i \in [0, n - 1]$. Using a polynomial as $f$ to interpolate points is relatively easy. Given $n$ points, a polynomial of degree $n$ can be used to perfectly fit each of these points. But higher-degree polynomials have a lot of problems (poor generalizability outside the points, high computational cost, numerical instability from high exponents). Splines are defined as a set of piecewise polynomials, and can be thought of as an alternative to using a single high degree polynomial that fixes a lot of these issues.
+
+For $n$ states, a spline would then be represented as $n - 1$ different polynomials $f_i$ defined on each interval: $[t_i, t_{i + 1}]$ such that:
+
+$$
+\begin{align*}
+f_i(t_i) &= p_i \\
+f_i(t_{i + 1}) &= p_{i + 1}
+\end{align*}
+$$
+
+This means that the spline segments are continuous on the knot points $p_i$. If the velocity constraints are added in:
+
+$$
+\begin{align*}
+f_i'(t_i) &= v_i \\
+f_i'(t_{i + 1}) &= v_{i + 1}
+\end{align*}
+$$
+
+then the splines also have a continuous first derivative on the knot points.
+
+### Cubic Splines
+
+There are a lot of different types of splines, and ways to construct them.
+
+Many physical systems modeled with Newton's second law will typically have a continuous state and first derivative. The second derivative (like acceleration) will not necessarily be continuous, as that depends on the active forces.
+
+This then motivates the use of spline segments with cubic polynomials:
+
+$$
+f_i(t) = a_i t^3 + b_i t^2 + c_i t + d_i
+$$
+
+which also means that the acceleration will be constant within each spline segment.
+
+A cubic polynomial has 4 coefficients. Given positions and velocities at 2 knot points, this results in 4 equations:
+
+$$
+\begin{align*}
+f_i(t_i) &= a_i t_i^3 + b_i t_i^2 + c_i t_i + d_i &= p_i \\
+f_i(t_{i + 1}) &= a_i t_{i + 1}^3 + b_i t_{i + 1}^2 + c_i t_{i + 1} + d_i &= p_{i + 1} \\
+f_i'(t_i) &= 3 a_i t_i^2 + 2 b_i t_i + c_i &= v_i \\
+f_i'(t_{i + 1}) &= 3 a_i t_{i + 1}^2 + 2 b_i t_{i + 1} + c_i &= v_{i + 1}
+\end{align*}
+$$
+
+and 4 unknowns. Rewrite as a linear system:
+
+$$
+\begin{bmatrix} t_i^3 & t_i^2 & t_i & 1 \\ t_{i + 1}^3 & t_{i + 1}^2 & t_{i + 1} & 1 \\ 3 t_i^2 & 2 t_i & 1 & 0 \\ 3 t_{i + 1}^2 & 2 t_{i + 1} & 1 & 0 \end{bmatrix} \begin{bmatrix} a_i \\ b_i \\ c_i \\ d_i \end{bmatrix} = \begin{bmatrix} p_i \\ p_{i + 1} \\ v_i \\ v_{i + 1} \end{bmatrix}
+$$
+
+which is solvable as long as $t_i \neq t_{i + 1}$, and can be solved symbolically to get explicit expressions for the coefficients of each spline segment. Alternatively with numerical solvers.
+
+### Cubic Hermite Splines
+
+Right now the timepoints are assumed to be any value, as long as they are sorted in ascending order. One thing that would simplify some calculations and numerical errors is to normalize the time between intervals to always go from 0 to 1.
+
+Define a normalized time as:
+
+$$
+u_i(t) = \frac{t - t_i}{t_{i+1} - t_i}
+$$
+
+Then define the new spline segment polynomial:
+
+$$
+F_i(u_i) = a_i u_i^3 + b_i u_i^2 + c_i u_i + d_i
+$$
+
+such that:
+
+$$
+\begin{align*}
+f_i(t) &= F_i(u_i(t)) \\
+f_i'(t) &= F_i'(u_i(t)) \cdot u_i'(t) = \frac{F_i'(u_i(t))}{t_{i + 1} - t_i}
+\end{align*}
+$$
+
+Can then define:
+
+$$
+\begin{align*}
+m_i = (t_{i + 1} - t_i) v_i
+m_{i + 1} = (t_{i + 1} - t_i) v_{i + 1}
+\end{align*}
+$$
+
+for each spline segment. This leads to a simpler form:
+
+$$
+\begin{bmatrix} 0 & 0 & 0 & 1 \\ 1 & 1 & 1 & 1 \\ 0 & 0 & 1 & 0 \\ 3 & 2 & 1 & 0 \end{bmatrix} \begin{bmatrix} a_i \\ b_i \\ c_i \\ d_i \end{bmatrix} = \begin{bmatrix} p_i \\ p_{i + 1} \\ m_i \\ m_{i + 1} \end{bmatrix}
+$$
+
+This approach turns out be to equivalent to cubic Hermite spline, which uses a set of basis functions to define the polynomial:
+
+$$
+F_i(u) = (2 u_i^3 - 3 u_i^2 + 1) p_i + (u_i^3 - 2 u_i^2 + u_i) m_i + (-2 u_i^3 + 3 u_i^2) p_{i + 1} + (u_i^3 - u_i^2) m_{i + 1}
+$$
+
+Expanding the above expression and collecting the terms for the coefficients can be shown to lead to the same result as solving the linear system.
+
+Cubic Hermite splines are a relatively standard way of doing it, so mentioned here for completeness. It is often convenient to not have to rescale the timepoints, so the initial approach is going to be the one used forwards.
+
+### 3D Splines
+
+todo
+
+### 3D Spline Intersections
+
+todo
+
+### Hitboxes
+
+todo
+
+### Polynomial Root Finding
+
+todo
+
+### Conclusion
+
+todo

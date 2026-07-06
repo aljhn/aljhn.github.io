@@ -10,5 +10,8 @@ export async function load({ params }) {
     }
 
     const post = await importer();
-    return { component: post.default, metadata: post.metadata };
+    return {
+        component: post.default,
+        metadata: post.metadata
+    };
 }
