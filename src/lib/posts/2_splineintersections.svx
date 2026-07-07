@@ -1,30 +1,48 @@
 ---
-title: 3D Trajectory Intersections
+title: 3D Cubic Spline Trajectory Intersections
 description: How to algorithmically check for collisions of 3D trajectories with non-convex optimization.
 date: 2026-07-07
 ---
 
 ### Setup
 
-This is a followup to this <a href="/writing/1_splinetrajectories" class="text-linklight dark:text-linkdark font-semibold hover:underline">post</a> on 3D trajectories from cubic splines.
+This is a followup to this <a href="/writing/1_splinetrajectories" class="text-linklight dark:text-linkdark font-semibold hover:underline">post</a> on 3D trajectories with cubic splines.
 
 Let's now assume that we have two different rigid bodies moving through 3D space, and each rigid body has a trajectory given with 3D cubic splines:
 
 $$
-\bm{f_i}(t) = \begin{bmatrix} x_i(t) \\ y_i(t) \\ z_i(t) \end{bmatrix} = \begin{bmatrix} a_{x, i} t^3 + b_{x, i} t^2 + c_{x, i} t + d_{x, i} \\ a_{y, i} t^3 + b_{y, i} t^2 + c_{y, i} t + d_{y, i} \\ a_{z, i} t^3 + b_{z, i} t^2 + c_{z, i} t + d_{z, i} \end{bmatrix}
+\bm{f}_i(t) = \begin{bmatrix} x_i(t) \\ y_i(t) \\ z_i(t) \end{bmatrix} = \begin{bmatrix} a_{x, i} t^3 + b_{x, i} t^2 + c_{x, i} t + d_{x, i} \\ a_{y, i} t^3 + b_{y, i} t^2 + c_{y, i} t + d_{y, i} \\ a_{z, i} t^3 + b_{z, i} t^2 + c_{z, i} t + d_{z, i} \end{bmatrix}
 $$
 
 defined for each segment $i \in [0, n - 1]$.
 
 ### 3D Spline Intersections
 
-todo
+As trajectories in 3D will never intersect exactly, it is not enough to just solve an equation. What we need to do instead is look at the distance between the trajectories, and do a search for the minimum value(s). This can be formulated as an optimization problem.
 
-### Hitboxes
+Begin with looking at the distance between two trajectories over a single spline segment. For now, let's also assume that the spline segments start and end at the same timepoints. The distance function at spline segment $i$ can then be expressed as:
 
-todo
+$$
+d_i(t) = || \bm{f}_i(t) - \bm{g}_i(t) ||_2^2
+$$
+
+for $t \in [t_i, t_{i + 1}]$, and using the $L^2$ norm for the induced distance metric.
+
+If $\bm{f}_i(t)$ and $\bm{g}_i(t)$ are vectors made up of cubic polynomials, then $d_i(t)$ is now a single polynomial of degree 6. Finding the minimum distance over the segment interval is then equivalent minimizing this function over the interval:
+
+$$
+\begin{align*}
+\min_{t_i \leq t \leq t_{i + 1}} || \bm{f}_i(t) - \bm{g}_i(t) ||_2^2
+\end{align*}
+$$
+
+This optimization problem is non-convex in the general case, as most polynomials will swing up and down multiple times. But for a polynomial, the minimum will always be at either an extremal point or at the interval boundary. Evaluating the polynomial at the boundary is trivial, so then it remains to find the extremal points.
 
 ### Polynomial Root Finding
+
+todo
+
+### Future work: Non-Spherical Hitboxes
 
 todo
 

@@ -20,10 +20,10 @@ Given a set of $n$ states:
 
 $$
 \begin{align*}
-& (t_0, \bm{p_0}, \bm{v_0}) \\
-& (t_1, \bm{p_1}, \bm{v_1}) \\
+& (t_0, \bm{p}_0, \bm{v}_0) \\
+& (t_1, \bm{p}_1, \bm{v}_1) \\
 & \dots \\
-& (t_{n - 1}, \bm{p_{n - 1}}, \bm{v_{n - 1}})
+& (t_{n - 1}, \bm{p}_{n - 1}, \bm{v}_{n - 1})
 \end{align*}
 $$
 
@@ -31,8 +31,8 @@ here assumed to be 3-dimensional, find a function $\bm{f} : \mathbb{R} \rightarr
 
 $$
 \begin{align*}
-\bm{f}(t_i) &= \bm{p_i} \\
-\bm{f}'(t_i) &= \bm{v_i}
+\bm{f}(t_i) &= \bm{p}_i \\
+\bm{f}'(t_i) &= \bm{v}_i
 \end{align*}
 $$
 
@@ -93,7 +93,7 @@ $$
 
 which is solvable as long as $t_i \neq t_{i + 1}$, and can be solved symbolically to get explicit expressions for the coefficients of each spline segment. Alternatively with numerical solvers.
 
-### Cubic Hermite Splines (Tangent)
+### Cubic Hermite Splines (Tangent 1)
 
 Right now the timepoints are assumed to be any value, as long as they are sorted in ascending order. Sometimes the timepoints can get relatively large, which can lead to some numerical errors. Something that would simplify some calculations and numerical problems is to normalize the time between intervals to always go from 0 to 1.
 
@@ -148,16 +148,53 @@ Cubic Hermite splines are a relatively standard way of doing it, so mentioned he
 Let's now go back to the original 3-dimensional trajectories. Extending splines to work in 3-dimensions is as easy as using a separate spline for each coordinate, and concatenating in a vector. Each spline segment is found by independently estimating the coefficients for that segment and coordinate. For cubic splines this becomes:
 
 $$
-\bm{f_i}(t) = \begin{bmatrix} x_i(t) \\ y_i(t) \\ z_i(t) \end{bmatrix} = \begin{bmatrix} a_{x, i} t^3 + b_{x, i} t^2 + c_{x, i} t + d_{x, i} \\ a_{y, i} t^3 + b_{y, i} t^2 + c_{y, i} t + d_{y, i} \\ a_{z, i} t^3 + b_{z, i} t^2 + c_{z, i} t + d_{z, i} \end{bmatrix}
+\bm{f}_i(t) = \begin{bmatrix} x_i(t) \\ y_i(t) \\ z_i(t) \end{bmatrix} = \begin{bmatrix} a_{x, i} t^3 + b_{x, i} t^2 + c_{x, i} t + d_{x, i} \\ a_{y, i} t^3 + b_{y, i} t^2 + c_{y, i} t + d_{y, i} \\ a_{z, i} t^3 + b_{z, i} t^2 + c_{z, i} t + d_{z, i} \end{bmatrix}
 $$
 
 Another way to interpret 3D splines is as follows:
 
 $$
-\bm{f_i}(t) = \begin{bmatrix} a_{x, i} \\ a_{y, i} \\ a_{z, i} \end{bmatrix} t^3 + \begin{bmatrix} b_{x, i} \\ b_{y, i} \\ b_{z, i} \end{bmatrix} t^2 + \begin{bmatrix} c_{x, i} \\ c_{y, i} \\ c_{z, i} \end{bmatrix} t + \begin{bmatrix} d_{x, i} \\ d_{y, i} \\ d_{z, i} \end{bmatrix}
+\bm{f}_i(t) = \begin{bmatrix} a_{x, i} \\ a_{y, i} \\ a_{z, i} \end{bmatrix} t^3 + \begin{bmatrix} b_{x, i} \\ b_{y, i} \\ b_{z, i} \end{bmatrix} t^2 + \begin{bmatrix} c_{x, i} \\ c_{y, i} \\ c_{z, i} \end{bmatrix} t + \begin{bmatrix} d_{x, i} \\ d_{y, i} \\ d_{z, i} \end{bmatrix}
 $$
 
 meaning one cubic spline with the coefficients as vectors. This is of course the same mathematically, but can be important to consider when implementing it in code. Basically vector of splines vs spline of vectors.
+
+### Horner's Method for Evaluating Polynomials (Tangent 2)
+
+Let's use a standard cubic polynomial as an example:
+
+$$
+f(t) = a t^3 + b t^2 + c t + d
+$$
+
+To evaluate this polynomial naively, an algorithm can look like this:
+
+```python
+def f_naive(t, a, b, c, d):
+    t2 = t * t
+    t3 = t2 * t
+
+    return a * t3 + b * t2 + c * t + d
+```
+
+requiring a total of 5 multiplications and 3 additions. As floating point multiplications are a lot more expensive than additions, a more efficient implementation looks like this:
+
+```python
+def f_horner(t, a, b, c, d):
+    return (((a * t) + b) * t + c) * t + d
+```
+
+called Horner's method, and only requires 3 multiplications and 3 additions. For a general polynomial of degree n, the implementation could look like this:
+
+```python
+def f_horner(t, coeffs):
+    n = len(coeffs)
+    f = coeffs[0]
+    for i in range(1, n):
+        f = f * t + coeffs[i]
+    return f
+
+```
 
 ### End
 
