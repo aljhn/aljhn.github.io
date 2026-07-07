@@ -12,7 +12,7 @@
 <div class="mx-auto w-full max-w-4xl pt-5 pb-20">
     <a
         href="/writing"
-        class="text-linklight dark:text-linkdark text-lg font-semibold hover:underline"
+        class="text-linklight dark:text-linkdark text-lg font-semibold underline"
         aria-label="Back to Writing"
     >
         &larr; Back

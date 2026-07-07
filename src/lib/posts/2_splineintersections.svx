@@ -1,0 +1,33 @@
+---
+title: 3D Trajectory Intersections
+description: How to algorithmically check for collisions of 3D trajectories with non-convex optimization.
+date: 2026-07-07
+---
+
+### Setup
+
+This is a followup to this <a href="/writing/1_splinetrajectories" class="text-linklight dark:text-linkdark font-semibold hover:underline">post</a> on 3D trajectories from cubic splines.
+
+Let's now assume that we have two different rigid bodies moving through 3D space, and each rigid body has a trajectory given with 3D cubic splines:
+
+$$
+\bm{f_i}(t) = \begin{bmatrix} x_i(t) \\ y_i(t) \\ z_i(t) \end{bmatrix} = \begin{bmatrix} a_{x, i} t^3 + b_{x, i} t^2 + c_{x, i} t + d_{x, i} \\ a_{y, i} t^3 + b_{y, i} t^2 + c_{y, i} t + d_{y, i} \\ a_{z, i} t^3 + b_{z, i} t^2 + c_{z, i} t + d_{z, i} \end{bmatrix}
+$$
+
+defined for each segment $i \in [0, n - 1]$.
+
+### 3D Spline Intersections
+
+todo
+
+### Hitboxes
+
+todo
+
+### Polynomial Root Finding
+
+todo
+
+### Conclusion
+
+todo

@@ -16,8 +16,8 @@
         { url: resolve("/about"), label: "About" },
         { url: resolve("/quotes"), label: "Quotes" },
         { url: resolve("/skills"), label: "Skills" },
-        { url: resolve("/research"), label: "Research" }
-        // { url: resolve("/writing"), label: "Writing" }
+        { url: resolve("/research"), label: "Research" },
+        { url: resolve("/writing"), label: "Writing" }
     ];
 
     let darkModeState = $state(true);
@@ -69,6 +69,8 @@
             isDropdownOpen = false;
         }
     };
+
+    const currentTopPage = $derived("/" + page.url.pathname.split("/").at(1));
 </script>
 
 <header class="bg-bglight-2 text-textlight-1 dark:bg-bgdark-2 dark:text-textdark-1 darkModeFade font-mono">
@@ -97,10 +99,10 @@
                         {#each links as link (link.url)}
                             <a
                                 href={link.url}
-                                class="{page.url.pathname === link.url
+                                class="{currentTopPage === link.url
                                     ? 'font-extrabold'
                                     : 'font-medium'} hover:underline"
-                                aria-current={page.url.pathname === link.url ? "page" : undefined}>{link.label}</a
+                                aria-current={currentTopPage === link.url ? "page" : undefined}>{link.label}</a
                             >
                         {/each}
 
@@ -143,10 +145,10 @@
             {#each links as link (link.url)}
                 <a
                     href={link.url}
-                    class="p-1 text-lg {page.url.pathname === link.url
+                    class="p-1 text-lg {currentTopPage === link.url
                         ? 'font-extrabold'
                         : 'font-medium'} hover:underline"
-                    aria-current={page.url.pathname === link.url ? "page" : undefined}>{link.label}</a
+                    aria-current={currentTopPage === link.url ? "page" : undefined}>{link.label}</a
                 >
             {/each}
         </nav>
