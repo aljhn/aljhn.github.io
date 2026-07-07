@@ -99,9 +99,7 @@
                         {#each links as link (link.url)}
                             <a
                                 href={link.url}
-                                class="{currentTopPage === link.url
-                                    ? 'font-extrabold'
-                                    : 'font-medium'} hover:underline"
+                                class="{currentTopPage === link.url ? 'font-extrabold' : 'font-medium'} hover:underline"
                                 aria-current={currentTopPage === link.url ? "page" : undefined}>{link.label}</a
                             >
                         {/each}
@@ -145,9 +143,7 @@
             {#each links as link (link.url)}
                 <a
                     href={link.url}
-                    class="p-1 text-lg {currentTopPage === link.url
-                        ? 'font-extrabold'
-                        : 'font-medium'} hover:underline"
+                    class="p-1 text-lg {currentTopPage === link.url ? 'font-extrabold' : 'font-medium'} hover:underline"
                     aria-current={currentTopPage === link.url ? "page" : undefined}>{link.label}</a
                 >
             {/each}
