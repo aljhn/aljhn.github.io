@@ -188,4 +188,8 @@ Then solve the minimization problem for each of these intervals, and get the glo
 
 ### Future work: Non-Spherical Hitboxes
 
-todo
+The current approach described here works by comparing trajectories describing the positions of the mass centers of the rigid bodies. Checking for a collision is to see if the minimum distance is smaller than some value. Using the $L^2$ norm is kind of like assuming each rigid body has a spherical hitbox. The main benefit of the $L^2$ here is that it is easy to optimize for, as it is continuous and continuously differentiable in the inputs, allowing for continuous optimization methods. Basing the distance metric on the $L^1$ or the $L^{\infty}$ norms could also work, as it is still fundamentally polynomials, but requires some more workarounds.
+
+What is actually needed is a distance metric, which is a lot more general than norms. This can in theory work with any hitbox shape, but is hard to fit into this framework.
+
+An alternative way to fit other hitbox shapes is to approximate it with multiple spheres, and then check if any of them collide with the target(s), as is relatively common in games.
