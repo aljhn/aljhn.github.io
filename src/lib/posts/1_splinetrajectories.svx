@@ -1,7 +1,7 @@
 ---
 title: 3D Cubic Splines from Irregularly Sampled Timepoints
 description: Interpolating trajectories with cubic splines.
-date: 2026-07-07
+date: 2026-07-08
 ---
 
 ### Motivation
@@ -74,7 +74,7 @@ $$
 
 which means that acceleration will be continuous within each spline segment, but can be discontinuous between them.
 
-A cubic polynomial has 4 coefficients. Given positions and velocities at 2 knot points, this results in 4 equations:
+A cubic polynomial has 4 coefficients. Given positions and velocities at 2 knot points, this results in $4$ equations:
 
 $$
 \begin{align*}
@@ -85,7 +85,7 @@ f_i'(t_{i + 1}) &= 3 a_i t_{i + 1}^2 + 2 b_i t_{i + 1} + c_i &= v_{i + 1}
 \end{align*}
 $$
 
-and 4 unknowns. Rewrite as a linear system:
+and $4$ unknowns. Rewrite as a linear system:
 
 $$
 \begin{bmatrix} t_i^3 & t_i^2 & t_i & 1 \\ t_{i + 1}^3 & t_{i + 1}^2 & t_{i + 1} & 1 \\ 3 t_i^2 & 2 t_i & 1 & 0 \\ 3 t_{i + 1}^2 & 2 t_{i + 1} & 1 & 0 \end{bmatrix} \begin{bmatrix} a_i \\ b_i \\ c_i \\ d_i \end{bmatrix} = \begin{bmatrix} p_i \\ p_{i + 1} \\ v_i \\ v_{i + 1} \end{bmatrix}
