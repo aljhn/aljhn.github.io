@@ -1,6 +1,6 @@
 ---
-title: 3D Cubic Spline Trajectory Intersections
-description: How to algorithmically check for collisions of 3D trajectories with non-convex optimization.
+title: Continuous Collision Detection for 3D Cubic Spline Trajectories
+description: How to algorithmically check for collisions between 3D trajectories using non-convex optimization.
 date: 2026-07-08
 ---
 
@@ -14,13 +14,13 @@ $$
 \bm{f}_i(t) = \begin{bmatrix} f_{x, i}(t) \\ f_{y, i}(t) \\ f_{z, i}(t) \end{bmatrix} = \begin{bmatrix} a_{x, i} t^3 + b_{x, i} t^2 + c_{x, i} t + d_{x, i} \\ a_{y, i} t^3 + b_{y, i} t^2 + c_{y, i} t + d_{y, i} \\ a_{z, i} t^3 + b_{z, i} t^2 + c_{z, i} t + d_{z, i} \end{bmatrix}
 $$
 
-defined for each segment $i \in [0, n - 1]$.
+defined for each segment $i \in \begin{Bmatrix} 0, 1, \dots, n - 1 \end{Bmatrix}$.
 
 ### 3D Spline Intersections
 
 As trajectories in 3D will never intersect exactly, it is not enough to just solve an equation. What we need to do instead is look at the distance between the trajectories, and do a search for the minimum value(s). This can be formulated as an optimization problem.
 
-Begin with looking at the distance between two trajectories over a single spline segment $\bm{f}_i(t)$ and $\bm{g}_i(t)$. For now, let's also assume that the spline segments start and end at the same timepoints. Define the trajectory difference as $\bm{h}_i(t) = \bm{f}_i(t) - \bm{f}_i(t)$, which is another polynomial of the same degree. The distance function at spline segment $i$ can then be expressed as:
+Begin by looking at the distance between two trajectories over a single spline segment $\bm{f}_i(t)$ and $\bm{g}_i(t)$. For now, let's also assume that the spline segments start and end at the same timepoints. Define the trajectory difference as $\bm{h}_i(t) = \bm{f}_i(t) - \bm{g}_i(t)$, which is another polynomial of the same degree. The distance function at spline segment $i$ can then be expressed as:
 
 $$
 d_i(t) = || \bm{f}_i(t) - \bm{g}_i(t) ||_2^2 = || \bm{h}_i(t) ||_2^2 = h_{x, i}(t)^2 + h_{y, i}(t)^2 + h_{z, i}(t)^2
@@ -36,28 +36,13 @@ $$
 \end{align*}
 $$
 
-This optimization problem is non-convex in the general case, as most polynomials will swing up and down multiple times. But for a polynomial, the minimum will always be at either an extremal point or at the interval boundary. Evaluating the polynomial at the boundary is trivial, so then it remains to find the extremal points.
+This optimization problem is non-convex in the general case, as most polynomials will swing up and down multiple times. But for a polynomial, the minimum will always be at either an stationary point or at the interval boundary. Evaluating the polynomial at the boundary is trivial, so then it remains to find the stationary points.
 
-Extremal points are located at the same points where the derivative of the function is zero. As it is trivial to differentiate a polynomial, this means that the minimum points can be found where the derivative is equal to zero, reducing the whole problem to finding polynomial roots.
-
-```python
-def derivative(coeffs):
-    n = len(coeffs) - 1
-    d_coeffs = [0 for _ in range(n)]
-    for i in range(n):
-        d_coeffs[i] = coeffs[i] * (n - i)
-    return d_coeffs
-```
-
-```python
-def derivative(coeffs):
-    n = coeffs.shape[0] - 1
-    return coeffs[:-1] * np.arange(n, 0, -1)
-```
+Stationary points are located where the derivative of the function is zero. As it is trivial to differentiate a polynomial, this means that the minimum points can be found where the derivative is equal to zero, reducing the whole problem to finding polynomial roots.
 
 ### Polynomial Root Finding (Tangent)
 
-The fundamental theorem of algebra states that a polynomial of degree $n$ will always have $n$ complex-valued roots. As this is about solving a minimization problem, we only care about the real roots. And in a given bounded interval, a polynomial can have anywhere between $0$ and $n$ real roots, including roots with higher multiplicities.
+The fundamental theorem of algebra states that a polynomial of degree $n$ will always have $n$ complex-valued roots (when considering multiplicity). As this is about solving a minimization problem, we only care about the real roots. And in a given bounded interval, a polynomial can have anywhere between $0$ and $n$ real roots, including roots with higher multiplicities.
 
 The standard way to find polynomial roots is to rely on some linear algebra. For a square $n \times n$ matrix $M$, the characteristic polynomial of the matrix is defined as:
 
@@ -65,15 +50,15 @@ $$
 p(\lambda) = \det(M - \lambda I)
 $$
 
-and is a polynomial of degree $n$ in $\lambda$. It also has the property that the roots of the polynomial is equal to the eigenvalues of the matrix. When finding eigenvalues of $2 \times 2$ and $3 \times 3$ matrices by hand, this is a common method to use.
+and is a polynomial of degree $n$ in $\lambda$. It also has the property that the roots of the polynomial are equal to the eigenvalues of the matrix. When finding eigenvalues of $2 \times 2$ and $3 \times 3$ matrices by hand, this is a common method to use.
 
-Doing this process in reverse, and relying on existing eigenvalue solvers, is then a way to find polynomial roots. Start with an $n$ degree polynomial of the form:
+Doing this process in reverse and relying on existing eigenvalue solvers is then a way to find polynomial roots. Start with an $n$ degree polynomial of the form:
 
 $$
 f(t) = t^n + c_{n - 1} t^{n - 1} + \dots + c_2 t^2 + c_1 t + c_0
 $$
 
-Such that the leading coefficient is $1$. If it is different from $1$, divide all the coefficients by this leading coeficient, as the resulting polynomial will have the same roots.
+Such that the leading coefficient is $1$. If it is different from $1$, divide all the coefficients by this leading coefficient, as the resulting polynomial will have the same roots.
 
 The companion matrix is defined like this:
 
@@ -87,13 +72,13 @@ $$
 \end{bmatrix}
 $$
 
-and is deliberately defined to have the original polynomial as its characteristic polynomial. Finding the roots of this polynomial is then equivalent to finding the eigenvalues of the companion matrix. One option here is to use the QR algorithm, which finds all the eigenvalues simultaneously. One way to do this is with an iterative algorithm that computes a QR decomposition every iteration, but there are ways to make the algorithm more efficient, giving a time complexity of $\mathcal{O}(n^3)$ as most linear algebra algorithms have.
+and is deliberately defined to have the original polynomial as its characteristic polynomial. Finding the roots of this polynomial is then equivalent to finding the eigenvalues of the companion matrix. One option is to use the QR algorithm, which finds all the eigenvalues simultaneously. One way to do this is with an iterative algorithm that computes a QR decomposition every iteration, but there are ways to make the algorithm more efficient, giving a time complexity of $\mathcal{O}(n^3)$ as many linear algebra algorithms have.
 
 ### Low Degree Polynomial Root Finding
 
 The companion matrix / QR algorithm approach is probably the best method for higher degree polynomials / larger matrices. But for lower degrees, there are more efficient algorithms. The following is mostly an explanation of <a href="https://www.cemyuksel.com/research/polynomials/" class="text-linklight dark:text-linkdark font-semibold hover:underline">[Yuksel 2022]</a>. It works as a recursive algorithm, so let's start with defining the base cases.
 
-A degree zero polynomial is not really well defined, so let's here assume that it means a function of the form $f(t) = a$, meaning a constant. A degree zero polynomial will then have zero roots. For a degree $1$ polynomial on the form: $f(t) = a t + b$, there is one real root found at $t = - \frac{b}{a}$. For a quadractic polynomial $f(t) = a t^2 + b t + c$ there is the familiar ABC formula:
+A degree zero polynomial is not really well defined, so let's here assume that it means a function of the form $f(t) = a$, meaning a constant. A degree zero polynomial will then have zero roots. For a degree $1$ polynomial of the form: $f(t) = a t + b$, there is one real root found at $t = - \frac{b}{a}$. For a quadratic polynomial $f(t) = a t^2 + b t + c$ there is the familiar quadratic formula:
 
 $$
 t = \frac{-b \pm \sqrt{b^2 - 4 a c}}{2 a}
@@ -105,27 +90,27 @@ $$
 \Delta = b^2 - 4 a c \qquad , \qquad t_1 = - \frac{2 c}{b + \operatorname{sign}(b) \sqrt{\Delta}} \qquad , \qquad t_2 = - \frac{b + \operatorname{sign}(b) \sqrt{\Delta}}{2 a}
 $$
 
-giving either zero, one or two real roots. Continuing like this, there are explicit symbolic formulas for degree $3$ and $4$ polynomials, but those are too complicated to write out and use. Fifth degree and higher polynomials are famously unsolvable with symbolic expressions in the general case. 
+giving either zero, one or two real roots. Continuing like this, there are explicit symbolic formulas for degree $3$ and $4$ polynomials, but those are too complicated to write out and use. Fifth-degree and higher polynomials are famously unsolvable with symbolic expressions in the general case. 
 
-One thing to realize is that every polynomial root lies in between two extremal points of the polynomial. So one way to find roots is to first find the extremal points, and then do a local search inside the interval of the extremal points. And extremal points can be found by differentiating the polynomial and finding the roots of the derivative, leading to the recursive step.
+One thing to realize is that every polynomial root lies in between two stationary points of the polynomial. So one way to find roots is to first find the stationary points, and then do a local search inside the interval of the stationary points. And stationary points can be found by differentiating the polynomial and finding the roots of the derivative, leading to the recursive step.
 
-If we go back to a degree $3$ polynomial, there are at most two extremal points. Differentiating it gives a degree $2$ polynomial, whose roots can be found easily with the formulas above. If we find two distinct extremal points, and these extremal points evaluate to different signs (one positive and one negative), then there must be a root in between. This is a convex optimization problem that can be solved with for example Newton's method or just a ternary search.
+If we go back to a degree $3$ polynomial, there are at most two stationary points. Differentiating it gives a degree $2$ polynomial, whose roots can be found easily with the formulas above. If we find two distinct stationary points, and these stationary points evaluate to different signs (one positive and one negative), then there must be a root in between. This can be solved with for example Newton's method.
 
 So to find the roots of a degree $n$ polynomial, differentiate it and find the roots of the degree $n - 1$ polynomial recursively. Then iterate over the intervals and solve the local convex optimization problem for each.
 
-This method has a worse time complexity compared to the QR algorithm, but ends up being more performant anyways when the degree is small enough, as time complexity is only measuring the asymptotic performance. For a polynomial of degree 5, which is what we end up solving for with cubic splines, this is definitely low enough to be worth it.
+This method has a worse time complexity compared to the QR algorithm, but ends up being more performant anyways when the degree is small enough, as time complexity is only measuring the asymptotic performance. For a polynomial of degree 5, which is what we end up solving for with cubic splines, this is small enough to be worth it.
 
 ### Cauchy Bound
 
-In addition to searching between extremal points, it is also necessary to search from $- \infty$ to the first extremal point, and from the last extremal point and to $+ \infty$. To limit the search a little, it is enough to search inside what is called the Cauchy bound of the polynomial.
+In addition to searching between stationary points, it is also necessary to search from $- \infty$ to the first stationary point, and from the last stationary point and to $+ \infty$. To limit the search a little, it is enough to search inside what is called the Cauchy bound of the polynomial.
 
-More specifically, all the complex-valued roots of a complex-valued polynomial:
+More specifically, all the roots of a polynomial with complex coefficients:
 
 $$
 f(t) = c_n z^n + c_{n - 1} z^{n - 1} \dots + c_1 z + c_0
 $$
 
-is guaranteed to lie within the following disk centered at the origin:
+are guaranteed to lie within the following disk centered at the origin:
 
 $$
 z \in \mathbb{C} \quad : \quad |z| \leq \alpha
@@ -139,24 +124,9 @@ $$
 
 So when searching for roots, it is enough to limit the search to inside $[- \alpha, \alpha]$.
 
-```python
-def cauchy_bound(coeffs):
-    n = len(coeffs)
-    alpha_max = 0.0
-    for i in range(1, n):
-        alpha = abs(coeffs[i] / coeffs[0])
-        alpha_max = max(alpha_max, alpha)
-    return 1.0 + alpha_max
-```
-
-```python
-def cauchy_bound(coeffs):
-    return 1.0 + np.max(np.abs(coeffs[1:] / coeffs[0]))
-```
-
 ### Intersecting Splines at Different Sampling Times
 
-So far, the assumption has been that spline segments for the two trajectories has been at the same time interval. But one of the original motivations of using splines is because it works with irregularly sampled timepoints, so let's correct this now.
+So far, the assumption has been that spline segments for the two trajectories have been at the same time interval. But one of the original motivations of using splines is because it works with irregularly sampled timepoints, so let's correct this now.
 
 Let's explain with an example, and say that we have these $7$ timepoints: $t_0, t_1, t_2, t_3, t_4, t_5, t_6$, and that $t_i < t_{i + 1}$. Then we'll say that trajectory $1$ is given at $t_0, t_2, t_4, t_6$, with spline segments: $\bm{f}_0(t)$ at $[t_0, t_2)$, $\bm{f}_2(t)$ at $[t_2, t_4)$ and $\bm{f}_4(t)$ at $[t_4, t_6)$. Trajectory $2$ is given at $t_1, t_3, t_5$ with spline segments $\bm{g}_1(t)$ at $[t_1, t_3)$ and $\bm{g}_3(t)$ at $[t_3, t_5)$. When searching for the minimum distance, we need to split the intervals up with corresponding spline segments:
 
@@ -182,13 +152,13 @@ Then solve the minimization problem for each of these intervals, and get the glo
     * $\left\langle \begin{matrix} \bm{f}_0(t), \bm{f}_1(t), \dots, \bm{f}_n(t) \end{matrix} \right\rangle$
     * $\left\langle \begin{matrix} \bm{g}_0(t), \bm{g}_1(t), \dots, \bm{g}_m(t) \end{matrix} \right\rangle$
 3. Take the union of all the timepoints of both trajectories, and sort them in ascending order
-4. For each pair of timepoints, find the two spline segments that is defined in this interval
+4. For each pair of timepoints, find the two spline segments that are defined in this interval
 5. Compute the spline segment difference $\bm{h}(t)$ and solve the minimization problem with the polynomial root finding method
 6. Find the global minimum over all the results from the minimization problems
 
 ### Future work: Non-Spherical Hitboxes
 
-The current approach described here works by comparing trajectories describing the positions of the mass centers of the rigid bodies. Checking for a collision is to see if the minimum distance is smaller than some value. Using the $L^2$ norm is kind of like assuming each rigid body has a spherical hitbox. The main benefit of the $L^2$ here is that it is easy to optimize for, as it is continuous and continuously differentiable in the inputs, allowing for continuous optimization methods. Basing the distance metric on the $L^1$ or the $L^{\infty}$ norms could also work, as it is still fundamentally polynomials, but requires some more workarounds.
+The current approach described here works by comparing trajectories of the positions of the rigid body mass centers. Checking for a collision is to see if the minimum distance is smaller than some value. Using the $L^2$ norm is kind of like assuming each rigid body has a spherical hitbox. The main benefit of the $L^2$ is that it is easy to optimize for, as it is continuous and continuously differentiable in the inputs, allowing for continuous optimization methods. Basing the distance metric on the $L^1$ or the $L^{\infty}$ norms could also work, as it is still fundamentally polynomials, but requires some more workarounds.
 
 What is actually needed is a distance metric, which is a lot more general than norms. This can in theory work with any hitbox shape, but is hard to fit into this framework.
 

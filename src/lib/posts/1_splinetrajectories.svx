@@ -10,7 +10,7 @@ Imagine a rigid body moving in 3D space, subject to forces. Then imagine integra
 
 Adaptive ODE solvers are relatively common, which could result in states at irregularly sampled timepoints. This means the deltatime between timepoints isn't constant, which is again often problematic when doing signal processing or other forms of data analysis, typically being solved with various interpolation schemes.
 
-Let's say we now have two rigid bodies, and we want to check if they collide when simulating the systems. Also assume that we are interested in checking if the two objects are going to collide at some future timepoint, and then finding the time of collision. One option is to have a low enough step size, and just check every iteration, as game engines often do. Here is an alternative approach relying on spline interpolations for irregularly sampled timepoints.
+Let's say we now have two rigid bodies, and we want to check if they collide when simulating the systems. Also assume that we are interested in checking if the two objects are going to collide at some future timepoint, and then finding the time of collision. One option is to have a low enough step size, and just check every iteration, as game engines often do. Here is an alternative approach relying on spline interpolation for irregularly sampled timepoints.
 
 Let's first construct a continuous representation of the trajectories using splines.
 
@@ -27,7 +27,7 @@ $$
 \end{align*}
 $$
 
-here assumed to be 3-dimensional, find a function $\bm{f} : \mathbb{R} \rightarrow \mathbb{R}^3$ that perfectly hits each of these states:
+here assumed to be 3-dimensional, construct a function $\bm{f} : \mathbb{R} \rightarrow \mathbb{R}^3$ that perfectly hits each of these states:
 
 $$
 \begin{align*}
@@ -133,7 +133,7 @@ $$
 \begin{bmatrix} 0 & 0 & 0 & 1 \\ 1 & 1 & 1 & 1 \\ 0 & 0 & 1 & 0 \\ 3 & 2 & 1 & 0 \end{bmatrix} \begin{bmatrix} a_i \\ b_i \\ c_i \\ d_i \end{bmatrix} = \begin{bmatrix} p_i \\ p_{i + 1} \\ m_i \\ m_{i + 1} \end{bmatrix}
 $$
 
-This approach turns out be to equivalent to a cubic Hermite spline, which uses a set of basis functions to define the polynomial:
+This approach turns out to be equivalent to a cubic Hermite spline, which uses a set of basis functions to define the polynomial:
 
 $$
 F_i(u_i) = (2 u_i^3 - 3 u_i^2 + 1) p_i + (u_i^3 - 2 u_i^2 + u_i) m_i + (-2 u_i^3 + 3 u_i^2) p_{i + 1} + (u_i^3 - u_i^2) m_{i + 1}
@@ -141,11 +141,13 @@ $$
 
 Expanding the above expression and collecting the terms for the coefficients can be shown to lead to the same result as solving the linear system.
 
-Cubic Hermite splines are a relatively standard way of doing it, so mentioned here for completeness. It is often convenient to not have to rescale the timepoints, so the initial approach is going to be the one used forwards.
+Cubic Hermite splines are a relatively standard way of doing it, so mentioned here for completeness. It is often convenient to not have to rescale the timepoints, so the initial approach is going to be the one used forward.
+
+An alternative is to just use $u_i(t) = t - t_i$, as this avoids the rescaling, but could still fix a lot of the numerical problems.
 
 ### 3D Splines
 
-Let's now go back to the original 3-dimensional trajectories. Extending splines to work in 3-dimensions is as easy as using a separate spline for each coordinate, and concatenating in a vector. Each spline segment is found by independently estimating the coefficients for that segment and coordinate. For cubic splines this becomes:
+Let's now go back to the original 3-dimensional trajectories. Extending splines to work in $3$ dimensions is as easy as using a separate spline for each coordinate, and concatenating in a vector. Each spline segment is found by independently estimating the coefficients for that segment and coordinate. For cubic splines this becomes:
 
 $$
 \bm{f}_i(t) = \begin{bmatrix} x_i(t) \\ y_i(t) \\ z_i(t) \end{bmatrix} = \begin{bmatrix} a_{x, i} t^3 + b_{x, i} t^2 + c_{x, i} t + d_{x, i} \\ a_{y, i} t^3 + b_{y, i} t^2 + c_{y, i} t + d_{y, i} \\ a_{z, i} t^3 + b_{z, i} t^2 + c_{z, i} t + d_{z, i} \end{bmatrix}
@@ -177,14 +179,14 @@ def f_naive(t, a, b, c, d):
     return a * t3 + b * t2 + c * t + d
 ```
 
-requiring a total of 5 multiplications and 3 additions. As floating point multiplications are a lot more expensive than additions, a more efficient implementation looks like this:
+requiring a total of 5 multiplications and 3 additions. As floating-point multiplications are a lot more expensive than additions, a more efficient implementation looks like this:
 
 ```python
 def f_horner(t, a, b, c, d):
     return (((a * t) + b) * t + c) * t + d
 ```
 
-called Horner's method, and only requires 3 multiplications and 3 additions. For a general polynomial of degree n, the implementation could look like this:
+called Horner's method, and only requires 3 multiplications and 3 additions. For a general polynomial of degree n, an implementation could look like this:
 
 ```python
 def f_horner(t, coeffs):
@@ -198,4 +200,4 @@ def f_horner(t, coeffs):
 
 ### End
 
-Now that we have a way to represent trajectories as continuous functions, the <a href="/writing/2_splineintersections" class="text-linklight dark:text-linkdark font-semibold hover:underline">followup post</a> goes into how to use these to check for collisions between two different trajectories.
+Now that we have a way to represent trajectories as continuous functions, the <a href="/writing/2_splineintersections" class="text-linklight dark:text-linkdark font-semibold hover:underline">follow-up post</a> goes into how to use these to check for collisions between two different trajectories.
