@@ -1,7 +1,7 @@
 ---
 title: Continuous Collision Detection for 3D Cubic Spline Trajectories
 description: How to algorithmically check for collisions between 3D trajectories using non-convex optimization.
-date: 2026-07-08
+date: 2026-07-11
 ---
 
 <script>
