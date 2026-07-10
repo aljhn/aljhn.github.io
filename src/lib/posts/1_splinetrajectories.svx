@@ -14,6 +14,17 @@ Let's say we now have two rigid bodies, and we want to check if they collide whe
 
 Let's first construct a continuous representation of the trajectories using splines.
 
+<figure class="my-5 flex flex-col items-center">
+    <img
+        src="/images/posts/plot_1_1.png"
+        alt="Particle trajectory"
+        class="rounded-md shadow-lg"
+    />
+    <figcaption class="mt-2 text-sm text-gray-500">
+        Example particle trajectory with irregular samples.
+    </figcaption>
+</figure>
+
 ### Splines
 
 Given a set of $n$ states:
@@ -92,6 +103,17 @@ $$
 $$
 
 which is solvable as long as $t_i \neq t_{i + 1}$, and can be solved symbolically to get explicit expressions for the coefficients of each spline segment. Alternatively with numerical solvers.
+
+<figure class="my-5 flex flex-col items-center">
+    <img
+        src="/images/posts/plot_1_2.png"
+        alt="Example cubic spline"
+        class="rounded-md shadow-lg"
+    />
+    <figcaption class="mt-2 text-sm text-gray-500">
+        Example cubic spline in 2 dimensions.
+    </figcaption>
+</figure>
 
 ### Cubic Hermite Splines (Tangent 1)
 
