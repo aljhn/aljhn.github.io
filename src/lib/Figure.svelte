@@ -1,6 +1,6 @@
 <script lang="ts">
     interface Figure {
-        src: string | { img: { src: string; w: number; h: number }; sources: Record<string, string> };
+        src: { img: { src: string; w: number; h: number }; sources: Record<string, string> };
         alt: string;
         caption: string;
     }
@@ -9,6 +9,11 @@
 </script>
 
 <figure class="my-5 flex flex-col items-center">
-    <enhanced:img {src} {alt} class="rounded-md shadow-lg" />
+    <enhanced:img
+        src={src}
+        alt={alt}
+        class="rounded-md shadow-lg"
+        sizes={"1200px"}
+    />
     <figcaption class="mt-3 px-20 text-sm text-textlight-2 dark:text-textdark-2 darkModeFade">{caption}</figcaption>
 </figure>
