@@ -10,5 +10,5 @@
 
 <figure class="my-5 flex flex-col items-center">
     <enhanced:img {src} {alt} class="rounded-md shadow-lg" />
-    <figcaption class="mt-2 text-sm text-textlight-2 dark:text-textdark-2 darkModeFade">{caption}</figcaption>
+    <figcaption class="mt-3 px-20 text-sm text-textlight-2 dark:text-textdark-2 darkModeFade">{caption}</figcaption>
 </figure>

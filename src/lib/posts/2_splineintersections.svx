@@ -4,6 +4,13 @@ description: How to algorithmically check for collisions between 3D trajectories
 date: 2026-07-08
 ---
 
+<script>
+    import Figure from "$lib/Figure.svelte";
+    import plot2_1 from "$lib/posts/images/plot_2_1.png?enhanced";
+    import plot2_2 from "$lib/posts/images/plot_2_2.png?enhanced";
+    import plot2_3 from "$lib/posts/images/plot_2_3.png?enhanced";
+</script>
+
 ### Setup
 
 This is a followup to this <a href="/writing/1_splinetrajectories" class="text-linklight dark:text-linkdark font-semibold hover:underline">post</a> on 3D trajectories with cubic splines.
@@ -19,6 +26,12 @@ defined for each segment $i \in \begin{Bmatrix} 0, 1, \dots, n - 1 \end{Bmatrix}
 ### 3D Spline Intersections
 
 As trajectories in 3D will never intersect exactly, it is not enough to just solve an equation. What we need to do instead is look at the distance between the trajectories, and do a search for the minimum value(s). This can be formulated as an optimization problem.
+
+<Figure
+    src={plot2_1}
+    alt="3D trajectories"
+    caption="Example 3D trajectories."
+/>
 
 Begin by looking at the distance between two trajectories over a single spline segment $\bm{f}_i(t)$ and $\bm{g}_i(t)$. For now, let's also assume that the spline segments start and end at the same timepoints. Define the trajectory difference as $\bm{h}_i(t) = \bm{f}_i(t) - \bm{g}_i(t)$, which is another polynomial of the same degree. The distance function at spline segment $i$ can then be expressed as:
 
@@ -94,6 +107,12 @@ giving either zero, one or two real roots. Continuing like this, there are expli
 
 One thing to realize is that every polynomial root lies in between two stationary points of the polynomial. So one way to find roots is to first find the stationary points, and then do a local search inside the interval of the stationary points. And stationary points can be found by differentiating the polynomial and finding the roots of the derivative, leading to the recursive step.
 
+<Figure
+    src={plot2_2}
+    alt="Polynomial with roots"
+    caption="Fifth-degree polynomial with roots highlighted. Notice how all the roots are either located between two stationary points, or before and after the last stationary points."
+/>
+
 If we go back to a degree $3$ polynomial, there are at most two stationary points. Differentiating it gives a degree $2$ polynomial, whose roots can be found easily with the formulas above. If we find two distinct stationary points, and these stationary points evaluate to different signs (one positive and one negative), then there must be a root in between. This can be solved with for example Newton's method.
 
 So to find the roots of a degree $n$ polynomial, differentiate it and find the roots of the degree $n - 1$ polynomial recursively. Then iterate over the intervals and solve the local convex optimization problem for each.
@@ -140,6 +159,12 @@ $$
 $$
 
 here assuming that the splines just continue with the first and last segment outside the first and last timepoint of the whole spline. This basically means taking the union of the two sets of timepoints, but restricting it to the intersection instead could also work if that is desirable.
+
+<Figure
+    src={plot2_3}
+    alt="Spline trajectories at different knot points."
+    caption="Spline trajectories at different knot points. Intervals between consecutive timepoints highlighted."
+/>
 
 Then solve the minimization problem for each of these intervals, and get the global minimum by taking the minimum of all of these again.
 
