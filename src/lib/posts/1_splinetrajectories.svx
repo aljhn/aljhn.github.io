@@ -5,8 +5,9 @@ date: 2026-07-08
 ---
 
 <script>
-    import Plot1_1 from "$lib/images/Plot1_1.svelte";
-    import Plot1_2 from "$lib/images/Plot1_2.svelte";
+    import Figure from "$lib/Figure.svelte";
+    import plot1_1 from "$lib/posts/images/plot_1_1.png?enhanced";
+    import plot1_2 from "$lib/posts/images/plot_1_2.png?enhanced";
 </script>
 
 ### Motivation
@@ -19,12 +20,11 @@ Let's say we now have two rigid bodies, and we want to check if they collide whe
 
 Let's first construct a continuous representation of the trajectories using splines.
 
-<figure class="my-5 flex flex-col items-center">
-    <Plot1_1 />
-    <figcaption class="mt-2 text-sm text-gray-500">
-        Example particle trajectory with irregularly spaced samples.
-    </figcaption>
-</figure>
+<Figure
+    src={plot1_1}
+    alt="Particle trajectory"
+    caption="Example particle trajectory with irregularly spaced samples."
+/>
 
 ### Splines
 
@@ -105,12 +105,11 @@ $$
 
 which is solvable as long as $t_i \neq t_{i + 1}$, and can be solved symbolically to get explicit expressions for the coefficients of each spline segment. Alternatively with numerical solvers.
 
-<figure class="my-5 flex flex-col items-center">
-    <Plot1_2 />
-    <figcaption class="mt-2 text-sm text-gray-500">
-        Example cubic spline in 2 dimensions.
-    </figcaption>
-</figure>
+<Figure
+    src={plot1_2}
+    alt="Example cubic spline"
+    caption="Example cubic spline in 2 dimensions."
+/>
 
 ### Cubic Hermite Splines (Tangent 1)
 
