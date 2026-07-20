@@ -67,3 +67,11 @@
     color: var(--shiki-dark);
     background-color: var(--shiki-dark-bg);
 }
+
+.katex-display {
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding-bottom: 0.5rem;
+    padding-top: 0.5rem;
+    max-width: 100%;
+}

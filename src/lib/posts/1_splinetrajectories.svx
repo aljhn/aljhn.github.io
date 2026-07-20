@@ -154,7 +154,12 @@ $$
 This approach turns out to be equivalent to a cubic Hermite spline, which uses a set of basis functions to define the polynomial:
 
 $$
-F_i(u_i) = (2 u_i^3 - 3 u_i^2 + 1) p_i + (u_i^3 - 2 u_i^2 + u_i) m_i + (-2 u_i^3 + 3 u_i^2) p_{i + 1} + (u_i^3 - u_i^2) m_{i + 1}
+\begin{align*}
+F_i(u_i) &= (2 u_i^3 - 3 u_i^2 + 1) p_i \\
+& + (u_i^3 - 2 u_i^2 + u_i) m_i \\
+& + (-2 u_i^3 + 3 u_i^2) p_{i + 1} \\
+& + (u_i^3 - u_i^2) m_{i + 1}
+\end{align*}
 $$
 
 Expanding the above expression and collecting the terms for the coefficients can be shown to lead to the same result as solving the linear system.
