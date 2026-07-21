@@ -66,18 +66,18 @@
     <div class="grid auto-rows-min gap-y-10 pt-10 lg:pt-0">
         <div class="flex justify-center">
             <enhanced:img
-                src="/static/images/MassSpringDamper.png?w=600;300"
+                src="/static/images/MassSpringDamper.png?w=1600;800"
                 alt="Mass spring damper vector field plot"
-                class="h-[225px] w-[300px] rounded-md shadow-lg md:h-[450px] md:w-[600px]"
-                sizes="(min-width:768px) 600px, 300px"
+                class="w-[800px] rounded-md shadow-lg md:w-[1600px]"
+                sizes="(min-width:768px) 1600px, 800px"
             />
         </div>
         <div class="flex justify-center">
             <enhanced:img
-                src="/static/images/Burger.png?w=600;300"
+                src="/static/images/Burger.png?w=1600;800"
                 alt="Burgers' equation plot"
-                class="h-[225px] w-[300px] rounded-md shadow-lg md:h-[450px] md:w-[600px]"
-                sizes="(min-width:768px) 600px, 300px"
+                class="w-[800px] rounded-md shadow-lg md:w-[1600px]"
+                sizes="(min-width:768px) 1600px, 800px"
             />
         </div>
     </div>
