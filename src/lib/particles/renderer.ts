@@ -50,7 +50,7 @@ export class Renderer {
 
         const FOV = 60;
         this.camera = new THREE.PerspectiveCamera(FOV, canvas.clientWidth / canvas.clientHeight, 0.1, 1000.0);
-        this.camera.position.set(0, 0, 100);
+        this.camera.position.set(0, 0, 50);
         this.camera.lookAt(0, 0, 0);
 
         this.scene = new THREE.Scene();
@@ -128,6 +128,17 @@ export class Renderer {
         }
 
         this.qSlerped = new THREE.Quaternion();
+
+        this.geometry.computeBoundingBox();
+        this.geometry.computeBoundingSphere();
+
+        this.mesh.position.set(0.0, -25.0, 0.0);
+        this.mesh.rotation.x = -Math.PI / 2.0;
+        this.mesh.rotation.z = -Math.PI / 4.0;
+
+        this.mesh.updateMatrixWorld(true);
+        this.meshNormalMatrix.getNormalMatrix(this.mesh.matrixWorld);
+        this.meshNormalMatrixTransposed.copy(this.meshNormalMatrix).transpose();
     }
 
     initializeVertices(simulationState: SimulationState): void {
@@ -147,9 +158,6 @@ export class Renderer {
                 this.vertices[vertexIndex + 5] = particlePositions[positionIndex + 2];
             }
         }
-
-        this.geometry.computeBoundingBox();
-        this.geometry.computeBoundingSphere();
     }
 
     resize(width: number, height: number): void {
@@ -157,6 +165,14 @@ export class Renderer {
         this.threeRenderer.setSize(width, height, false);
 
         this.aspectRatio = width / height;
+
+        let cameraPos = 150 - width / 5;
+        if (cameraPos > 100) {
+            cameraPos = 100;
+        } else if (cameraPos < 50) {
+            cameraPos = 50;
+        }
+        this.camera.position.set(0, 0, cameraPos);
 
         this.camera.aspect = this.aspectRatio;
         this.camera.updateProjectionMatrix();
@@ -347,15 +363,6 @@ export class Renderer {
     ) {
         this.scene.background = this.backgroundColor.setStyle(backgroundColor);
 
-        const scale = this.aspectRatio + 0.4;
-        this.mesh.scale.set(scale, scale, scale);
-        this.mesh.position.set(0.0, -25.0 * scale, 0.0);
-        this.mesh.rotation.x = -Math.PI / 2.0;
-        this.mesh.rotation.z = -Math.PI / 4.0;
-
-        this.mesh.updateMatrixWorld(true);
-        this.meshNormalMatrix.getNormalMatrix(this.mesh.matrixWorld);
-        this.meshNormalMatrixTransposed.copy(this.meshNormalMatrix).transpose();
         this.camera.getWorldDirection(this.cameraDir);
         this.cameraDir.applyMatrix3(this.meshNormalMatrixTransposed);
 

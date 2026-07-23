@@ -36,13 +36,13 @@ function getInitialHuePosition(): number {
     const sigmoidLike = (x: number) => Math.atan(k * x) / Math.PI + 0.5;
 
     const notches = [
-        {pos: 20, width: 20},
-        {pos: 90, width: 50},
-        {pos: 250, width: 110}
+        { pos: 20, width: 20 },
+        { pos: 90, width: 50 },
+        { pos: 250, width: 110 }
     ];
 
     let L = 360.0;
-    for(let i = 0; i < notches.length; i++) {
+    for (let i = 0; i < notches.length; i++) {
         L -= notches[i].width;
     }
 
@@ -50,9 +50,9 @@ function getInitialHuePosition(): number {
 
     let hueValue = L * u;
 
-    for(let i = 0; i < notches.length; i++) {
+    for (let i = 0; i < notches.length; i++) {
         let offset = notches[i].pos;
-        for(let j = 0; j < i; j++) {
+        for (let j = 0; j < i; j++) {
             offset -= notches[j].width;
         }
         hueValue += notches[i].width * sigmoidLike(L * u - offset);

@@ -82,7 +82,7 @@ export class SimulationState {
 
         this.hueRangeChangeFactor = 0.2;
         this.hueRangeChangeDefault = 2.0;
-        this.huePositionChangeFactor = 0.1;
+        this.huePositionChangeFactor = 0.05;
         this.hueRotationChangeFactor = 0.5;
         this.saturationChangeFactor = 0.5;
         this.lightChangeFactor = 0.1;
