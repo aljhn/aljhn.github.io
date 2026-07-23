@@ -166,7 +166,7 @@ export class Renderer {
 
         this.aspectRatio = width / height;
 
-        let cameraPos = 150 - width / 5;
+        let cameraPos = 200 - width / 4;
         if (cameraPos > 100) {
             cameraPos = 100;
         } else if (cameraPos < 50) {
