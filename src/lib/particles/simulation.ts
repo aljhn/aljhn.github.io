@@ -3,6 +3,7 @@ import type { ODE, Integrator } from "./utils";
 import {
     Lorenz,
     Heun,
+    getInitialHuePosition,
     getNextHueRangeTarget,
     getNextSaturationTarget,
     getNextLightTarget,
@@ -67,22 +68,22 @@ export class SimulationState {
         this.colorFrameRotation = new THREE.Quaternion();
         this.dq = new THREE.Quaternion();
 
-        this.hueRange = 20;
+        this.hueRange = 0;
         this.hueRangeTarget = getNextHueRangeTarget();
 
-        this.huePosition = sampleUniform(0.0, 360.0);
+        this.huePosition = getInitialHuePosition();
         this.hueRotation = 0;
 
-        this.saturation = 60;
+        this.saturation = 70;
         this.saturationTarget = getNextSaturationTarget();
 
         this.light = 50;
         this.lightTarget = 50;
 
         this.hueRangeChangeFactor = 0.2;
-        this.hueRangeChangeDefault = 10.0;
-        this.huePositionChangeFactor = 0.05;
-        this.hueRotationChangeFactor = 0.1;
+        this.hueRangeChangeDefault = 2.0;
+        this.huePositionChangeFactor = 0.1;
+        this.hueRotationChangeFactor = 0.5;
         this.saturationChangeFactor = 0.5;
         this.lightChangeFactor = 0.1;
 

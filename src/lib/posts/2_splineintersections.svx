@@ -183,11 +183,19 @@ Then solve the minimization problem for each of these intervals, and get the glo
 ### Putting it all together
 
 1. Inputs: timepoints, positions and velocities
-    * Trajectory 1 with $n$ states: $\left\langle \begin{matrix} (t_{1, 0}, \bm{p}_{1, 0}, \bm{v}_{1, 0}), (t_{1, 1}, \bm{p}_{1, 1}, \bm{v}_{1, 1}), \dots, (t_{1, n}, \bm{p}_{1, n}, \bm{v}_{1, n}) \end{matrix} \right\rangle$
-    * Trajectory 2 with $n$ states: $\left\langle \begin{matrix} (t_{2, 0}, \bm{p}_{2, 0}, \bm{v}_{2, 0}), (t_{2, 1}, \bm{p}_{2, 1}, \bm{v}_{2, 1}), \dots, (t_{2, m}, \bm{p}_{2, m}, \bm{v}_{2, m}) \end{matrix} \right\rangle$
+    * Trajectory $1$ with $n$ states:
+        * $(t_{1, 0}, \bm{p}_{1, 0}, \bm{v}_{1, 0})$
+        * $(t_{1, 1}, \bm{p}_{1, 1}, \bm{v}_{1, 1})$
+        * $\dots$
+        * $(t_{1, n}, \bm{p}_{1, n}, \bm{v}_{1, n})$
+    * Trajectory $2$ with $m$ states:
+        * $(t_{2, 0}, \bm{p}_{2, 0}, \bm{v}_{2, 0})$
+        * $(t_{2, 1}, \bm{p}_{2, 1}, \bm{v}_{2, 1})$
+        * $\dots$
+        * $(t_{2, m}, \bm{p}_{2, m}, \bm{v}_{2, m})$
 2. Compute cubic spline segments:
-    * $\left\langle \begin{matrix} \bm{f}_0(t), \bm{f}_1(t), \dots, \bm{f}_n(t) \end{matrix} \right\rangle$
-    * $\left\langle \begin{matrix} \bm{g}_0(t), \bm{g}_1(t), \dots, \bm{g}_m(t) \end{matrix} \right\rangle$
+    * $\begin{matrix} \bm{f}_0(t), \bm{f}_1(t), \dots, \bm{f}_n(t) \end{matrix}$
+    * $\begin{matrix} \bm{g}_0(t), \bm{g}_1(t), \dots, \bm{g}_m(t) \end{matrix}$
 3. Take the union of all the timepoints of both trajectories, and sort them in ascending order
 4. For each pair of timepoints, find the two spline segments that are defined in this interval
 5. Compute the spline segment difference $\bm{h}(t)$ and solve the minimization problem with the polynomial root finding method

@@ -26,12 +26,47 @@ function sampleLogNormal(mean: number, std: number): number {
     return Math.exp(sampleNormal(mean, std));
 }
 
+function sampleExponential(mean: number): number {
+    const u = Math.random();
+    return -mean * Math.log(1.0 - u);
+}
+
+function getInitialHuePosition(): number {
+    const k = 10.0;
+    const sigmoidLike = (x: number) => Math.atan(k * x) / Math.PI + 0.5;
+
+    const notches = [
+        {pos: 20, width: 20},
+        {pos: 90, width: 50},
+        {pos: 250, width: 110}
+    ];
+
+    let L = 360.0;
+    for(let i = 0; i < notches.length; i++) {
+        L -= notches[i].width;
+    }
+
+    const u = Math.random();
+
+    let hueValue = L * u;
+
+    for(let i = 0; i < notches.length; i++) {
+        let offset = notches[i].pos;
+        for(let j = 0; j < i; j++) {
+            offset -= notches[j].width;
+        }
+        hueValue += notches[i].width * sigmoidLike(L * u - offset);
+    }
+
+    return hueValue;
+}
+
 function getNextHueRangeTarget(): number {
-    return sampleLogNormal(4, 0.5);
+    return sampleExponential(30.0);
 }
 
 function getNextSaturationTarget(): number {
-    return sampleUniform(60.0, 80.0);
+    return sampleUniform(60.0, 90.0);
 }
 
 function getNextLightTarget(darkMode: boolean): number {
@@ -43,11 +78,11 @@ function getNextLightTarget(darkMode: boolean): number {
 }
 
 function getHuePositionChange(): number {
-    return sampleNormal(50.0, 15.0);
+    return sampleLogNormal(2.0, 1.5);
 }
 
 function getHueRotationChange(): number {
-    return sampleNormal(30.0, 10.0);
+    return sampleLogNormal(1.5, 1.0);
 }
 
 function mod(n: number, d: number): number {
@@ -149,6 +184,7 @@ class Heun implements Integrator {
 export {
     RAD2DEG,
     sampleUniform,
+    getInitialHuePosition,
     getNextHueRangeTarget,
     getNextSaturationTarget,
     getNextLightTarget,
