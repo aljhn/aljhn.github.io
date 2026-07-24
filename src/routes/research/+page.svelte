@@ -68,7 +68,7 @@
             <enhanced:img
                 src="/static/images/MassSpringDamper.png?w=1600;800"
                 alt="Mass spring damper vector field plot"
-                class="w-full max-w-[800px] rounded-md shadow-lg md:max-w-[1600px]"
+                class="w-full max-w-full rounded-md shadow-lg"
                 sizes="(min-width:768px) 1600px, 800px"
             />
         </div>
@@ -76,7 +76,7 @@
             <enhanced:img
                 src="/static/images/Burger.png?w=1600;800"
                 alt="Burgers' equation plot"
-                class="w-full max-w-[800px] rounded-md shadow-lg md:max-w-[1600px]"
+                class="w-full max-w-full rounded-md shadow-lg"
                 sizes="(min-width:768px) 1600px, 800px"
             />
         </div>
