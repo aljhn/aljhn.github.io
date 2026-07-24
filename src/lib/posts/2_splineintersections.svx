@@ -150,7 +150,7 @@ $$
 with the Cauchy bound defined as:
 
 $$
-\alpha = 1 + \max{\begin{Bmatrix} \begin{vmatrix} \frac{c_{n - 1}}{c_n}| \end{vmatrix}, & \begin{vmatrix} \frac{c_{n - 2}}{c_n} \end{vmatrix}, & \dots, & \begin{vmatrix} \frac{c_1}{c_n} \end{vmatrix}, & \begin{vmatrix} \frac{c_0}{c_n} \end{vmatrix} \end{Bmatrix}}
+\alpha = 1 + \max{\begin{Bmatrix} \begin{vmatrix} \frac{c_{n - 1}}{c_n}| \end{vmatrix}, & \begin{vmatrix} \frac{c_{n - 2}}{c_n} \end{vmatrix}, & \dots, & \begin{vmatrix} \frac{c_0}{c_n} \end{vmatrix} \end{Bmatrix}}
 $$
 
 So when searching for roots, it is enough to limit the search to inside $[- \alpha, \alpha]$.
