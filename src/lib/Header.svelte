@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { onMount } from "svelte";
+    import { onMount, tick } from "svelte";
     import { resolve } from "$app/paths";
     import { page } from "$app/state";
 
@@ -49,9 +49,11 @@
     let dropdownMenuButton: HTMLElement;
     let dropdownMenuDiv: HTMLElement;
 
-    const handleDropdownClick = () => {
+    const handleDropdownClick = async () => {
         isDropdownOpen = !isDropdownOpen;
         if (isDropdownOpen && dropdownMenuButton && dropdownMenuDiv) {
+            await tick();
+
             const positionLeftUnderButton: number = Math.floor(
                 (dropdownMenuButton.getClientRects()[0].x + dropdownMenuButton.getClientRects()[0].right) / 2 -
                     dropdownMenuDiv.clientWidth / 2
