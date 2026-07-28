@@ -15,7 +15,7 @@
     });
 </script>
 
-<div class="flex min-h-screen flex-col font-sans">
+<div class="flex min-h-dvh flex-col font-sans">
     <Header />
 
     <div
