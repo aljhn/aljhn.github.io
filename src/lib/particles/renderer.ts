@@ -13,12 +13,14 @@ export class Renderer {
     threeRenderer: THREE.WebGLRenderer;
     controls: OrbitControls;
 
-    vertices: Float32Array;
+    positions: Float32Array;
+    velocities: Float32Array;
     indexes: Uint32Array;
     colors: Float32Array;
+    sides: Float32Array;
 
     geometry: THREE.BufferGeometry;
-    material: THREE.MeshBasicMaterial;
+    material: THREE.ShaderMaterial;
     mesh: THREE.Mesh;
 
     positionAttribute: THREE.BufferAttribute;
@@ -61,7 +63,7 @@ export class Renderer {
         this.controls.enableDamping = true;
         this.controls.dampingFactor = 0.1;
 
-        this.vertices = new Float32Array(2 * this.particleAmount * this.trailAmount * 3);
+        this.positions = new Float32Array(2 * this.particleAmount * this.trailAmount * 3);
         this.indexes = new Uint32Array(2 * this.particleAmount * this.trailAmount * 3);
         const maxIndex = this.trailAmount * 2;
         for (let i = 0; i < this.particleAmount; i++) {
@@ -80,18 +82,69 @@ export class Renderer {
             }
         }
 
+        this.velocities = new Float32Array(2 * this.particleAmount * this.trailAmount * 3);
+
         this.colors = new Float32Array(2 * this.particleAmount * this.trailAmount * 4);
 
+        this.sides = new Float32Array(2 * particleAmount * trailAmount);
+        for (let i = 0; i < this.sides.length; i++) {
+            this.sides[i] = (i % 2) * 2 - 1;
+        }
+
         this.geometry = new THREE.BufferGeometry();
-        this.geometry.setAttribute("position", new THREE.BufferAttribute(this.vertices, 3));
+        this.geometry.setAttribute("position", new THREE.BufferAttribute(this.positions, 3));
+        this.geometry.setAttribute("velocity", new THREE.BufferAttribute(this.velocities, 3));
         this.geometry.setAttribute("color", new THREE.BufferAttribute(this.colors, 4));
+        this.geometry.setAttribute("side", new THREE.BufferAttribute(this.sides, 1));
         this.geometry.setIndex(new THREE.BufferAttribute(this.indexes, 1));
 
-        this.material = new THREE.MeshBasicMaterial({
-            vertexColors: true,
+        this.cameraDir = new THREE.Vector3();
+        this.meshNormalMatrix = new THREE.Matrix3();
+        this.meshNormalMatrixTransposed = new THREE.Matrix3();
+
+        const vertexShader = `
+            attribute vec3 velocity;
+            attribute float side;
+            attribute vec4 color;
+
+            uniform vec3 cameraDirection;
+            uniform float ribbonWidth;
+
+            varying vec4 vColor;
+
+            void main() {
+                vec3 tangent = normalize(velocity);
+                vec3 ribbonNormal = normalize(cross(cameraDirection, tangent));
+                vec3 finalPosition = position + side * ribbonWidth * ribbonNormal;
+
+                gl_Position = projectionMatrix * modelViewMatrix * vec4(finalPosition, 1.0);
+
+                vColor = color;
+            }
+        `;
+
+        const fragmentShader = `
+            varying vec4 vColor;
+
+            void main() {
+                gl_FragColor = vColor;
+            }
+        `;
+
+        this.material = new THREE.ShaderMaterial({
+            vertexShader,
+            fragmentShader,
             transparent: true,
             side: THREE.DoubleSide,
-            depthWrite: false
+            depthWrite: false,
+            uniforms: {
+                cameraDirection: {
+                    value: this.cameraDir
+                },
+                ribbonWidth: {
+                    value: this.ribbonWidth
+                }
+            }
         });
 
         this.mesh = new THREE.Mesh(this.geometry, this.material);
@@ -107,10 +160,6 @@ export class Renderer {
         this.threeRenderer.render(this.scene, this.camera);
 
         this.aspectRatio = 1.0;
-
-        this.cameraDir = new THREE.Vector3();
-        this.meshNormalMatrix = new THREE.Matrix3();
-        this.meshNormalMatrixTransposed = new THREE.Matrix3();
 
         this.backgroundColor = new THREE.Color();
 
@@ -149,13 +198,13 @@ export class Renderer {
                 const vertexIndex = (i * this.trailAmount + j) * 6;
                 const positionIndex = i * 3;
 
-                this.vertices[vertexIndex] = particlePositions[positionIndex];
-                this.vertices[vertexIndex + 1] = particlePositions[positionIndex + 1];
-                this.vertices[vertexIndex + 2] = particlePositions[positionIndex + 2];
+                this.positions[vertexIndex] = particlePositions[positionIndex];
+                this.positions[vertexIndex + 1] = particlePositions[positionIndex + 1];
+                this.positions[vertexIndex + 2] = particlePositions[positionIndex + 2];
 
-                this.vertices[vertexIndex + 3] = particlePositions[positionIndex];
-                this.vertices[vertexIndex + 4] = particlePositions[positionIndex + 1];
-                this.vertices[vertexIndex + 5] = particlePositions[positionIndex + 2];
+                this.positions[vertexIndex + 3] = particlePositions[positionIndex];
+                this.positions[vertexIndex + 4] = particlePositions[positionIndex + 1];
+                this.positions[vertexIndex + 5] = particlePositions[positionIndex + 2];
             }
         }
     }
@@ -216,48 +265,23 @@ export class Renderer {
             const dy = lerp(dyPrevious, dyCurrent, interpolateAlpha);
             const dz = lerp(dzPrevious, dzCurrent, interpolateAlpha);
 
-            const nx = this.cameraDir.y * dz - this.cameraDir.z * dy;
-            const ny = this.cameraDir.z * dx - this.cameraDir.x * dz;
-            const nz = this.cameraDir.x * dy - this.cameraDir.y * dx;
-
-            const normalLength = this.ribbonWidth / Math.max(Math.sqrt(nx * nx + ny * ny + nz * nz), 1e-6);
-            const offsetX = nx * normalLength;
-            const offsetY = ny * normalLength;
-            const offsetZ = nz * normalLength;
-
             const vertexIndex = (i * this.trailAmount + this.currentStartIndex) * 6;
 
-            this.vertices[vertexIndex] = x - offsetX;
-            this.vertices[vertexIndex + 1] = y - offsetY;
-            this.vertices[vertexIndex + 2] = z - offsetZ;
+            this.positions[vertexIndex] = x;
+            this.positions[vertexIndex + 1] = y;
+            this.positions[vertexIndex + 2] = z;
 
-            this.vertices[vertexIndex + 3] = x + offsetX;
-            this.vertices[vertexIndex + 4] = y + offsetY;
-            this.vertices[vertexIndex + 5] = z + offsetZ;
+            this.positions[vertexIndex + 3] = x;
+            this.positions[vertexIndex + 4] = y;
+            this.positions[vertexIndex + 5] = z;
 
-            const vertexIndexNext = (i * this.trailAmount + ((this.currentStartIndex + 1) % this.trailAmount)) * 6;
+            this.velocities[vertexIndex] = dx;
+            this.velocities[vertexIndex + 1] = dy;
+            this.velocities[vertexIndex + 2] = dz;
 
-            this.vertices[vertexIndexNext] = x;
-            this.vertices[vertexIndexNext + 1] = y;
-            this.vertices[vertexIndexNext + 2] = z;
-
-            this.vertices[vertexIndexNext + 3] = x;
-            this.vertices[vertexIndexNext + 4] = y;
-            this.vertices[vertexIndexNext + 5] = z;
-
-            const vertexIndexNextNext = (i * this.trailAmount + ((this.currentStartIndex + 2) % this.trailAmount)) * 6;
-
-            const xLast = (this.vertices[vertexIndexNextNext] + this.vertices[vertexIndexNextNext + 3]) / 2.0;
-            const yLast = (this.vertices[vertexIndexNextNext + 1] + this.vertices[vertexIndexNextNext + 4]) / 2.0;
-            const zLast = (this.vertices[vertexIndexNextNext + 2] + this.vertices[vertexIndexNextNext + 5]) / 2.0;
-
-            this.vertices[vertexIndexNextNext] = xLast;
-            this.vertices[vertexIndexNextNext + 1] = yLast;
-            this.vertices[vertexIndexNextNext + 2] = zLast;
-
-            this.vertices[vertexIndexNextNext + 3] = xLast;
-            this.vertices[vertexIndexNextNext + 4] = yLast;
-            this.vertices[vertexIndexNextNext + 5] = zLast;
+            this.velocities[vertexIndex + 3] = dx;
+            this.velocities[vertexIndex + 4] = dy;
+            this.velocities[vertexIndex + 5] = dz;
         }
     }
 
@@ -319,9 +343,9 @@ export class Renderer {
             const halfAngle = 360 - 2 * Math.abs(rotatedAngle - 180);
             const hue = mod(
                 (halfAngle / 360) * hueRange +
-                    huePosition -
-                    hueRange / 2 +
-                    velocityLengthSquared * this.velocityHueFactor,
+                huePosition -
+                hueRange / 2 +
+                velocityLengthSquared * this.velocityHueFactor,
                 360
             );
 
@@ -366,6 +390,9 @@ export class Renderer {
         this.camera.getWorldDirection(this.cameraDir);
         this.cameraDir.applyMatrix3(this.meshNormalMatrixTransposed);
 
+        this.material.uniforms.cameraDirection.value.copy(this.cameraDir);
+        this.material.uniforms.ribbonWidth.value = this.ribbonWidth;
+
         this.updateVertices(simulationStateCurrent, simulationStatePrevious, interpolateAlpha);
         this.updateColors(simulationStateCurrent, simulationStatePrevious, interpolateAlpha);
 
@@ -373,6 +400,7 @@ export class Renderer {
 
         this.positionAttribute.needsUpdate = true;
         this.colorAttribute.needsUpdate = true;
+        (this.geometry.getAttribute("velocity") as THREE.BufferAttribute).needsUpdate = true;
 
         this.controls.update();
         this.threeRenderer.render(this.scene, this.camera);
