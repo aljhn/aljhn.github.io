@@ -50,7 +50,8 @@
 
                 try {
                     renderer = new Renderer(canvas, PARTICLES, TRAIL, WIDTH);
-                } catch {
+                } catch (error) {
+                    console.log(error);
                     webglSupported = false;
                     return;
                 }

@@ -24,6 +24,7 @@ export class Renderer {
     mesh: THREE.Mesh;
 
     positionAttribute: THREE.BufferAttribute;
+    velocityAttribute: THREE.BufferAttribute;
     colorAttribute: THREE.BufferAttribute;
 
     aspectRatio: number;
@@ -113,7 +114,7 @@ export class Renderer {
             varying vec4 vColor;
 
             void main() {
-                vec3 tangent = normalize(velocity);
+                vec3 tangent = normalize(velocity + vec3(1e-6));
                 vec3 ribbonNormal = normalize(cross(cameraDirection, tangent));
                 vec3 finalPosition = position + side * ribbonWidth * ribbonNormal;
 
@@ -153,6 +154,9 @@ export class Renderer {
 
         this.positionAttribute = this.mesh.geometry.getAttribute("position") as THREE.BufferAttribute;
         this.positionAttribute.setUsage(THREE.DynamicDrawUsage);
+
+        this.velocityAttribute = this.mesh.geometry.getAttribute("velocity") as THREE.BufferAttribute;
+        this.velocityAttribute.setUsage(THREE.DynamicDrawUsage);
 
         this.colorAttribute = this.mesh.geometry.getAttribute("color") as THREE.BufferAttribute;
         this.colorAttribute.setUsage(THREE.DynamicDrawUsage);
@@ -399,8 +403,8 @@ export class Renderer {
         this.currentStartIndex = (this.currentStartIndex + 1) % this.trailAmount;
 
         this.positionAttribute.needsUpdate = true;
+        this.velocityAttribute.needsUpdate = true;
         this.colorAttribute.needsUpdate = true;
-        (this.geometry.getAttribute("velocity") as THREE.BufferAttribute).needsUpdate = true;
 
         this.controls.update();
         this.threeRenderer.render(this.scene, this.camera);
