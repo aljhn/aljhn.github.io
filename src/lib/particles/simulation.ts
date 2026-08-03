@@ -127,7 +127,7 @@ export class SimulationState {
         this.colorFrameRotation.normalize();
     }
 
-    updateColorValues(dt: number, darkMode: boolean): void {
+    updateColorValues(dt: number): void {
         if (this.hueRange < this.hueRangeTarget) {
             this.hueRange +=
                 ((this.hueRangeTarget - this.hueRange) * this.hueRangeChangeFactor + this.hueRangeChangeDefault) * dt;
@@ -165,7 +165,7 @@ export class SimulationState {
         if (Math.abs(lightError) > 1e-1) {
             this.light += lightError * this.lightChangeFactor * dt;
         } else {
-            this.lightTarget = getNextLightTarget(darkMode);
+            this.lightTarget = getNextLightTarget();
         }
     }
 
@@ -189,9 +189,9 @@ export class SimulationState {
         }
     }
 
-    update(dt: number, darkMode: boolean): void {
+    update(dt: number): void {
         this.updateColorFrameRotation(dt);
-        this.updateColorValues(dt, darkMode);
+        this.updateColorValues(dt);
         this.updateParticles(dt);
     }
 

@@ -79,7 +79,7 @@
                     timestepAccumulator += dt;
                     while (timestepAccumulator > fixedPhysicsTimestep) {
                         simulationState.copyTo(simulationStatePrevious);
-                        simulationState.update(fixedPhysicsTimestep, darkMode);
+                        simulationState.update(fixedPhysicsTimestep);
                         timestepAccumulator -= fixedPhysicsTimestep;
                     }
 

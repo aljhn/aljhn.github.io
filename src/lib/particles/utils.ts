@@ -69,12 +69,8 @@ function getNextSaturationTarget(): number {
     return sampleUniform(60.0, 90.0);
 }
 
-function getNextLightTarget(darkMode: boolean): number {
-    if (darkMode) {
-        return sampleUniform(60.0, 80.0);
-    } else {
-        return sampleUniform(20.0, 40.0);
-    }
+function getNextLightTarget(): number {
+    return sampleUniform(50.0, 90.0);
 }
 
 function getHuePositionChange(): number {
