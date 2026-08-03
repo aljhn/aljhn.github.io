@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import type { SimulationState } from "./simulation";
-import { lerp, mod, RAD2DEG } from "./utils";
+import { lerp } from "./utils";
 
 export class Renderer {
     particleAmount: number;
@@ -16,8 +16,8 @@ export class Renderer {
     positions: Float32Array;
     velocities: Float32Array;
     indexes: Uint32Array;
-    colors: Float32Array;
     sides: Float32Array;
+    trailIndexes: Float32Array;
 
     geometry: THREE.BufferGeometry;
     material: THREE.ShaderMaterial;
@@ -25,7 +25,6 @@ export class Renderer {
 
     positionAttribute: THREE.BufferAttribute;
     velocityAttribute: THREE.BufferAttribute;
-    colorAttribute: THREE.BufferAttribute;
 
     aspectRatio: number;
 
@@ -37,12 +36,7 @@ export class Renderer {
 
     currentStartIndex: number;
 
-    colorHSL: THREE.Color;
-    colorRGB: THREE.Vector3;
-
     velocityHueFactor: number;
-
-    alphaRamp: Float32Array;
 
     qSlerped: THREE.Quaternion;
 
@@ -84,34 +78,77 @@ export class Renderer {
         }
 
         this.velocities = new Float32Array(2 * this.particleAmount * this.trailAmount * 3);
-
-        this.colors = new Float32Array(2 * this.particleAmount * this.trailAmount * 4);
+        for (let i = 0; i < this.velocities.length; i++) {
+            this.velocities[i] = 0.0;
+        }
 
         this.sides = new Float32Array(2 * particleAmount * trailAmount);
         for (let i = 0; i < this.sides.length; i++) {
             this.sides[i] = (i % 2) * 2 - 1;
         }
 
+        this.trailIndexes = new Float32Array(2 * particleAmount * trailAmount);
+        for (let i = 0; i < particleAmount; i++) {
+            for (let j = 0; j < trailAmount; j++) {
+                const index = (i * trailAmount + j) * 2;
+
+                this.trailIndexes[index] = j;
+                this.trailIndexes[index + 1] = j;
+            }
+        }
+
         this.geometry = new THREE.BufferGeometry();
         this.geometry.setAttribute("position", new THREE.BufferAttribute(this.positions, 3));
         this.geometry.setAttribute("velocity", new THREE.BufferAttribute(this.velocities, 3));
-        this.geometry.setAttribute("color", new THREE.BufferAttribute(this.colors, 4));
         this.geometry.setAttribute("side", new THREE.BufferAttribute(this.sides, 1));
+        this.geometry.setAttribute("trailIndex", new THREE.BufferAttribute(this.trailIndexes, 1));
         this.geometry.setIndex(new THREE.BufferAttribute(this.indexes, 1));
 
         this.cameraDir = new THREE.Vector3();
         this.meshNormalMatrix = new THREE.Matrix3();
         this.meshNormalMatrixTransposed = new THREE.Matrix3();
 
+        this.currentStartIndex = 0;
+
+        this.velocityHueFactor = 0.0001;
+
         const vertexShader = `
             attribute vec3 velocity;
             attribute float side;
-            attribute vec4 color;
+            attribute float trailIndex;
 
             uniform vec3 cameraDirection;
             uniform float ribbonWidth;
 
+            uniform float trailAmount;
+            uniform float currentStartIndex;
+
+            uniform float hueRotation;
+            uniform float hueRange;
+            uniform float huePosition;
+            uniform float saturation;
+            uniform float light;
+            uniform float velocityHueFactor;
+            uniform vec4 colorFrameRotation;
+
             varying vec4 vColor;
+
+            vec3 hsl2rgb(vec3 hsl) {
+                vec3 rgb = clamp(
+                    abs(mod(hsl.x * 6.0 + vec3(0, 4, 2), 6.0) - 3.0) - 1.0,
+                    0.0,
+                    1.0
+                );
+
+                return hsl.z + hsl.y *
+                    (rgb - 0.5) *
+                    (1.0 - abs(2.0 * hsl.z - 1.0));
+            }
+
+            vec3 rotateVectorByQuaternion(vec3 v, vec4 q) {
+                vec3 t = 2.0 * cross(q.xyz, v);
+                return v + q.w * t + cross(q.xyz, t);
+            }
 
             void main() {
                 vec3 tangent = normalize(velocity + vec3(1e-6));
@@ -120,7 +157,26 @@ export class Renderer {
 
                 gl_Position = projectionMatrix * modelViewMatrix * vec4(finalPosition, 1.0);
 
-                vColor = color;
+                float velocityLengthSquared = dot(velocity, velocity);
+                float angle = degrees(atan(velocity.y, velocity.x));
+                float rotatedAngle = mod(angle + hueRotation + 180.0, 360.0);
+                float halfAngle = 360.0 - 2.0 * abs(rotatedAngle - 180.0);
+                float hue = mod(
+                    (halfAngle / 360.0) * hueRange +
+                        huePosition -
+                        hueRange / 2.0 +
+                        velocityLengthSquared * velocityHueFactor,
+                    360.0
+                );
+
+                vec3 rgb = hsl2rgb(vec3(hue / 360.0, saturation / 100.0, light / 100.0));
+                rgb = rotateVectorByQuaternion(rgb, colorFrameRotation);
+                rgb = clamp(rgb, 0.0, 1.0);
+
+                float trailAge = mod(trailIndex - currentStartIndex + trailAmount, trailAmount);
+                float alpha = pow(trailAge / (trailAmount - 1.0), 3.0);
+
+                vColor = vec4(rgb.x, rgb.y, rgb.z, alpha);
             }
         `;
 
@@ -144,6 +200,33 @@ export class Renderer {
                 },
                 ribbonWidth: {
                     value: this.ribbonWidth
+                },
+                trailAmount: {
+                    value: this.trailAmount
+                },
+                currentStartIndex: {
+                    value: this.currentStartIndex
+                },
+                hueRotation: {
+                    value: 0
+                },
+                hueRange: {
+                    value: 360
+                },
+                huePosition: {
+                    value: 0
+                },
+                saturation: {
+                    value: 100
+                },
+                light: {
+                    value: 50
+                },
+                velocityHueFactor: {
+                    value: this.velocityHueFactor
+                },
+                colorFrameRotation: {
+                    value: new THREE.Vector4()
                 }
             }
         });
@@ -158,27 +241,11 @@ export class Renderer {
         this.velocityAttribute = this.mesh.geometry.getAttribute("velocity") as THREE.BufferAttribute;
         this.velocityAttribute.setUsage(THREE.DynamicDrawUsage);
 
-        this.colorAttribute = this.mesh.geometry.getAttribute("color") as THREE.BufferAttribute;
-        this.colorAttribute.setUsage(THREE.DynamicDrawUsage);
-
         this.threeRenderer.render(this.scene, this.camera);
 
         this.aspectRatio = 1.0;
 
         this.backgroundColor = new THREE.Color();
-
-        this.currentStartIndex = 0;
-
-        this.colorHSL = new THREE.Color();
-        this.colorRGB = new THREE.Vector3();
-
-        this.velocityHueFactor = 0.0001;
-
-        this.alphaRamp = new Float32Array(this.trailAmount);
-        for (let j = 0; j < this.trailAmount; j++) {
-            const alpha = j / (this.trailAmount - 1);
-            this.alphaRamp[j] = Math.pow(alpha, 3.0);
-        }
 
         this.qSlerped = new THREE.Quaternion();
 
@@ -294,9 +361,6 @@ export class Renderer {
         simulationStatePrevious: SimulationState,
         interpolateAlpha: number
     ) {
-        const particleVelocitiesCurrent = simulationStateCurrent.particleVelocities;
-        const particleVelocitiesPrevious = simulationStatePrevious.particleVelocities;
-
         const hueRotationCurrent = simulationStateCurrent.hueRotation;
         const hueRotationPrevious = simulationStatePrevious.hueRotation;
         const hueRotation = lerp(hueRotationPrevious, hueRotationCurrent, interpolateAlpha);
@@ -325,62 +389,20 @@ export class Renderer {
         this.qSlerped.z = colorFrameRotationPrevious.z;
         const colorFrameRotation = this.qSlerped.slerp(colorFrameRotationCurrent, interpolateAlpha);
 
-        for (let i = 0; i < this.particleAmount; i++) {
-            const particleIndex = i * 3;
+        const uniforms = this.material.uniforms;
 
-            const dxCurrent = particleVelocitiesCurrent[particleIndex];
-            const dyCurrent = particleVelocitiesCurrent[particleIndex + 1];
-            const dzCurrent = particleVelocitiesCurrent[particleIndex + 2];
+        uniforms.currentStartIndex.value = this.currentStartIndex;
 
-            const dxPrevious = particleVelocitiesPrevious[particleIndex];
-            const dyPrevious = particleVelocitiesPrevious[particleIndex + 1];
-            const dzPrevious = particleVelocitiesPrevious[particleIndex + 2];
+        uniforms.hueRotation.value = hueRotation;
+        uniforms.hueRange.value = hueRange;
+        uniforms.huePosition.value = huePosition;
+        uniforms.saturation.value = saturation;
+        uniforms.light.value = light;
 
-            const dx = lerp(dxPrevious, dxCurrent, interpolateAlpha);
-            const dy = lerp(dyPrevious, dyCurrent, interpolateAlpha);
-            const dz = lerp(dzPrevious, dzCurrent, interpolateAlpha);
-
-            const velocityLengthSquared = dx * dx + dy * dy + dz * dz;
-
-            const angle = Math.atan2(dy, dx) * RAD2DEG;
-            const rotatedAngle = mod(angle + hueRotation + 180, 360);
-            const halfAngle = 360 - 2 * Math.abs(rotatedAngle - 180);
-            const hue = mod(
-                (halfAngle / 360) * hueRange +
-                huePosition -
-                hueRange / 2 +
-                velocityLengthSquared * this.velocityHueFactor,
-                360
-            );
-
-            this.colorHSL.setHSL(hue / 360.0, saturation / 100.0, light / 100.0);
-
-            this.colorRGB.x = this.colorHSL.r;
-            this.colorRGB.y = this.colorHSL.g;
-            this.colorRGB.z = this.colorHSL.b;
-
-            this.colorRGB.applyQuaternion(colorFrameRotation);
-            this.colorRGB.clampScalar(0.0, 1.0);
-
-            const indexColor = (i * this.trailAmount + this.currentStartIndex) * 8;
-
-            this.colors[indexColor] = this.colorRGB.x;
-            this.colors[indexColor + 1] = this.colorRGB.y;
-            this.colors[indexColor + 2] = this.colorRGB.z;
-
-            this.colors[indexColor + 4] = this.colorRGB.x;
-            this.colors[indexColor + 5] = this.colorRGB.y;
-            this.colors[indexColor + 6] = this.colorRGB.z;
-
-            for (let j = 0; j < this.trailAmount; j++) {
-                const indexAlpha = (j - this.currentStartIndex + this.trailAmount) % this.trailAmount;
-                const a = this.alphaRamp[indexAlpha];
-
-                const indexColor = (i * this.trailAmount + j) * 8;
-                this.colors[indexColor + 3] = a;
-                this.colors[indexColor + 7] = a;
-            }
-        }
+        uniforms.colorFrameRotation.value.w = colorFrameRotation.w;
+        uniforms.colorFrameRotation.value.x = colorFrameRotation.x;
+        uniforms.colorFrameRotation.value.y = colorFrameRotation.y;
+        uniforms.colorFrameRotation.value.z = colorFrameRotation.z;
     }
 
     update(
@@ -404,7 +426,6 @@ export class Renderer {
 
         this.positionAttribute.needsUpdate = true;
         this.velocityAttribute.needsUpdate = true;
-        this.colorAttribute.needsUpdate = true;
 
         this.controls.update();
         this.threeRenderer.render(this.scene, this.camera);
