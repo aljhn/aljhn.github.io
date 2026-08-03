@@ -129,7 +129,6 @@ export class Renderer {
             uniform float huePosition;
             uniform float saturation;
             uniform float light;
-            uniform bool darkMode;
             uniform float velocityHueFactor;
             uniform vec4 colorFrameRotation;
 
@@ -174,9 +173,6 @@ export class Renderer {
                 vec3 rgb = hsl2rgb(vec3(hue / 360.0, saturation / 100.0, light / 100.0));
                 rgb = rotateVectorByQuaternion(rgb, colorFrameRotation);
                 rgb = clamp(rgb, 0.0, 1.0);
-                if (darkMode) {
-                    rgb = 1.0 - rgb;
-                }
 
                 float trailAge = mod(trailIndex - currentStartIndex + trailAmount, trailAmount);
                 float alpha = pow(trailAge / (trailAmount - 1.0), 3.0);
@@ -226,9 +222,6 @@ export class Renderer {
                 },
                 light: {
                     value: 50
-                },
-                darkMode: {
-                    value: true
                 },
                 velocityHueFactor: {
                     value: this.velocityHueFactor
@@ -406,8 +399,11 @@ export class Renderer {
         uniforms.hueRange.value = hueRange;
         uniforms.huePosition.value = huePosition;
         uniforms.saturation.value = saturation;
-        uniforms.light.value = light;
-        uniforms.darkMode.value = light;
+        if (this.darkMode) {
+            uniforms.light.value = light;
+        } else {
+            uniforms.light.value = 100.0 - light;
+        }
 
         uniforms.colorFrameRotation.value.w = colorFrameRotation.w;
         uniforms.colorFrameRotation.value.x = colorFrameRotation.x;

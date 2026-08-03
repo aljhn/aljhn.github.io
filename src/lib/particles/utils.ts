@@ -70,7 +70,7 @@ function getNextSaturationTarget(): number {
 }
 
 function getNextLightTarget(): number {
-    return sampleUniform(50.0, 90.0);
+    return sampleUniform(50.0, 80.0);
 }
 
 function getHuePositionChange(): number {

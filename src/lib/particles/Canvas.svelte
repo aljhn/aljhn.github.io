@@ -43,7 +43,7 @@
                 }
 
                 const PARTICLES = 100;
-                const TRAIL = 300;
+                const TRAIL = 400;
                 const WIDTH = 0.1;
 
                 let renderer: Renderer;
