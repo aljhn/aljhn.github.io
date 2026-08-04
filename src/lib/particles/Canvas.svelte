@@ -35,11 +35,9 @@
                 const mainRoot: HTMLElement = document.getElementById("mainRoot")!;
 
                 let backgroundColor: string;
-                let darkMode: boolean;
 
                 function updateBackground() {
                     backgroundColor = window.getComputedStyle(mainRoot).backgroundColor;
-                    darkMode = document.documentElement.classList.contains("dark");
                 }
 
                 const PARTICLES = 100;
@@ -61,6 +59,7 @@
                 simulationState.copyTo(simulationStatePrevious);
 
                 renderer.initializeVertices(simulationState);
+                renderer.threeRenderer.render(renderer.scene, renderer.camera);
 
                 const MAX_DT = 0.05;
                 let timestampPrevious: DOMHighResTimeStamp = performance.now();
@@ -145,5 +144,5 @@
         <canvas bind:this={canvas} class="absolute h-full w-full" aria-hidden="true">Dynamical system simulator</canvas>
     </div>
 {:else}
-    <div class="flex flex-1 items-center justify-center text-lg">WebGL is not supported in your browser.</div>
+    <div class="flex flex-1 items-center justify-center text-lg">WebGL2 is not supported in your browser.</div>
 {/if}

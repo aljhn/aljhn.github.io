@@ -101,7 +101,7 @@ export class SimulationState {
 
         for (let i = 0; i < this.particleAmount; i++) {
             const index = i * 3;
-            this.particlePositions[index] = sampleUniform(-5.0, 5.0);
+            this.particlePositions[index + 0] = sampleUniform(-5.0, 5.0);
             this.particlePositions[index + 1] = sampleUniform(-5.0, 5.0);
             this.particlePositions[index + 2] = sampleUniform(80.0, 100.0);
         }
@@ -172,18 +172,18 @@ export class SimulationState {
     updateParticles(dt: number): void {
         for (let i = 0; i < this.particleAmount; i++) {
             const particleIndex = i * 3;
-            const x = this.particlePositions[particleIndex];
+            const x = this.particlePositions[particleIndex + 0];
             const y = this.particlePositions[particleIndex + 1];
             const z = this.particlePositions[particleIndex + 2];
 
             this.ode.f(x, y, z, this.integrateOutput);
-            this.particleVelocities[particleIndex] = this.integrateOutput.x;
+            this.particleVelocities[particleIndex + 0] = this.integrateOutput.x;
             this.particleVelocities[particleIndex + 1] = this.integrateOutput.y;
             this.particleVelocities[particleIndex + 2] = this.integrateOutput.z;
 
             const h = dt * this.speedScale;
             this.integrator.step(x, y, z, this.ode, h, this.integrateOutput);
-            this.particlePositions[particleIndex] = this.integrateOutput.x;
+            this.particlePositions[particleIndex + 0] = this.integrateOutput.x;
             this.particlePositions[particleIndex + 1] = this.integrateOutput.y;
             this.particlePositions[particleIndex + 2] = this.integrateOutput.z;
         }

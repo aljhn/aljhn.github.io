@@ -13,18 +13,20 @@ export class Renderer {
     threeRenderer: THREE.WebGLRenderer;
     controls: OrbitControls;
 
-    positions: Float32Array;
-    velocities: Float32Array;
+    positionTextureData: Float32Array;
+    velocityTextureData: Float32Array;
+
+    positionTexture: THREE.DataTexture;
+    velocityTexture: THREE.DataTexture;
+
     indexes: Uint32Array;
-    sides: Float32Array;
+    particleIndexes: Float32Array;
     trailIndexes: Float32Array;
+    sides: Float32Array;
 
     geometry: THREE.BufferGeometry;
     material: THREE.ShaderMaterial;
     mesh: THREE.Mesh;
-
-    positionAttribute: THREE.BufferAttribute;
-    velocityAttribute: THREE.BufferAttribute;
 
     aspectRatio: number;
 
@@ -54,12 +56,43 @@ export class Renderer {
         this.scene = new THREE.Scene();
 
         this.threeRenderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+        if (this.threeRenderer.capabilities.isWebGL2 == false) {
+            throw new Error("WebGL2 not supported");
+        }
 
         this.controls = new OrbitControls(this.camera, canvas);
         this.controls.enableDamping = true;
         this.controls.dampingFactor = 0.1;
 
-        this.positions = new Float32Array(2 * this.particleAmount * this.trailAmount * 3);
+        this.positionTextureData = new Float32Array(particleAmount * trailAmount * 4);
+        this.velocityTextureData = new Float32Array(particleAmount * trailAmount * 4);
+
+        this.positionTexture = new THREE.DataTexture(
+            this.positionTextureData,
+            particleAmount,
+            trailAmount,
+            THREE.RGBAFormat,
+            THREE.FloatType
+        );
+        this.positionTexture.magFilter = THREE.NearestFilter;
+        this.positionTexture.minFilter = THREE.NearestFilter;
+        this.positionTexture.wrapS = THREE.RepeatWrapping;
+        this.positionTexture.wrapT = THREE.ClampToEdgeWrapping;
+        this.positionTexture.internalFormat = "RGBA32F";
+
+        this.velocityTexture = new THREE.DataTexture(
+            this.velocityTextureData,
+            particleAmount,
+            trailAmount,
+            THREE.RGBAFormat,
+            THREE.FloatType
+        );
+        this.velocityTexture.magFilter = THREE.NearestFilter;
+        this.velocityTexture.minFilter = THREE.NearestFilter;
+        this.velocityTexture.wrapS = THREE.RepeatWrapping;
+        this.velocityTexture.wrapT = THREE.ClampToEdgeWrapping;
+        this.velocityTexture.internalFormat = "RGBA32F";
+
         this.indexes = new Uint32Array(2 * this.particleAmount * this.trailAmount * 3);
         const maxIndex = this.trailAmount * 2;
         for (let i = 0; i < this.particleAmount; i++) {
@@ -68,7 +101,7 @@ export class Renderer {
                 const index = j * 2;
                 const indexOffset = i * maxIndex;
 
-                this.indexes[insertIndex] = (index % maxIndex) + indexOffset;
+                this.indexes[insertIndex + 0] = ((index + 0) % maxIndex) + indexOffset;
                 this.indexes[insertIndex + 1] = ((index + 1) % maxIndex) + indexOffset;
                 this.indexes[insertIndex + 2] = ((index + 2) % maxIndex) + indexOffset;
 
@@ -78,9 +111,19 @@ export class Renderer {
             }
         }
 
-        this.velocities = new Float32Array(2 * this.particleAmount * this.trailAmount * 3);
-        for (let i = 0; i < this.velocities.length; i++) {
-            this.velocities[i] = 0.0;
+        this.particleIndexes = new Float32Array(2 * particleAmount * trailAmount);
+        this.trailIndexes = new Float32Array(2 * particleAmount * trailAmount);
+
+        for (let i = 0; i < particleAmount; i++) {
+            for (let j = 0; j < trailAmount; j++) {
+                const index = (i * trailAmount + j) * 2;
+
+                this.particleIndexes[index] = i;
+                this.particleIndexes[index + 1] = i;
+
+                this.trailIndexes[index] = j;
+                this.trailIndexes[index + 1] = j;
+            }
         }
 
         this.sides = new Float32Array(2 * particleAmount * trailAmount);
@@ -88,21 +131,10 @@ export class Renderer {
             this.sides[i] = (i % 2) * 2 - 1;
         }
 
-        this.trailIndexes = new Float32Array(2 * particleAmount * trailAmount);
-        for (let i = 0; i < particleAmount; i++) {
-            for (let j = 0; j < trailAmount; j++) {
-                const index = (i * trailAmount + j) * 2;
-
-                this.trailIndexes[index] = j;
-                this.trailIndexes[index + 1] = j;
-            }
-        }
-
         this.geometry = new THREE.BufferGeometry();
-        this.geometry.setAttribute("position", new THREE.BufferAttribute(this.positions, 3));
-        this.geometry.setAttribute("velocity", new THREE.BufferAttribute(this.velocities, 3));
-        this.geometry.setAttribute("side", new THREE.BufferAttribute(this.sides, 1));
+        this.geometry.setAttribute("particleIndex", new THREE.BufferAttribute(this.particleIndexes, 1));
         this.geometry.setAttribute("trailIndex", new THREE.BufferAttribute(this.trailIndexes, 1));
+        this.geometry.setAttribute("side", new THREE.BufferAttribute(this.sides, 1));
         this.geometry.setIndex(new THREE.BufferAttribute(this.indexes, 1));
 
         this.cameraDir = new THREE.Vector3();
@@ -114,13 +146,16 @@ export class Renderer {
         this.velocityHueFactor = 0.0001;
 
         const vertexShader = `
-            attribute vec3 velocity;
-            attribute float side;
-            attribute float trailIndex;
+            in float particleIndex;
+            in float trailIndex;
+            in float side;
 
             uniform vec3 cameraDirection;
             uniform float ribbonWidth;
 
+            uniform sampler2D positionTexture;
+            uniform sampler2D velocityTexture;
+            uniform float particleAmount;
             uniform float trailAmount;
             uniform float currentStartIndex;
 
@@ -132,7 +167,23 @@ export class Renderer {
             uniform float velocityHueFactor;
             uniform vec4 colorFrameRotation;
 
-            varying vec4 vColor;
+            out vec4 vColor;
+
+            vec3 getTrailPosition(float particle, float trail) {
+                vec2 uv;
+                uv.x = (particle + 0.5) / particleAmount;
+                uv.y = (trail + 0.5) / trailAmount;
+
+                return texture(positionTexture, uv).xyz;
+            }
+
+            vec3 getTrailVelocity(float particle, float trail) {
+                vec2 uv;
+                uv.x = (particle + 0.5) / particleAmount;
+                uv.y = (trail + 0.5) / trailAmount;
+
+                return texture(velocityTexture, uv).xyz;
+            }
 
             vec3 hsl2rgb(vec3 hsl) {
                 vec3 rgb = clamp(
@@ -152,6 +203,9 @@ export class Renderer {
             }
 
             void main() {
+                vec3 position = getTrailPosition(particleIndex, trailIndex);
+                vec3 velocity = getTrailVelocity(particleIndex, trailIndex);
+
                 vec3 tangent = normalize(velocity + vec3(1e-6));
                 vec3 ribbonNormal = normalize(cross(cameraDirection, tangent));
                 vec3 finalPosition = position + side * ribbonWidth * ribbonNormal;
@@ -182,10 +236,12 @@ export class Renderer {
         `;
 
         const fragmentShader = `
-            varying vec4 vColor;
+            in vec4 vColor;
+
+            out vec4 outColor;
 
             void main() {
-                gl_FragColor = vColor;
+                outColor = vColor;
             }
         `;
 
@@ -193,14 +249,24 @@ export class Renderer {
             vertexShader,
             fragmentShader,
             transparent: true,
-            side: THREE.DoubleSide,
+            side: THREE.FrontSide,
             depthWrite: false,
+            glslVersion: THREE.GLSL3,
             uniforms: {
                 cameraDirection: {
                     value: this.cameraDir
                 },
                 ribbonWidth: {
                     value: this.ribbonWidth
+                },
+                positionTexture: {
+                    value: this.positionTexture
+                },
+                velocityTexture: {
+                    value: this.velocityTexture
+                },
+                particleAmount: {
+                    value: this.particleAmount
                 },
                 trailAmount: {
                     value: this.trailAmount
@@ -236,12 +302,6 @@ export class Renderer {
         this.mesh.frustumCulled = false;
         this.scene.add(this.mesh);
 
-        this.positionAttribute = this.mesh.geometry.getAttribute("position") as THREE.BufferAttribute;
-        this.positionAttribute.setUsage(THREE.DynamicDrawUsage);
-
-        this.velocityAttribute = this.mesh.geometry.getAttribute("velocity") as THREE.BufferAttribute;
-        this.velocityAttribute.setUsage(THREE.DynamicDrawUsage);
-
         this.threeRenderer.render(this.scene, this.camera);
 
         this.aspectRatio = 1.0;
@@ -250,9 +310,6 @@ export class Renderer {
         this.darkMode = true;
 
         this.qSlerped = new THREE.Quaternion();
-
-        this.geometry.computeBoundingBox();
-        this.geometry.computeBoundingSphere();
 
         this.mesh.position.set(0.0, -25.0, 0.0);
         this.mesh.rotation.x = -Math.PI / 2.0;
@@ -268,18 +325,26 @@ export class Renderer {
 
         for (let i = 0; i < this.particleAmount; i++) {
             for (let j = 0; j < this.trailAmount; j++) {
-                const vertexIndex = (i * this.trailAmount + j) * 6;
+                const vertexIndex = (i + this.particleAmount * j) * 4;
                 const positionIndex = i * 3;
 
-                this.positions[vertexIndex] = particlePositions[positionIndex];
-                this.positions[vertexIndex + 1] = particlePositions[positionIndex + 1];
-                this.positions[vertexIndex + 2] = particlePositions[positionIndex + 2];
+                this.positionTextureData[vertexIndex + 0] = particlePositions[positionIndex];
+                this.positionTextureData[vertexIndex + 1] = particlePositions[positionIndex + 1];
+                this.positionTextureData[vertexIndex + 2] = particlePositions[positionIndex + 2];
+                this.positionTextureData[vertexIndex + 3] = 1.0;
 
-                this.positions[vertexIndex + 3] = particlePositions[positionIndex];
-                this.positions[vertexIndex + 4] = particlePositions[positionIndex + 1];
-                this.positions[vertexIndex + 5] = particlePositions[positionIndex + 2];
+                this.velocityTextureData[vertexIndex + 0] = 0.0;
+                this.velocityTextureData[vertexIndex + 1] = 0.0;
+                this.velocityTextureData[vertexIndex + 2] = 0.0;
+                this.velocityTextureData[vertexIndex + 3] = 1.0;
             }
         }
+
+        this.positionTexture.clearUpdateRanges();
+        this.velocityTexture.clearUpdateRanges();
+
+        this.positionTexture.needsUpdate = true;
+        this.velocityTexture.needsUpdate = true;
     }
 
     resize(width: number, height: number): void {
@@ -314,11 +379,11 @@ export class Renderer {
         for (let i = 0; i < this.particleAmount; i++) {
             const particleIndex = i * 3;
 
-            const xCurrent = particlePositionsCurrent[particleIndex];
+            const xCurrent = particlePositionsCurrent[particleIndex + 0];
             const yCurrent = particlePositionsCurrent[particleIndex + 1];
             const zCurrent = particlePositionsCurrent[particleIndex + 2];
 
-            const xPrevious = particlePositionsPrevious[particleIndex];
+            const xPrevious = particlePositionsPrevious[particleIndex + 0];
             const yPrevious = particlePositionsPrevious[particleIndex + 1];
             const zPrevious = particlePositionsPrevious[particleIndex + 2];
 
@@ -326,11 +391,11 @@ export class Renderer {
             const y = lerp(yPrevious, yCurrent, interpolateAlpha);
             const z = lerp(zPrevious, zCurrent, interpolateAlpha);
 
-            const dxCurrent = particleVelocitiesCurrent[particleIndex];
+            const dxCurrent = particleVelocitiesCurrent[particleIndex + 0];
             const dyCurrent = particleVelocitiesCurrent[particleIndex + 1];
             const dzCurrent = particleVelocitiesCurrent[particleIndex + 2];
 
-            const dxPrevious = particleVelocitiesPrevious[particleIndex];
+            const dxPrevious = particleVelocitiesPrevious[particleIndex + 0];
             const dyPrevious = particleVelocitiesPrevious[particleIndex + 1];
             const dzPrevious = particleVelocitiesPrevious[particleIndex + 2];
 
@@ -338,24 +403,27 @@ export class Renderer {
             const dy = lerp(dyPrevious, dyCurrent, interpolateAlpha);
             const dz = lerp(dzPrevious, dzCurrent, interpolateAlpha);
 
-            const vertexIndex = (i * this.trailAmount + this.currentStartIndex) * 6;
+            const index = (i + this.currentStartIndex * this.particleAmount) * 4;
 
-            this.positions[vertexIndex] = x;
-            this.positions[vertexIndex + 1] = y;
-            this.positions[vertexIndex + 2] = z;
+            this.positionTextureData[index + 0] = x;
+            this.positionTextureData[index + 1] = y;
+            this.positionTextureData[index + 2] = z;
+            this.positionTextureData[index + 3] = 1.0;
 
-            this.positions[vertexIndex + 3] = x;
-            this.positions[vertexIndex + 4] = y;
-            this.positions[vertexIndex + 5] = z;
-
-            this.velocities[vertexIndex] = dx;
-            this.velocities[vertexIndex + 1] = dy;
-            this.velocities[vertexIndex + 2] = dz;
-
-            this.velocities[vertexIndex + 3] = dx;
-            this.velocities[vertexIndex + 4] = dy;
-            this.velocities[vertexIndex + 5] = dz;
+            this.velocityTextureData[index + 0] = dx;
+            this.velocityTextureData[index + 1] = dy;
+            this.velocityTextureData[index + 2] = dz;
+            this.velocityTextureData[index + 3] = 1.0;
         }
+
+        const offset = this.currentStartIndex * this.particleAmount * 4;
+        const count = this.particleAmount * 4;
+
+        this.positionTexture.addUpdateRange(offset, count);
+        this.velocityTexture.addUpdateRange(offset, count);
+
+        this.positionTexture.needsUpdate = true;
+        this.velocityTexture.needsUpdate = true;
     }
 
     updateColors(
@@ -433,9 +501,6 @@ export class Renderer {
         this.updateColors(simulationStateCurrent, simulationStatePrevious, interpolateAlpha);
 
         this.currentStartIndex = (this.currentStartIndex + 1) % this.trailAmount;
-
-        this.positionAttribute.needsUpdate = true;
-        this.velocityAttribute.needsUpdate = true;
 
         this.controls.update();
         this.threeRenderer.render(this.scene, this.camera);
