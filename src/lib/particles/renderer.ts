@@ -14,10 +14,7 @@ export class Renderer {
     controls: OrbitControls;
 
     positionTextureData: Float32Array;
-    velocityTextureData: Float32Array;
-
     positionTexture: THREE.DataTexture;
-    velocityTexture: THREE.DataTexture;
 
     indexes: Uint32Array;
     particleIndexes: Float32Array;
@@ -65,8 +62,6 @@ export class Renderer {
         this.controls.dampingFactor = 0.1;
 
         this.positionTextureData = new Float32Array(particleAmount * trailAmount * 4);
-        this.velocityTextureData = new Float32Array(particleAmount * trailAmount * 4);
-
         this.positionTexture = new THREE.DataTexture(
             this.positionTextureData,
             particleAmount,
@@ -79,19 +74,6 @@ export class Renderer {
         this.positionTexture.wrapS = THREE.RepeatWrapping;
         this.positionTexture.wrapT = THREE.ClampToEdgeWrapping;
         this.positionTexture.internalFormat = "RGBA32F";
-
-        this.velocityTexture = new THREE.DataTexture(
-            this.velocityTextureData,
-            particleAmount,
-            trailAmount,
-            THREE.RGBAFormat,
-            THREE.FloatType
-        );
-        this.velocityTexture.magFilter = THREE.NearestFilter;
-        this.velocityTexture.minFilter = THREE.NearestFilter;
-        this.velocityTexture.wrapS = THREE.RepeatWrapping;
-        this.velocityTexture.wrapT = THREE.ClampToEdgeWrapping;
-        this.velocityTexture.internalFormat = "RGBA32F";
 
         this.indexes = new Uint32Array(2 * this.particleAmount * this.trailAmount * 3);
         const maxIndex = this.trailAmount * 2;
@@ -154,10 +136,11 @@ export class Renderer {
             uniform float ribbonWidth;
 
             uniform sampler2D positionTexture;
-            uniform sampler2D velocityTexture;
             uniform float particleAmount;
             uniform float trailAmount;
             uniform float currentStartIndex;
+
+            uniform float dt;
 
             uniform float hueRotation;
             uniform float hueRange;
@@ -175,14 +158,6 @@ export class Renderer {
                 uv.y = (trail + 0.5) / trailAmount;
 
                 return texture(positionTexture, uv).xyz;
-            }
-
-            vec3 getTrailVelocity(float particle, float trail) {
-                vec2 uv;
-                uv.x = (particle + 0.5) / particleAmount;
-                uv.y = (trail + 0.5) / trailAmount;
-
-                return texture(velocityTexture, uv).xyz;
             }
 
             vec3 hsl2rgb(vec3 hsl) {
@@ -204,10 +179,10 @@ export class Renderer {
 
             void main() {
                 vec3 position = getTrailPosition(particleIndex, trailIndex);
-                vec3 velocity = getTrailVelocity(particleIndex, trailIndex);
+                vec3 positionPrevious = getTrailPosition(particleIndex, mod(trailIndex - 1.0 + trailAmount, trailAmount));
+                vec3 velocity = dt * (position - positionPrevious);
 
-                vec3 tangent = normalize(velocity + vec3(1e-6));
-                vec3 ribbonNormal = normalize(cross(cameraDirection, tangent));
+                vec3 ribbonNormal = normalize(cross(cameraDirection, velocity));
                 vec3 finalPosition = position + side * ribbonWidth * ribbonNormal;
 
                 gl_Position = projectionMatrix * modelViewMatrix * vec4(finalPosition, 1.0);
@@ -262,9 +237,6 @@ export class Renderer {
                 positionTexture: {
                     value: this.positionTexture
                 },
-                velocityTexture: {
-                    value: this.velocityTexture
-                },
                 particleAmount: {
                     value: this.particleAmount
                 },
@@ -273,6 +245,9 @@ export class Renderer {
                 },
                 currentStartIndex: {
                     value: this.currentStartIndex
+                },
+                dt: {
+                    value: 0.01
                 },
                 hueRotation: {
                     value: 0
@@ -332,19 +307,11 @@ export class Renderer {
                 this.positionTextureData[vertexIndex + 1] = particlePositions[positionIndex + 1];
                 this.positionTextureData[vertexIndex + 2] = particlePositions[positionIndex + 2];
                 this.positionTextureData[vertexIndex + 3] = 1.0;
-
-                this.velocityTextureData[vertexIndex + 0] = 0.0;
-                this.velocityTextureData[vertexIndex + 1] = 0.0;
-                this.velocityTextureData[vertexIndex + 2] = 0.0;
-                this.velocityTextureData[vertexIndex + 3] = 1.0;
             }
         }
 
         this.positionTexture.clearUpdateRanges();
-        this.velocityTexture.clearUpdateRanges();
-
         this.positionTexture.needsUpdate = true;
-        this.velocityTexture.needsUpdate = true;
     }
 
     resize(width: number, height: number): void {
@@ -373,9 +340,6 @@ export class Renderer {
         const particlePositionsCurrent = simulationStateCurrent.particlePositions;
         const particlePositionsPrevious = simulationStatePrevious.particlePositions;
 
-        const particleVelocitiesCurrent = simulationStateCurrent.particleVelocities;
-        const particleVelocitiesPrevious = simulationStatePrevious.particleVelocities;
-
         for (let i = 0; i < this.particleAmount; i++) {
             const particleIndex = i * 3;
 
@@ -391,39 +355,19 @@ export class Renderer {
             const y = lerp(yPrevious, yCurrent, interpolateAlpha);
             const z = lerp(zPrevious, zCurrent, interpolateAlpha);
 
-            const dxCurrent = particleVelocitiesCurrent[particleIndex + 0];
-            const dyCurrent = particleVelocitiesCurrent[particleIndex + 1];
-            const dzCurrent = particleVelocitiesCurrent[particleIndex + 2];
-
-            const dxPrevious = particleVelocitiesPrevious[particleIndex + 0];
-            const dyPrevious = particleVelocitiesPrevious[particleIndex + 1];
-            const dzPrevious = particleVelocitiesPrevious[particleIndex + 2];
-
-            const dx = lerp(dxPrevious, dxCurrent, interpolateAlpha);
-            const dy = lerp(dyPrevious, dyCurrent, interpolateAlpha);
-            const dz = lerp(dzPrevious, dzCurrent, interpolateAlpha);
-
             const index = (i + this.currentStartIndex * this.particleAmount) * 4;
 
             this.positionTextureData[index + 0] = x;
             this.positionTextureData[index + 1] = y;
             this.positionTextureData[index + 2] = z;
             this.positionTextureData[index + 3] = 1.0;
-
-            this.velocityTextureData[index + 0] = dx;
-            this.velocityTextureData[index + 1] = dy;
-            this.velocityTextureData[index + 2] = dz;
-            this.velocityTextureData[index + 3] = 1.0;
         }
 
         const offset = this.currentStartIndex * this.particleAmount * 4;
         const count = this.particleAmount * 4;
 
         this.positionTexture.addUpdateRange(offset, count);
-        this.velocityTexture.addUpdateRange(offset, count);
-
         this.positionTexture.needsUpdate = true;
-        this.velocityTexture.needsUpdate = true;
     }
 
     updateColors(
