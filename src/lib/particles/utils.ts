@@ -158,8 +158,8 @@ interface Integrator {
 }
 
 class Heun implements Integrator {
-    k1: THREE.Vector3;
-    k2: THREE.Vector3;
+    private k1: THREE.Vector3;
+    private k2: THREE.Vector3;
 
     constructor() {
         this.k1 = new THREE.Vector3();
@@ -174,6 +174,78 @@ class Heun implements Integrator {
         out.x = x + 0.5 * (this.k1.x + this.k2.x) * h;
         out.y = y + 0.5 * (this.k1.y + this.k2.y) * h;
         out.z = z + 0.5 * (this.k1.z + this.k2.z) * h;
+    }
+}
+
+class DoPri5 implements Integrator {
+    private k: THREE.Vector3[];
+
+    private static readonly butcher_a: Float64Array[] = [
+        new Float64Array([0, 0, 0, 0, 0, 0, 0]),
+        new Float64Array([1 / 5, 0, 0, 0, 0, 0, 0]),
+        new Float64Array([3 / 40, 9 / 40, 0, 0, 0, 0, 0]),
+        new Float64Array([44 / 45, -56 / 15, 32 / 9, 0, 0, 0, 0]),
+        new Float64Array([19372 / 6561, -25360 / 2187, 64448 / 6561, -212 / 729, 0, 0, 0]),
+        new Float64Array([9017 / 3168, -355 / 33, 46732 / 5247, 49 / 176, -5103 / 18656, 0, 0]),
+        new Float64Array([35 / 384, 0, 500 / 1113, 125 / 192, -2187 / 6784, 11 / 84, 0])
+    ];
+
+    private static readonly butcher_b = new Float64Array([
+        35 / 384,
+        0,
+        500 / 1113,
+        125 / 192,
+        -2187 / 6784,
+        11 / 84,
+        0
+    ]);
+
+    // private static readonly butcher_c = new Float64Array([
+    //     0,
+    //     1 / 5,
+    //     3 / 10,
+    //     4 / 5,
+    //     8 / 9,
+    //     1,
+    //     1
+    // ]);
+
+    constructor() {
+        this.k = Array.from({ length: 7 }, () => new THREE.Vector3());
+    }
+
+    step(x: number, y: number, z: number, ode: ODE, h: number, out: THREE.Vector3): void {
+        for (let stage = 0; stage < 7; stage++) {
+            let sx = x;
+            let sy = y;
+            let sz = z;
+
+            const coeffs = DoPri5.butcher_a[stage];
+
+            for (let j = 0; j < stage; j++) {
+                const kj = this.k[j];
+                const a = coeffs[j];
+
+                sx += h * a * kj.x;
+                sy += h * a * kj.y;
+                sz += h * a * kj.z;
+            }
+
+            ode.f(sx, sy, sz, this.k[stage]);
+        }
+
+        out.x = x;
+        out.y = y;
+        out.z = z;
+
+        for (let i = 0; i < 7; i++) {
+            const bi = DoPri5.butcher_b[i];
+            const ki = this.k[i];
+
+            out.x += h * bi * ki.x;
+            out.y += h * bi * ki.y;
+            out.z += h * bi * ki.z;
+        }
     }
 }
 
@@ -192,7 +264,8 @@ export {
     getRandomTarget,
     deltaQuaternion,
     Lorenz,
-    Heun
+    Heun,
+    DoPri5
 };
 
 export type { ODE, Integrator };
