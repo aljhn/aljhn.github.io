@@ -194,9 +194,9 @@ class Heun implements Integrator {
 }
 
 interface AdaptiveIntegrator {
-    step: (x: number, y: number, z: number, ode: ODE, out: THREE.Vector3) => boolean;
+    step: (x: number, y: number, z: number, ode: ODE, maxH: number, out: THREE.Vector3) => boolean;
 
-    h: number;
+    getLastAcceptedTimestep: () => number;
 }
 
 class DoPri5 implements AdaptiveIntegrator {
@@ -207,7 +207,11 @@ class DoPri5 implements AdaptiveIntegrator {
     maxFactor: number;
     minFactor: number;
 
-    h: number;
+    minH: number;
+    maxH: number;
+
+    private h: number;
+    private lastAcceptedTimestep: number;
 
     private k: THREE.Vector3[];
 
@@ -261,6 +265,7 @@ class DoPri5 implements AdaptiveIntegrator {
 
     constructor(h0: number, absTol: number = 1e-6, relTol: number = 1e-4) {
         this.h = h0;
+        this.lastAcceptedTimestep = this.h;
 
         this.absTol = absTol;
         this.relTol = relTol;
@@ -268,6 +273,9 @@ class DoPri5 implements AdaptiveIntegrator {
         this.safetyFactor = 0.9;
         this.maxFactor = 5.0;
         this.minFactor = 1.0 / this.maxFactor;
+
+        this.minH = 1e-5;
+        this.maxH = 1e-1;
 
         this.k = Array.from({ length: 7 }, () => new THREE.Vector3());
 
@@ -278,7 +286,9 @@ class DoPri5 implements AdaptiveIntegrator {
         this.hasFSAL = false;
     }
 
-    step(x: number, y: number, z: number, ode: ODE, out: THREE.Vector3): boolean {
+    step(x: number, y: number, z: number, ode: ODE, maxH: number, out: THREE.Vector3): boolean {
+        const h = Math.min(this.h, maxH);
+
         for (let stage = 0; stage < 7; stage++) {
             if (stage === 0 && this.hasFSAL) {
                 this.k[0].x = this.fsal.x;
@@ -297,9 +307,9 @@ class DoPri5 implements AdaptiveIntegrator {
                 const kj = this.k[j];
                 const a = coeffs[j];
 
-                sx += this.h * a * kj.x;
-                sy += this.h * a * kj.y;
-                sz += this.h * a * kj.z;
+                sx += h * a * kj.x;
+                sy += h * a * kj.y;
+                sz += h * a * kj.z;
             }
 
             ode.f(sx, sy, sz, this.k[stage]);
@@ -318,13 +328,13 @@ class DoPri5 implements AdaptiveIntegrator {
             const b5i = DoPri5.butcher_b5[i];
             const ki = this.k[i];
 
-            this.out4.x += this.h * b4i * ki.x;
-            this.out4.y += this.h * b4i * ki.y;
-            this.out4.z += this.h * b4i * ki.z;
+            this.out4.x += h * b4i * ki.x;
+            this.out4.y += h * b4i * ki.y;
+            this.out4.z += h * b4i * ki.z;
 
-            this.out5.x += this.h * b5i * ki.x;
-            this.out5.y += this.h * b5i * ki.y;
-            this.out5.z += this.h * b5i * ki.z;
+            this.out5.x += h * b5i * ki.x;
+            this.out5.y += h * b5i * ki.y;
+            this.out5.z += h * b5i * ki.z;
         }
 
         const errorX = this.out5.x - this.out4.x;
@@ -339,15 +349,12 @@ class DoPri5 implements AdaptiveIntegrator {
             Math.sqrt((errorX / scaleX) ** 2.0 + (errorY / scaleY) ** 2.0 + (errorZ / scaleZ) ** 2.0) *
             DoPri5.INV_SQRT_3;
 
-        const factor = this.safetyFactor * Math.pow(error, -0.2);
-        const clampedFactor = Math.min(this.maxFactor, Math.max(this.minFactor, factor));
-        this.h *= clampedFactor;
-
         const accept = error <= 1.0;
         if (accept) {
             out.x = this.out5.x;
             out.y = this.out5.y;
             out.z = this.out5.z;
+            this.lastAcceptedTimestep = h;
 
             this.fsal.x = this.k[6].x;
             this.fsal.y = this.k[6].y;
@@ -357,7 +364,16 @@ class DoPri5 implements AdaptiveIntegrator {
             this.hasFSAL = false;
         }
 
+        const factor = this.safetyFactor * Math.pow(error, -0.2);
+        const clampedFactor = Math.min(this.maxFactor, Math.max(this.minFactor, factor));
+        this.h *= clampedFactor;
+        this.h = Math.min(this.maxH, Math.max(this.minH, this.h));
+
         return accept;
+    }
+
+    getLastAcceptedTimestep(): number {
+        return this.lastAcceptedTimestep;
     }
 }
 

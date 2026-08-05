@@ -1,8 +1,8 @@
 import * as THREE from "three";
-import type { ODE, Integrator } from "./utils";
+import type { ODE, AdaptiveIntegrator } from "./utils";
 import {
     Lorenz,
-    Heun,
+    DoPri5,
     getInitialHuePosition,
     getNextHueRangeTarget,
     getNextSaturationTarget,
@@ -54,7 +54,7 @@ export class SimulationState {
     integrateOutput: THREE.Vector3;
 
     ode: ODE;
-    integrator: Integrator;
+    integrators: AdaptiveIntegrator[];
 
     constructor(particleAmount: number) {
         this.omegaNorm = 0.1;
@@ -95,7 +95,7 @@ export class SimulationState {
         this.integrateOutput = new THREE.Vector3();
 
         this.ode = new Lorenz();
-        this.integrator = new Heun();
+        this.integrators = Array.from({ length: particleAmount }, () => new DoPri5(1e-3));
 
         for (let i = 0; i < this.particleAmount; i++) {
             const index = i * 3;
@@ -168,19 +168,30 @@ export class SimulationState {
     }
 
     updateParticles(dt: number): void {
+        const nextTargetTime = dt * this.speedScale;
+
         for (let i = 0; i < this.particleAmount; i++) {
             const particleIndex = i * 3;
-            const x = this.particlePositions[particleIndex + 0];
-            const y = this.particlePositions[particleIndex + 1];
-            const z = this.particlePositions[particleIndex + 2];
 
-            this.ode.f(x, y, z, this.integrateOutput);
+            let x = this.particlePositions[particleIndex + 0];
+            let y = this.particlePositions[particleIndex + 1];
+            let z = this.particlePositions[particleIndex + 2];
 
-            const h = dt * this.speedScale;
-            this.integrator.step(x, y, z, this.ode, h, this.integrateOutput);
-            this.particlePositions[particleIndex + 0] = this.integrateOutput.x;
-            this.particlePositions[particleIndex + 1] = this.integrateOutput.y;
-            this.particlePositions[particleIndex + 2] = this.integrateOutput.z;
+            let timeSoFar = 0.0;
+            while (timeSoFar < nextTargetTime) {
+                const remainingTime = nextTargetTime - timeSoFar;
+                const accepted = this.integrators[i].step(x, y, z, this.ode, remainingTime, this.integrateOutput);
+                if (accepted) {
+                    timeSoFar += this.integrators[i].getLastAcceptedTimestep();
+                    x = this.integrateOutput.x;
+                    y = this.integrateOutput.y;
+                    z = this.integrateOutput.z;
+                }
+            }
+
+            this.particlePositions[particleIndex + 0] = x;
+            this.particlePositions[particleIndex + 1] = y;
+            this.particlePositions[particleIndex + 2] = z;
         }
     }
 
