@@ -157,6 +157,22 @@ interface Integrator {
     step: (x: number, y: number, z: number, ode: ODE, h: number, out: THREE.Vector3) => void;
 }
 
+class Euler implements Integrator {
+    private k: THREE.Vector3;
+
+    constructor() {
+        this.k = new THREE.Vector3();
+    }
+
+    step(x: number, y: number, z: number, ode: ODE, h: number, out: THREE.Vector3): void {
+        ode.f(x, y, z, this.k);
+
+        out.x = x + this.k.x * h;
+        out.y = y + this.k.y * h;
+        out.z = z + this.k.z * h;
+    }
+}
+
 class Heun implements Integrator {
     private k1: THREE.Vector3;
     private k2: THREE.Vector3;
@@ -177,8 +193,31 @@ class Heun implements Integrator {
     }
 }
 
-class DoPri5 implements Integrator {
+interface AdaptiveIntegrator {
+    step: (x: number, y: number, z: number, ode: ODE, out: THREE.Vector3) => boolean;
+
+    h: number;
+}
+
+class DoPri5 implements AdaptiveIntegrator {
+    absTol: number;
+    relTol: number;
+
+    safetyFactor: number;
+    maxFactor: number;
+    minFactor: number;
+
+    h: number;
+
     private k: THREE.Vector3[];
+
+    private out4: THREE.Vector3;
+    private out5: THREE.Vector3;
+
+    private fsal: THREE.Vector3;
+    private hasFSAL: boolean;
+
+    private static readonly INV_SQRT_3 = 1.0 / Math.sqrt(3.0);
 
     private static readonly butcher_a: Float64Array[] = [
         new Float64Array([0, 0, 0, 0, 0, 0, 0]),
@@ -190,7 +229,7 @@ class DoPri5 implements Integrator {
         new Float64Array([35 / 384, 0, 500 / 1113, 125 / 192, -2187 / 6784, 11 / 84, 0])
     ];
 
-    private static readonly butcher_b = new Float64Array([
+    private static readonly butcher_b5 = new Float64Array([
         35 / 384,
         0,
         500 / 1113,
@@ -198,6 +237,16 @@ class DoPri5 implements Integrator {
         -2187 / 6784,
         11 / 84,
         0
+    ]);
+
+    private static readonly butcher_b4 = new Float64Array([
+        5179 / 57600,
+        0,
+        7571 / 16695,
+        393 / 640,
+        -92097 / 339200,
+        187 / 2100,
+        1 / 40
     ]);
 
     // private static readonly butcher_c = new Float64Array([
@@ -210,12 +259,34 @@ class DoPri5 implements Integrator {
     //     1
     // ]);
 
-    constructor() {
+    constructor(h0: number, absTol: number = 1e-6, relTol: number = 1e-4) {
+        this.h = h0;
+
+        this.absTol = absTol;
+        this.relTol = relTol;
+
+        this.safetyFactor = 0.9;
+        this.maxFactor = 5.0;
+        this.minFactor = 1.0 / this.maxFactor;
+
         this.k = Array.from({ length: 7 }, () => new THREE.Vector3());
+
+        this.out4 = new THREE.Vector3();
+        this.out5 = new THREE.Vector3();
+
+        this.fsal = new THREE.Vector3();
+        this.hasFSAL = false;
     }
 
-    step(x: number, y: number, z: number, ode: ODE, h: number, out: THREE.Vector3): void {
+    step(x: number, y: number, z: number, ode: ODE, out: THREE.Vector3): boolean {
         for (let stage = 0; stage < 7; stage++) {
+            if (stage === 0 && this.hasFSAL) {
+                this.k[0].x = this.fsal.x;
+                this.k[0].y = this.fsal.y;
+                this.k[0].z = this.fsal.z;
+                continue;
+            }
+
             let sx = x;
             let sy = y;
             let sz = z;
@@ -226,26 +297,67 @@ class DoPri5 implements Integrator {
                 const kj = this.k[j];
                 const a = coeffs[j];
 
-                sx += h * a * kj.x;
-                sy += h * a * kj.y;
-                sz += h * a * kj.z;
+                sx += this.h * a * kj.x;
+                sy += this.h * a * kj.y;
+                sz += this.h * a * kj.z;
             }
 
             ode.f(sx, sy, sz, this.k[stage]);
         }
 
-        out.x = x;
-        out.y = y;
-        out.z = z;
+        this.out4.x = x;
+        this.out4.y = y;
+        this.out4.z = z;
+
+        this.out5.x = x;
+        this.out5.y = y;
+        this.out5.z = z;
 
         for (let i = 0; i < 7; i++) {
-            const bi = DoPri5.butcher_b[i];
+            const b4i = DoPri5.butcher_b4[i];
+            const b5i = DoPri5.butcher_b5[i];
             const ki = this.k[i];
 
-            out.x += h * bi * ki.x;
-            out.y += h * bi * ki.y;
-            out.z += h * bi * ki.z;
+            this.out4.x += this.h * b4i * ki.x;
+            this.out4.y += this.h * b4i * ki.y;
+            this.out4.z += this.h * b4i * ki.z;
+
+            this.out5.x += this.h * b5i * ki.x;
+            this.out5.y += this.h * b5i * ki.y;
+            this.out5.z += this.h * b5i * ki.z;
         }
+
+        const errorX = this.out5.x - this.out4.x;
+        const errorY = this.out5.y - this.out4.y;
+        const errorZ = this.out5.z - this.out4.z;
+
+        const scaleX = this.absTol + this.relTol * Math.max(Math.abs(this.out5.x), Math.abs(x));
+        const scaleY = this.absTol + this.relTol * Math.max(Math.abs(this.out5.y), Math.abs(y));
+        const scaleZ = this.absTol + this.relTol * Math.max(Math.abs(this.out5.z), Math.abs(z));
+
+        const error =
+            Math.sqrt((errorX / scaleX) ** 2.0 + (errorY / scaleY) ** 2.0 + (errorZ / scaleZ) ** 2.0) *
+            DoPri5.INV_SQRT_3;
+
+        const factor = this.safetyFactor * Math.pow(error, -0.2);
+        const clampedFactor = Math.min(this.maxFactor, Math.max(this.minFactor, factor));
+        this.h *= clampedFactor;
+
+        const accept = error <= 1.0;
+        if (accept) {
+            out.x = this.out5.x;
+            out.y = this.out5.y;
+            out.z = this.out5.z;
+
+            this.fsal.x = this.k[6].x;
+            this.fsal.y = this.k[6].y;
+            this.fsal.z = this.k[6].z;
+            this.hasFSAL = true;
+        } else {
+            this.hasFSAL = false;
+        }
+
+        return accept;
     }
 }
 
@@ -264,8 +376,9 @@ export {
     getRandomTarget,
     deltaQuaternion,
     Lorenz,
+    Euler,
     Heun,
     DoPri5
 };
 
-export type { ODE, Integrator };
+export type { ODE, Integrator, AdaptiveIntegrator };

@@ -50,7 +50,6 @@ export class SimulationState {
     particleAmount: number;
 
     particlePositions: Float32Array;
-    // particleVelocities: Float32Array;
 
     integrateOutput: THREE.Vector3;
 
@@ -92,7 +91,6 @@ export class SimulationState {
         this.particleAmount = particleAmount;
 
         this.particlePositions = new Float32Array(this.particleAmount * 3);
-        // this.particleVelocities = new Float32Array(this.particleAmount * 3);
 
         this.integrateOutput = new THREE.Vector3();
 
@@ -177,9 +175,6 @@ export class SimulationState {
             const z = this.particlePositions[particleIndex + 2];
 
             this.ode.f(x, y, z, this.integrateOutput);
-            // this.particleVelocities[particleIndex + 0] = this.integrateOutput.x;
-            // this.particleVelocities[particleIndex + 1] = this.integrateOutput.y;
-            // this.particleVelocities[particleIndex + 2] = this.integrateOutput.z;
 
             const h = dt * this.speedScale;
             this.integrator.step(x, y, z, this.ode, h, this.integrateOutput);
@@ -242,7 +237,6 @@ export class SimulationState {
         dst.speedScale = this.speedScale;
 
         dst.particlePositions.set(this.particlePositions);
-        // dst.particleVelocities.set(this.particleVelocities);
 
         dst.integrateOutput.x = this.integrateOutput.x;
         dst.integrateOutput.y = this.integrateOutput.y;
