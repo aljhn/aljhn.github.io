@@ -11,9 +11,9 @@
 
 <div class="mx-auto w-full max-w-5xl pt-5 pb-20">
     <a
-        href="/writing"
+        href="/posts"
         class="text-linklight dark:text-linkdark text-lg font-semibold underline px-10"
-        aria-label="Back to Writing"
+        aria-label="Back to Posts"
     >
         &larr; Back
     </a>

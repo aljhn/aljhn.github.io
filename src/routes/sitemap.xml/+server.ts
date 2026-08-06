@@ -2,7 +2,7 @@ import type { RequestHandler } from "./$types";
 
 const site = "https://aljhn.github.io";
 const date = new Date().toISOString().split("T")[0];
-const pages = ["", "about", "quotes", "skills", "research", "writing"];
+const pages = ["", "about", "quotes", "skills", "research", "posts"];
 
 const posts = import.meta.glob<{ metadata: { date: string } }>("$lib/posts/*.svx", { eager: true });
 
@@ -28,7 +28,7 @@ ${pages
 ${postEntries
     .map(
         (post) => `	<url>
-		<loc>${site}/writing/${post.slug}</loc>
+		<loc>${site}/posts/${post.slug}</loc>
 		<lastmod>${post.date}</lastmod>
 	</url>`
     )

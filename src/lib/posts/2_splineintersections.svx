@@ -13,7 +13,7 @@ date: 2026-07-11
 
 ### Setup
 
-This is a followup to this <a href="/writing/1_splinetrajectories" class="text-linklight dark:text-linkdark font-semibold hover:underline">post</a> on 3D trajectories with cubic splines.
+This is a followup to this <a href="/posts/1_splinetrajectories" class="text-linklight dark:text-linkdark font-semibold hover:underline">post</a> on 3D trajectories with cubic splines.
 
 Let's now assume that we have two different rigid bodies moving through 3D space, and each rigid body has a trajectory given with 3D cubic splines:
 

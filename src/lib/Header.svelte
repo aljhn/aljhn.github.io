@@ -17,7 +17,7 @@
         { url: resolve("/quotes"), label: "Quotes" },
         { url: resolve("/skills"), label: "Skills" },
         { url: resolve("/research"), label: "Research" },
-        { url: resolve("/writing"), label: "Writing" }
+        { url: resolve("/posts"), label: "Posts" }
     ];
 
     let darkModeState = $state(true);

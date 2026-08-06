@@ -223,4 +223,4 @@ def f_horner(t, coeffs):
 
 ### End
 
-Now that we have a way to represent trajectories as continuous functions, the <a href="/writing/2_splineintersections" class="text-linklight dark:text-linkdark font-semibold hover:underline">follow-up post</a> goes into how to use these to check for collisions between two different trajectories.
+Now that we have a way to represent trajectories as continuous functions, the <a href="/posts/2_splineintersections" class="text-linklight dark:text-linkdark font-semibold hover:underline">follow-up post</a> goes into how to use these to check for collisions between two different trajectories.
