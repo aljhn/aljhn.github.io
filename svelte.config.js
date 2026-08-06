@@ -3,6 +3,7 @@ import { vitePreprocess } from "@sveltejs/vite-plugin-svelte";
 import { mdsvex } from "mdsvex";
 import remarkMath from "remark-math";
 import rehypeKatexSvelte from "rehype-katex-svelte";
+import rehypeSlug from "rehype-slug";
 import { createHighlighter } from "shiki";
 
 const hightlightThemeLight = "github-light";
@@ -16,7 +17,7 @@ const highlighter = await createHighlighter({
 const mdsvexConfig = mdsvex({
     extensions: [".md", ".svx"],
     remarkPlugins: [remarkMath],
-    rehypePlugins: [rehypeKatexSvelte],
+    rehypePlugins: [rehypeSlug, rehypeKatexSvelte],
     highlight: {
         highlighter: (code, lang = "text") => {
             return highlighter.codeToHtml(code, {

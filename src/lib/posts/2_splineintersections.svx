@@ -11,6 +11,23 @@ date: 2026-07-11
     import plot2_3 from "$lib/posts/images/plot_2_3.png?enhanced";
 </script>
 
+<div class="toc rounded-xl border border-bglight-2 shadow-xl bg-bglight-1 px-10 py-2 dark:bg-bgdark-1 dark:border-bgdark-2">
+
+<p class="font-semibold text-textlight-1 dark:text-textdark-1">
+    Contents
+</p>
+
+- [Setup](#setup)
+- [3D Spline Intersections](#3d-spline-intersections)
+- [Polynomial Root Finding](#polynomial-root-finding-tangent)
+- [Low Degree Polynomial Root Finding](#low-degree-polynomial-root-finding)
+- [Cauchy Bound](#cauchy-bound)
+- [Intersecting Splines at Different Sampling Times](#intersecting-splines-at-different-sampling-times)
+- [Putting it All Together](#putting-it-all-together)
+- [Future work: Non-Spherical Hitboxes](#future-work-non-spherical-hitboxes)
+
+</div>
+
 ### Setup
 
 This is a followup to this <a href="/posts/1_splinetrajectories" class="text-linklight dark:text-linkdark font-semibold hover:underline">post</a> on 3D trajectories with cubic splines.
@@ -180,7 +197,7 @@ here assuming that the splines just continue with the first and last segment out
 
 Then solve the minimization problem for each of these intervals, and get the global minimum by taking the minimum of all of these again.
 
-### Putting it all together
+### Putting it All Together
 
 1. Inputs: timepoints, positions and velocities
     * Trajectory $1$ with $n$ states:

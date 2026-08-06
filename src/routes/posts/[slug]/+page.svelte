@@ -18,9 +18,9 @@
         &larr; Back
     </a>
 
-    <article class="prose dark:prose-invert pt-10 px-5 mx-auto w-full max-w-5xl">
-        <h1 class="text-center">{title}</h1>
-        <h2 class="text-center pb-10">{description}</h2>
+    <article class="prose dark:prose-invert pt-10 px-5 mx-auto w-full max-w-5xl text-textlight-2 dark:text-textdark-2">
+        <h1 class="text-center text-textlight-1 dark:text-textdark-1">{title}</h1>
+        <h2 class="text-center text-textlight-1 dark:text-textdark-1 pb-10">{description}</h2>
 
         <Post />
     </article>

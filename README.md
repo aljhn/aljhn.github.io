@@ -14,7 +14,7 @@
 - Prettier + ESLint
 - GitHub Pages + GitHub Actions
 - Three.js
-- mdsvex + katex + remark-math + rehype-katex-svelte + shiki
+- mdsvex + katex + remark-math + rehype-katex-svelte + shiki + rehype-slug
 
 ---
 
