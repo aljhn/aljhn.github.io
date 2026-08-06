@@ -29,7 +29,7 @@
             conference: "NeurIPS 2022 Workshop - The Symbiosis of Deep Learning and Differential Equations II",
             year: 2022,
             link: "https://openreview.net/forum?id=6EvTvGpiXe0",
-            pdf: "papers/LineIntegralLoss.pdf"
+            pdf: "/papers/LineIntegralLoss.pdf"
         }
     ];
 
@@ -40,7 +40,7 @@
             conference: "Norwegian Research Information Repository",
             year: 2024,
             link: "https://nva.sikt.no/registration/0198ec6407ac-73371548-6668-4c6c-bfc1-1b8452106fa6",
-            pdf: "papers/MasterThesis2.pdf"
+            pdf: "/papers/MasterThesis2.pdf"
         },
         {
             title: "Motion Classification with Neural Ordinary Differential Equations",
@@ -48,7 +48,7 @@
             conference: "Norwegian Research Information Repository",
             year: 2022,
             link: "https://nva.sikt.no/registration/0198eaba1be8-c870f8f5-94b4-4643-a358-6c7904de4be6",
-            pdf: "papers/MasterThesis.pdf"
+            pdf: "/papers/MasterThesis.pdf"
         }
     ];
 </script>

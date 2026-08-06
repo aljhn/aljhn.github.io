@@ -1,4 +1,6 @@
 <script lang="ts">
+    import { asset } from "$app/paths";
+
     interface Paper {
         title: string;
         authors: string;
@@ -30,8 +32,9 @@
                 <h3 class="text-textlight-1 dark:text-textdark-1 darkModeFade text-xl font-semibold">{paper.title}</h3>
                 <div class="flex">
                     {#if paper.pdf != ""}
-                        <a class="text-linklight dark:text-linkdark mr-3 text-lg hover:underline" href={paper.pdf}
-                            >[PDF]</a
+                        <a
+                            class="text-linklight dark:text-linkdark mr-3 text-lg hover:underline"
+                            href={asset(paper.pdf)}>[PDF]</a
                         >
                     {/if}
                     {#if paper.link != ""}

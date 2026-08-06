@@ -1,5 +1,6 @@
 <script lang="ts">
     import Meta from "$lib/Meta.svelte";
+    import { resolve } from "$app/paths";
 
     let { data } = $props();
 </script>
@@ -11,7 +12,7 @@
         <p class="text-textlight-2 dark:text-textdark-2 darkModeFade">Sorted newest to oldest.</p>
         {#each data.posts as post (post.id)}
             <a
-                href={`/posts/${post.slug}`}
+                href={resolve(`/posts/${post.slug}`)}
                 class="bg-bglight-2 dark:bg-bgdark-2 darkModeFade block rounded-xl p-6 shadow-xl"
             >
                 <h2 class="text-textlight-1 dark:text-textdark-1 darkModeFade text-xl font-semibold">

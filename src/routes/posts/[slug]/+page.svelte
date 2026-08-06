@@ -1,5 +1,6 @@
 <script lang="ts">
     import Meta from "$lib/Meta.svelte";
+    import { resolve } from "$app/paths";
 
     let { data } = $props();
 
@@ -11,7 +12,7 @@
 
 <div class="mx-auto w-full max-w-5xl pt-5 pb-20">
     <a
-        href="/posts"
+        href={resolve("/posts")}
         class="text-linklight dark:text-linkdark text-lg font-semibold underline px-10"
         aria-label="Back to Posts"
     >

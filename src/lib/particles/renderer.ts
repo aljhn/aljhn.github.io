@@ -156,7 +156,7 @@ export class Renderer {
                     value: this.currentStartIndex
                 },
                 dt: {
-                    value: 0.01
+                    value: 1e-2
                 },
                 hueRotation: {
                     value: 0
@@ -336,7 +336,8 @@ export class Renderer {
         simulationStateCurrent: SimulationState,
         simulationStatePrevious: SimulationState,
         interpolateAlpha: number,
-        backgroundColor: string
+        backgroundColor: string,
+        dt: number
     ) {
         this.scene.background = this.backgroundColor.setStyle(backgroundColor);
 
@@ -349,6 +350,8 @@ export class Renderer {
 
         this.material.uniforms.cameraDirection.value.copy(this.cameraDir);
         this.material.uniforms.ribbonWidth.value = this.ribbonWidth;
+
+        this.material.uniforms.dt.value = dt;
 
         this.updateVertices(simulationStateCurrent, simulationStatePrevious, interpolateAlpha);
         this.updateColors(simulationStateCurrent, simulationStatePrevious, interpolateAlpha);

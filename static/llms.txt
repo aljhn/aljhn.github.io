@@ -9,3 +9,4 @@
 - [Quotes](https://aljhn.github.io/quotes): Various quotes I like
 - [Skills](https://aljhn.github.io/skills): A list of some of my technical skills
 - [Research](https://aljhn.github.io/research): More detailed description of my research interests, along with publications
+- [Posts](https://aljhn.github.io/posts): Posts I have written. Technical articles and descriptions of personal projects

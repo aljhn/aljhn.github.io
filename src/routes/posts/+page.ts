@@ -1,4 +1,12 @@
-const posts = import.meta.glob("$lib/posts/*.svx");
+interface Post {
+    metadata: {
+        title: string;
+        description: string;
+        date: string;
+    };
+}
+
+const posts = import.meta.glob<Post>("$lib/posts/*.svx");
 
 export async function load() {
     const entries = await Promise.all(

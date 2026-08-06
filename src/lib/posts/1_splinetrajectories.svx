@@ -6,6 +6,7 @@ date: 2026-07-11
 
 <script>
     import Figure from "$lib/Figure.svelte";
+    import { resolve } from "$app/paths";
     import plot1_1 from "$lib/posts/images/plot_1_1.png?enhanced";
     import plot1_2 from "$lib/posts/images/plot_1_2.png?enhanced";
 </script>
@@ -239,4 +240,4 @@ def f_horner(t, coeffs):
 
 ### End
 
-Now that we have a way to represent trajectories as continuous functions, the <a href="/posts/2_splineintersections" class="text-linklight dark:text-linkdark font-semibold hover:underline">follow-up post</a> goes into how to use these to check for collisions between two different trajectories.
+Now that we have a way to represent trajectories as continuous functions, the <a href={resolve("/posts/2_splineintersections")} class="text-linklight dark:text-linkdark font-semibold hover:underline">follow-up post</a> goes into how to use these to check for collisions between two different trajectories.

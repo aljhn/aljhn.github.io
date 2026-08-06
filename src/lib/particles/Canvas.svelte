@@ -88,7 +88,13 @@
                     }
 
                     const interpolateAlpha = timestepAccumulator / fixedPhysicsTimestep;
-                    renderer.update(simulationState, simulationStatePrevious, interpolateAlpha, backgroundColor);
+                    renderer.update(
+                        simulationState,
+                        simulationStatePrevious,
+                        interpolateAlpha,
+                        backgroundColor,
+                        fixedPhysicsTimestep
+                    );
 
                     animationFrameId = requestAnimationFrame(animate);
                 }

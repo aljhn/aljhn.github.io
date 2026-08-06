@@ -96,7 +96,8 @@
         ]
     });
 
-    const jsonldString: string = $derived.by(() => JSON.stringify(jsonld));
+    const jsonldString: string = $derived(JSON.stringify(jsonld));
+    const jsonldHtml: string = $derived(`<script type="application/ld+json">${jsonldString}</` + `script>`);
 </script>
 
 <svelte:head>
@@ -127,5 +128,5 @@
         <meta property="article:author" content={data.name} />
     {/if}
 
-    {@html `<script type="application/ld+json">${jsonldString}</script>`}
+    {@html jsonldHtml}
 </svelte:head>

@@ -1,6 +1,16 @@
 import { error } from "@sveltejs/kit";
+import type { Component } from "svelte";
 
-const posts = import.meta.glob("/src/lib/posts/*.svx");
+interface Post {
+    default: Component;
+    metadata: {
+        title: string;
+        description: string;
+        date: string;
+    };
+}
+
+const posts = import.meta.glob<Post>("/src/lib/posts/*.svx");
 
 export async function load({ params }) {
     const importer = posts[`/src/lib/posts/${params.slug}.svx`];

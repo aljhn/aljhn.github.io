@@ -16,6 +16,7 @@ const highlighter = await createHighlighter({
 
 const mdsvexConfig = mdsvex({
     extensions: [".md", ".svx"],
+    smartypants: false,
     remarkPlugins: [remarkMath],
     rehypePlugins: [rehypeSlug, rehypeKatexSvelte],
     highlight: {
