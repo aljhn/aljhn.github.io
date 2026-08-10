@@ -219,6 +219,8 @@ Then solve the minimization problem for each of these intervals, and get the glo
 5. Compute the spline segment difference $\bm{h}(t)$ and solve the minimization problem with the polynomial root finding method
 6. Find the global minimum over all the results from the minimization problems
 
+An example implementation in Python can be found <a href="https://github.com/aljhn/spline_intersections" class="text-linklight dark:text-linkdark font-semibold hover:underline">here</a>.
+
 ### Future work: Non-Spherical Hitboxes
 
 The current approach described here works by comparing trajectories of the positions of the rigid body mass centers. Checking for a collision is to see if the minimum distance is smaller than some value. Using the $L^2$ norm is kind of like assuming each rigid body has a spherical hitbox. The main benefit of the $L^2$ is that it is easy to optimize for, as it is continuous and continuously differentiable in the inputs, allowing for continuous optimization methods. Basing the distance metric on the $L^1$ or the $L^{\infty}$ norms could also work, as it is still fundamentally polynomials, but requires some more workarounds.
