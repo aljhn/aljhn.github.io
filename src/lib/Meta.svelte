@@ -16,7 +16,7 @@
     const data = {
         name: "Albert Johannessen",
         url: "https://aljhn.github.io",
-        desc: "Personal website",
+        desc: "Personal website, project portfolio and posts",
         image: "https://aljhn.github.io/images/Logo.png"
     };
 

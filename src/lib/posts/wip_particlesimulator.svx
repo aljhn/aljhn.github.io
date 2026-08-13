@@ -17,14 +17,15 @@ date: 2026-08-13
 </p>
 
 - [Part 1: Realtime Simulator](#part-1-realtime-simulator)
-    - [Numerical Integrators](#numerical-integrators)
-    - [Timestep interpolation](#timestep-interpolation)
     - [Chaotic Systems](#chaotic-systems)
-    - [Lorenz System](#lorenz-systems)
-- [Part 2: Trail Rendering](#-part-2-trail-rendering)
+    - [The Lorenz System](#the-lorenz-system)
+    - [Numerical Integrators](#numerical-integrators)
+    - [Adaptive Integrators](#adaptive-integrators)
+    - [Timestep Interpolation](#timestep-interpolation)
+- [Part 2: Trail Rendering](#part-2-trail-rendering)
     - [Drawing Lines](#drawing-lines)
-    - [Shaders](#shaders)
     - [Ring Buffers](#ring-buffers)
+    - [Shaders](#shaders)
     - [Colors](#colors)
 - [Final Result](#final-result)
 
@@ -34,19 +35,23 @@ date: 2026-08-13
 
 todo
 
-#### Numerical Integrators
-
-todo
-
-#### Timestep interpolation
-
-todo
-
 #### Chaotic Systems
 
 todo
 
-#### Lorenz System
+#### The Lorenz System
+
+todo
+
+#### Numerical Integrators
+
+todo
+
+#### Adaptive Integrators
+
+todo
+
+#### Timestep Interpolation
 
 todo
 
@@ -58,13 +63,13 @@ todo
 
 todo
 
-#### Shaders
-
-todo minimize data transfers between vram and ram
-
 #### Ring Buffers
 
 todo
+
+#### Shaders
+
+todo minimize data transfers between vram and ram
 
 #### Colors
 
