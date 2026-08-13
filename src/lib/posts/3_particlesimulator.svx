@@ -1,0 +1,79 @@
+---
+title: Realtime Particle Simulations and 3D Rendering
+description: Simulating multiple particles following a chaotic ODE, and rendering trails with Three.js.
+date: 2026-08-13
+---
+
+<script>
+    import { resolve } from "$app/paths";
+
+    import ParticleCanvas from "$lib/particles/Canvas.svelte";
+</script>
+
+<div class="toc rounded-xl border border-bglight-2 shadow-xl bg-bglight-1 px-10 py-2 dark:bg-bgdark-1 dark:border-bgdark-2">
+
+<p class="font-semibold text-textlight-1 dark:text-textdark-1">
+    Contents
+</p>
+
+- [Part 1: Realtime Simulator](#part-1-realtime-simulator)
+    - [Numerical Integrators](#numerical-integrators)
+    - [Timestep interpolation](#timestep-interpolation)
+    - [Chaotic Systems](#chaotic-systems)
+    - [Lorenz System](#lorenz-systems)
+- [Part 2: Trail Rendering](#-part-2-trail-rendering)
+    - [Drawing Lines](#drawing-lines)
+    - [Shaders](#shaders)
+    - [Ring Buffers](#ring-buffers)
+    - [Colors](#colors)
+- [Final Result](#final-result)
+
+</div>
+
+### Part 1: Realtime Simulator
+
+todo
+
+#### Numerical Integrators
+
+todo
+
+#### Timestep interpolation
+
+todo
+
+#### Chaotic Systems
+
+todo
+
+#### Lorenz System
+
+todo
+
+### Part 2: Trail Rendering
+
+todo
+
+#### Drawing Lines
+
+todo
+
+#### Shaders
+
+todo minimize data transfers between vram and ram
+
+#### Ring Buffers
+
+todo
+
+#### Colors
+
+todo
+
+### Final Result
+
+todo
+
+<div class="h-[500px] [&>div]:h-full">
+    <ParticleCanvas />
+</div>
