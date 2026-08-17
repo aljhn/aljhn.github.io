@@ -1,6 +1,6 @@
 ---
-title: Realtime Particle Simulations and 3D Rendering
-description: Simulating multiple particles following a chaotic ODE, and rendering trails with Three.js.
+title: Chaotic Systems, Realtime Particle Simulations and 3D Rendering
+description: Simulating multiple independent particles following a chaotic ODE, and rendering particle trails with Three.js.
 date: 2026-08-13
 ---
 
@@ -33,11 +33,38 @@ date: 2026-08-13
 
 ### Part 1: Realtime Simulator
 
-todo
+#### Dynamical Systems
+
+Imagine a set of particles moving around in 3-dimensional space, each following the dynamics of an ODE:
+
+$$
+\dot{\bm{x}} = f(t, \bm{x})
+$$
+
+The behavior of each particle is then determined by the form of the dynamics. And there are of course a lot of different possibilies. A common way to look at the behavior is to look at the various equilibrium points and how they make the system behave.
+
+A linear autonomous system given as:
+
+$$
+\dot{\bm{x}} = \bm{A} \bm{x}
+$$
+
+for some square matrix $\bm{A}$, will have it's global behavior determined by the type of equilibrium point at the origin. But basically, most trajectories will either converge to the origin if the linear system is stable, or diverge to infinity for an unstable system (marginal stability being the third case).
+
+For visualization purposes, neither of the above are particularly interesting to look at. Which is where nonlinear dynamical systems come in, giving more interesting visuals. Global convergence to a single point, a periodic orbit, or divergence is still possible, which again depends on the dynamics.
 
 #### Chaotic Systems
 
-todo
+For a dynamical system to be chaotic in some subspace it's enough to satisfy these:
+
+1. Topological transitivity
+2. Dense periodic orbits
+
+More informally, the first requirement kind of means that trajectories will come arbitrarily close to visiting every part of the subspace. And the second requirement means that most trajectories are always very close to an unstable periodic orbit, which provides some structure to the way they move around.
+
+Robert Devaney's original original formulation included one more requirement, which is what many people often associate with chaotic systems: sensitive dependence on initial conditions. This kind of means that two trajectories that start very close together will eventually start diverging from each other at an exponential rate (measured by what is called a Lyapunov exponent). It was later proved by Banks et al. that this requirement can be proved to be satisfied if the first two requirements are fulfilled, and is therefore unnecessary to include in the definition.
+
+And in even simpler words, chaotic systems are cool to visualize because all trajectories just move around endlessly, but still contains some structure. This subspace is called an attractor if trajectories outside converge into it. And many chaotic systems result in attractors containing a fractal dimension, kind of because the trajectories almost work like space-filling curves, which have the fancy name of a strange attractor.
 
 #### The Lorenz System
 
