@@ -17,12 +17,13 @@ date: 2026-08-13
 </p>
 
 - [Part 1: Realtime Simulator](#part-1-realtime-simulator)
+    - [Dynamical Systems](#dynamical-systems)
     - [Chaotic Systems](#chaotic-systems)
     - [The Lorenz System](#the-lorenz-system)
-    - [Numerical Integrators](#numerical-integrators)
+    - [Numerically Integrating Chaotic Systems](#numerically-integrating-chaotic-systems)
     - [Adaptive Integrators](#adaptive-integrators)
-    - [Timestep Interpolation](#timestep-interpolation)
 - [Part 2: Trail Rendering](#part-2-trail-rendering)
+    - [Timestep Interpolation](#timestep-interpolation)
     - [Drawing Lines](#drawing-lines)
     - [Ring Buffers](#ring-buffers)
     - [Shaders](#shaders)
@@ -55,34 +56,71 @@ For visualization purposes, neither of the above are particularly interesting to
 
 #### Chaotic Systems
 
-For a dynamical system to be chaotic in some subspace it's enough to satisfy these:
+For a dynamical system to be chaotic in some subspace it's enough to satisfy these requirements:
 
 1. Topological transitivity
 2. Dense periodic orbits
 
-More informally, the first requirement kind of means that trajectories will come arbitrarily close to visiting every part of the subspace. And the second requirement means that most trajectories are always very close to an unstable periodic orbit, which provides some structure to the way they move around.
+which is not necesarily trivial to show for a general system. For a more informal explanation, the first requirement kind of means that trajectories will come arbitrarily close to visiting every part of the subspace. And the second requirement means that most trajectories are always very close to an unstable periodic orbit, which provides some structure to the way they move around.
 
 Robert Devaney's original original formulation included one more requirement, which is what many people often associate with chaotic systems: sensitive dependence on initial conditions. This kind of means that two trajectories that start very close together will eventually start diverging from each other at an exponential rate (measured by what is called a Lyapunov exponent). It was later proved by Banks et al. that this requirement can be proved to be satisfied if the first two requirements are fulfilled, and is therefore unnecessary to include in the definition.
 
-And in even simpler words, chaotic systems are cool to visualize because all trajectories just move around endlessly, but still contains some structure. This subspace is called an attractor if trajectories outside converge into it. And many chaotic systems result in attractors containing a fractal dimension, kind of because the trajectories almost work like space-filling curves, which have the fancy name of a strange attractor.
+And in even simpler words, chaotic systems are cool to visualize because all trajectories just move around endlessly, but still contains some structure. This subspace is called an attractor if trajectories outside converge into it. And many chaotic systems result in attractors containing a fractal dimension, a little because the trajectories almost work like space-filling curves, which have the fancy name of a strange attractor.
 
 #### The Lorenz System
 
-todo
+Chaotic systems can be both discrete time, and continuous time. A lot of textbooks like to start with talking about discrete-time systems to introduce chaos, but I am personally more fascinated by continuous time systems. The Lorenz system was historically one of the first examples that explicitly demonstrated chaotic behavior, and the concept of sensitive dependence on initial conditions.
 
-#### Numerical Integrators
+The system is defined as the following 3-dimensional nonlinear ODE:
 
-todo
+$$
+\begin{align*}
+\dot{x} &= \sigma (x - y) \\
+\dot{y} &= x (\rho - z) - y \\
+\dot{z} &= x y - \beta z
+\end{align*}
+$$
+
+with three parameters: $\sigma, \rho, \beta$. The specific values of these parameters will greatly influence the behavior of the overall system, containing multiple bifurcation points. The most common parameters to use for chaotic behavior is: $\sigma = 10, \rho = 28, \beta = 8 / 3$, which gives three unstable equilibrium points: origin is always an equilibrium point, and two others in the centers of the two discs of the attractor.
+
+TODO: image of lorenz attractor
+Also called butterfly attractor (maybe partially because of the relation to the butterfly effect).
+
+#### Numerically Integrating Chaotic Systems
+
+One thing that makes chaotic systems interesting from a more applied math perspective is that they are very hard to solve numerically. Computers can't represent real numbers, and rely on approximating them, typically with floating point numbers. But this leads to some inaccuracies from the quantization, and one of the key properties of chaotic systems is that a small error compounds to an exponentially increasing difference. This means that any numerical solution will eventually be too inaccurate to be of use after some integration time.
+
+So this could make it seem like fancy integration methods doesn't work, but they can still give a better prediction horizon than a more naive integrator. To see this, look at how error accumulates in chaotic systems. Start with trajectories $\bm{x}_1(t)$ and $\bm{x}_2(t)$ such that:
+
+$$
+\bm{\epsilon}(t) = \bm{x}_1(t) - \bm{x}_2(t)
+$$
+
+is the difference between them. If we assume that the initial error $\bm{\epsilon}(0) = \bm{x}_1(0) - \bm{x}_2(0)$ is small, then the Lyapunov exponent of the system $\lambda$ says that:
+
+$$
+|| \bm{\epsilon}(t) || \approx || \bm{\epsilon}_0 || e^{\lambda t}
+$$
+
+We can then define a maximum acceptable error: $\epsilon_{\textrm{max}}$, and manipulate the equation above into this:
+
+$$
+t_{\textrm{max}} = \frac{1}{\lambda} \ln{\left( \frac{\epsilon_{\textrm{max}}}{|| \bm{\epsilon}_0 ||} \right)}
+$$
+
+so if we can reduce $\epsilon_{\textrm{max}}$ from fancy integration methods, it will contribute to increasing the prediction horizon $t_{\textrm{max}}$. Although it is logarithmic in the error, so increasing the horizon requires exponentially more effort from the integrator.
+
+Before the next section, I'll just note that integration accuracy doesn't actually matter for visualizing it here, as all trajectories stay on the attractor anyways. Or put another way, it does matter for an individual trajectory, but not really for visualizing the attractor itself with a set of trajectories, which is kind of what this is building up to.
 
 #### Adaptive Integrators
 
 todo
 
-#### Timestep Interpolation
+### Part 2: Trail Rendering
 
 todo
 
-### Part 2: Trail Rendering
+#### Timestep Interpolation
 
 todo
 
